@@ -1,0 +1,78 @@
+{
+  "dict": {
+    "b61541208db7fa7dba42c85224405911": {
+      "en": "Menu",
+      "fr": "Carte"
+    },
+    "a6080006fe365de590e36613692039e8": {
+      "en": "Menu Editor",
+      "fr": "Carte Éditeur"
+    },
+    "a4078983ea2dd318ef80b2c13849b782":{
+      "en": "Order for",
+      "fr": "Commande pour"
+    },
+    "7be83b8c2599af113aa97a0335f0e538":{
+      "en": "Menu for",
+      "fr": "Menu pour"
+    },
+    "f6039d44b29456b20f8f373155ae4973": {
+      "en": "Username",
+      "fr": "Nom d'utilisateur"
+    },
+    "7f005c3fa691e77c52d3297cc2699072": {
+      "en": "reserved",
+      "fr": "réservé"
+    },
+    "c679b3488ea95e3fb6d343b56bba5968": {
+      "en": "Add Menu Item",
+      "fr": "Ajouter un élément de carte"
+    },
+    "d4acb5850c2a8ddf85cfadfe3c1a5dd5": {
+      "en": "Visit Day",
+      "fr": "Jour de visite"
+    },
+    "be192bc9b7150341cfa0cb7bafae72f2": {
+      "en": "Main Course",
+      "fr": "Plat"
+    },
+    "0c96179df5834759b90ee5cb3834a365": {
+      "en": "Drinks",
+      "fr": "Boissons"
+    },
+    "ddeb50f3cdd633650acef33587b91d78": {
+      "en": "Duck, salt, spieses",
+      "fr": "Canard, sel, espions"
+    },
+    "ef6f6a1c0e002ecd1063b3ee0ac9302d": {
+      "en": "content_text",
+      "fr": "texte de contenu"
+    },
+    "ea44d72bb3383b275e1f49b333eb3050":{
+      "en": "Add Tab",
+      "fr": "Ajouter un onglet"
+    },
+    "9d44e336e31130bea94764accc8a426a":{
+      "en": "Add Comments",
+      "fr": "Ajoutez des commentaires"
+    },
+    "0ba80006400cc1b99c2bc9a160fa64a5": {
+      "fr": "Biere",
+      "en": "Beer"
+    },
+    "04bd09bce3173f943374c299c3b52df9":{
+      "en": "<h1>Your table reservation was successfully canceled</h1>",
+      "fr": "Votre réservation de table a été annulée avec succès"
+    },
+    "3e68ad9b7ced9994b62721c5af7c5fbc":{
+      "en":"Input image address (ex: http://www.nedol.ru) or click Cancel to upload image from the device",
+      "fr":"Entrez l'adresse de l'image (ex: http://www.nedol.ru) ou cliquez sur Annuler pour charger l'image de l'appareil"
+    },
+    "b7beed125a75ff65d74424407f05e8b1":{
+      "en":"Main Course",
+      "fr":"Plats"
+    }
+
+  }
+}
+
