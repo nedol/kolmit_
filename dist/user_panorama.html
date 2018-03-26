@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!--<meta name="description" content="360&deg; Image - A-Frame">-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>La Route du Miam</title>
+</head>
+
+<link rel="stylesheet" type="text/css" href="./css/dialog-polyfill.css" />
+<!--<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">-->
+<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link href="./css/bootstrap-datetimepicker.css" rel="stylesheet" type="text/css">
+<link href="../node_modules/flag-icon-css/css/flag-icon.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="../lib/style.css">
+
+
+<script type="text/javascript" src="./host.js?v=1"></script>
+<script type="text/javascript" src="common.js"></script>
+<script type="text/javascript" src="user.js"></script>
+
+
+<!--<script src="../lib/load-image.all.min.js"></script>-->
+<!--<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL" defer async></script>-->
+
+<body>
+<style>
+    html, body {
+        height: 100%;
+        overflow: hidden;
+    }
+</style>
+<!--<div id="splash" style="position:absolute; background-color: black; align-content: center;width:100%; height: 100%; z-index: 50">-->
+<!--<img src="./images/ic_splash.png" align="middle" width="20%" style="position: absolute;-->
+<!--margin: auto;-->
+<!--top: 0;-->
+<!--left: 0;-->
+<!--right: 0;-->
+<!--bottom: 0;-->
+<!--"/>-->
+<!--</div>-->
+<div   style="visibility: visible" id="ddd">
+    <div id='day_of_visit_text' data-translate="d4acb5850c2a8ddf85cfadfe3c1a5dd5"></div>
+    <a-scene id="scene"   light="defaultLightsEnabled: false"
+             style="
+            pointer-events: auto;
+            position:absolute;
+            height:100%;
+            width:100%;
+            margin: auto;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index:2;"
+             cursor="rayOrigin: mouse" antialias='true'
+             vr-mode-ui="enabled: false"
+             embedded arjs='sourceType: webcam;'
+             physics="debug: true">
+
+        <a-sky class="panorama" id="hall_1" src="./images/Smith-Wollensky-360-virtual-tour-002.jpg" radius="10000"></a-sky>
+
+        <a-assets>
+            <a-asset-item id="optimerBoldFont" src="../lib/fonts/optimer_bold.typeface.json"></a-asset-item>
+            <a-asset-item id="appetite" src="./fonts/Appetite-msdf.json"></a-asset-item>
+            <a-asset-item id="appetite_img" src="./fonts/Appetite.png"></a-asset-item>
+            <a-asset-item id="creepster" src="https://raw.githubusercontent.com/etiennepinchon/aframe-fonts/master/fonts/creepster/Creepster-Regular.json"></a-asset-item>
+            <a-mixin id="table" src="./ddd/table_1/table.dae"></a-mixin>
+            <a-mixin id="chair" src="./ddd/chair/amat_toledo.dae"></a-mixin>
+
+            <!--<a-mixin id="main_menu" src="./ddd/mirror_1/mirror.dae"></a-mixin>-->
+            <!--<a-mixin id="sconce" src="./ddd/sconce/sconce.dae"></a-mixin>-->
+            <!--<a-mixin id="glasscase" src="./ddd/glasscase/glasscase.dae"></a-mixin>-->
+            <!--<a-mixin id="bar" src="./ddd/bar/rack_bar.dae"></a-mixin>-->
+            <!--<a-mixin id="light" geometry="primitive: sphere; radius: 1.5" material="color: #FFF; shader: sdf" light="color: #DDDDFF; distance: 120; intensity: 2; type: point"></a-mixin>-->
+
+        </a-assets>
+
+        <a-camera id="camera" user-height="0" camera="active:true" fov="80" keyboard-controls="mode: fps"
+                  wasd-controls-enabled="true" look-controls-enabled="false"
+                  orbit-controls="autoRotateSpeed:0.01;target:#target;enableDamping:true;dampingFactor:0.05;rotateSpeed:0.02;
+                  minDistance:20;maxDistance:20;maxPolarAngle:2;zoomSpeed:10;distance:10"
+                  position="0 0 0" rotation="24.592 0 0" wasd-controls="" data-aframe-inspector-original-camera="">
+
+            <!--<a-plane id="plane_expose" class="plane" position="-0.075 0.108 -26.15" rotation="-0.573 -0.1146 -0.0573"-->
+                     <!--width="400" height="400" geometry="width:200;height:100"-->
+                     <!--material="opacity:0;vertexColors:face;emissiveIntensity:0.83;width:513.17;roughness:1;metalness:0.76;emissive:gray;ambientOcclusionMapIntensity:1.37;color:#FFB27F;depthTest:false;transparent:true"-->
+                     <!--text="value:BONMENU DEMO;width:50;alphaTest:0;opacity:0.6;height:1.79;align:bottom;letterSpacing:5"></a-plane>-->
+        </a-camera>
+
+        <a-entity id="target" position="0.029 0 0" rotation="-90 0 0" scale="3 3 1" geometry="primitive:sphere;radius:0.18"
+                  text__bm_text="value:bm;color:#ff0000;width:5;align:center;tabSize:10;wrapCount:40;alphaTest:0.2;lineHeight:1;height:1;yOffset:0.07;letterSpacing:2.49"
+                  material="depthTest:false;opacity:0.53;width:200;height:256.13;alphaTest:0.51;ambientOcclusionMapIntensity:0.44;emissive:#ff8000;metalness:0.38;side:double">
+        </a-entity>
+
+<a-plane id="plane" class="plane" position="0 5 0" rotation="-90 0 0" width="400" height="400" visible="false" shadow=""
+       material="opacity:.5;vertexColors:face;displacementScale:1;emissiveIntensity:0.83;normalScale:1 1;width:513.17;
+       roughness:1;metalness:0.76;emissive:gray;ambientOcclusionMapIntensity:1.37;color:#FFB27F;"
+></a-plane>
+
+
+<a-plane id="main_menu" position="-2593.936 283.685 -1882.644" rotation="0 107.4 0" scale="20 20 1" color="#AFFFD4" geometry="height:60;width:45" material="opacity:0">
+
+  <a-entity light="decay:1.48;intensity:0.33;type:spot;castShadow:true" position="-7.333 0 -6.878" rotation="-26.47 168.85 -66"></a-entity>
+
+  <a-entity class="calendar" position="-0.1 1 0" scale="1.1 1.2 1">
+      <a-plane id="dt_text" data-translate="d4acb5850c2a8ddf85cfadfe3c1a5dd5" position="0 0.5 0" color="#ddd" material="opacity:0" geometry="height:0.5;width:3;segmentsHeight:2" text=""></a-plane>
+      <a-plane id="date" position="-1.2 0 0" color="#ddd" material="opacity:0" geometry="height:0.5;width:1.9;segmentsHeight:2" text="align:center;alphaTest:0.12;color:black;font:monoid;height:2;side:double;tabSize:10;value:21.02.2018;width:3;wrapCount:15"></a-plane>
+      <a-entity id="period_1" class="period" position="1 0 0.05" visible="false" geometry="primitive:plane;height:0.5;width:2.2">
+          <a-plane class="from" position="-0.5 0 0" color="#ddd" material="opacity:0" geometry="height:0.5;segmentsHeight:2" text="align:center;alphaTest:0.12;color:black;font:aileronsemibold;height:2;side:double;tabSize:10;value:19:00;width:3;wrapCount:15"></a-plane>
+          <a-plane class="to" position="0.5 0 0" color="#ddd" material="opacity:0" geometry="height:0.5;segmentsHeight:2" text="align:center;alphaTest:0.12;color:#A0A0A0;font:aileronsemibold;height:2;side:double;tabSize:10;value:24:00;width:3;wrapCount:15"></a-plane>
+      </a-entity>
+
+      <a-entity id="period_2" class="period" position="1 -0.7 0.04" visible="false" geometry="primitive:plane;height:0.5;width:2.2">
+          <a-plane class="from" position="-0.5 0 0" color="white" material="opacity:0" geometry="height:0.5;segmentsHeight:2" text="align:center;alphaTest:0.12;color:gray;font:aileronsemibold;height:2;side:double;tabSize:10;value:13:00;width:3;wrapCount:15"></a-plane>
+          <a-plane class="to" position="0.5 0 0" color="white" material="opacity:0" geometry="height:0.5;segmentsHeight:2" text="align:center;alphaTest:0.12;color:#A0A0A0;font:aileronsemibold;height:2;side:double;tabSize:10;value:17:00;width:3;wrapCount:15"></a-plane>
+      </a-entity>
+
+  </a-entity>
+
+          <a-entity id="menu" position="0 18.727 0.01" geometry="segmentsHeight:9;width:40;primitive:plane;height:20" material="color:#c0c0c0;depthTest:false;opacity:0.050000000000000044" text="align:center;alphaTest:0.2;color:#b6b6b6;font:aileronsemibold;height:2;side:single;tabSize:5;value:menu;width:50;wrapCount:8;letterSpacing:10"></a-entity>       </a-plane>
+        <a-entity light="color:#BBB;type:ambient" data-aframe-default-light="" aframe-injected="" position="-20 40 0"></a-entity>
+        <a-entity light="color:#FFF;intensity:0.6;castShadow:true" position="20 40 1" data-aframe-default-light="" aframe-injected=""></a-entity>
+
+        <a-entity class="table" id="table_1"
+                position="-2373.450 -1056 473.385" rotation="-90 -34.435 0"  scale="5 5 1"
+                geometry="height:250;primitive:plane;width:250" material="opacity:0.1;color:white">
+
+          <a-entity class="free" id="menu_1" position="-89.766 4.23 0" rotation="0 0 -90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_2" position="1.073 87.241 0" rotation="0 0 180" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_3" position="88.715 2.822 0" rotation="0 0 90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_4" position="0 -87.609 0" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+
+
+          <a-entity class="camera_table" position="0 0 400" rotation="0 0 0"
+                    camera="active:false;zoom:1.7;fov:60"
+                    wasd-controls="" look-controls="" aframe-injected=""
+                    data-aframe-inspector-original-camera=""
+                    data-aframe-inspector="default-camera"></a-entity>
+        </a-entity>
+        <a-entity class="table" id="table_2" position="-1449.980 -1120.366 3460.441" rotation="-90.012 -8.85 0" geometry="width:250;height:250;primitive:plane" scale="5 5 1" material="opacity:0.2;color:white">
+          <a-entity class="free" id="menu_1" position="-89.766 4.23 0" rotation="0 0 -90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_2" position="1.073 87.241 0" rotation="0 0 180" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_3" position="88.715 2.822 0" rotation="0 0 90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_4" position="0 -87.609 0" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+
+        </a-entity>
+        <a-entity class="table" id="table_3" position="2282.921 -1042.178 -1140.228" rotation="-90 -9 -20.722" geometry="primitive:plane;height:250;width:250" scale="5 5 1" material="opacity:0.2;color:white">
+            <a-entity class="free" id="menu_1" position="-89.766 4.23 0" rotation="0 0 -90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+            <a-entity class="free" id="menu_2" position="1.073 87.241 0" rotation="0 0 180" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+            <a-entity class="free" id="menu_3" position="88.715 2.822 0" rotation="0 0 90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+            <a-entity class="free" id="menu_4" position="0 -87.609 0" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+        </a-entity>
+        <a-entity class="table" id="table_4" position="3018 -793.6 2600.881" rotation="-90 0 0" geometry="primitive:circle;radius:100" scale="8 8 1" material="opacity:0.53;color:gray">
+          <a-entity class="free" id="menu_1" position="-74.925 39.472 13.321" rotation="0 0 -122" scale="5 5 1" geometry="primitive:plane;height:3;width:5;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;width:700;height:6;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_3" position="-80.029 -30.783 0" rotation="0 0 -73.46" scale="5 5 1" geometry="primitive:plane;height:3;width:5;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;width:700;height:6;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_2" position="-29 80.345 15.98" rotation="0 0 -156" scale="5 5 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.96;depthTest:false;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_4" position="-25.222 -77.596 15.98" rotation="0 0 -31" scale="5 5 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.96;depthTest:false;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_5" position="63.058 -56 15.98" rotation="0 0 46" scale="5 5 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.96;depthTest:false;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+          <a-entity class="free" id="menu_6" position="53.009 61.34 15.98" rotation="0 0 133" scale="5 5 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.96;depthTest:false;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+
+  <!--<a-entity active="false" class="camera_table" position="0 0 250" camera="zoom:1;fov:60" wasd-controls="" look-controls="" aframe-injected="" data-aframe-inspector-original-camera="" data-aframe-inspector="default-camera"></a-entity>-->
+        </a-entity>
+
+        <a-entity class="table" id="table_5" position="-672.859 -1120.366 6250.457" rotation="-90.01166961505233 66.17662533761009 0" geometry="width:250;height:250;primitive:plane" scale="5 5 1" material="opacity:0.2;color:white">
+            <a-entity class="free" id="menu_1" position="-89.766 4.23 0" rotation="0 0 -90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+            <a-entity class="free" id="menu_2" position="1.073 87.241 0" rotation="0 0 180" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+            <a-entity class="free" id="menu_3" position="88.715 2.822 0" rotation="0 0 90" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+            <a-entity class="free" id="menu_4" position="0 -87.609 0" scale="20 20 1" geometry="width:5;primitive:plane;height:3;segmentsHeight:7;segmentsWidth:2" material="alphaTest:0.9;depthWrite:false;depthTest:false;offset:50 0;width:700;height:4;roughness:1;color:#ffffff" text="align:center;color:#ff0000;font:monoid;height:3;value:click to reserve;width:5;wrapCount:8"></a-entity>
+
+        </a-entity>
+</a-scene>
+
+
+</div>
+
+
+<div id="main_window" class="container" style="position: absolute;visibility: visible;z-index: 11">
+
+        <div id="select_lang"  style="display:inline-block;position: relative;visibility: visible;width:40px;right: 10px">
+            <select class="selectpicker" data-width="fit"></select>
+        </div>
+
+        <div class="form-group"   style="display:inline-block;position: absolute;left:100%;">
+            <input type='text' class="form-control dt_val" data-translate="d4acb5850c2a8ddf85cfadfe3c1a5dd5"
+                    style="position: relative;width:120px" value="Day of visit"/>
+            <div class="form-group">
+                <button class="btn btn-default dropdown-toggle sel_time" type="button" data-toggle="dropdown"
+                        style="position: relative;width:120px">
+                    <a>closed</a>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu period_list"  style="">
+                    <li href="#"  onclick="window.user.OnClickTimeRange(this)"><a>19:00 - 24:00</a></li>
+                    <li href="#"  onclick="window.user.OnClickTimeRange(this)"><a>13:00 - 17:00</a></li>
+                </ul>
+            </div>
+        </div>
+
+
+    <div id="datetimepicker"
+         style="
+             position: absolute;
+             top: 150px;
+             left: 20%;
+             background-color: rgba(255,255,255,.8);
+             z-index: 11;"></div>
+    <div id="dt_from"
+         style="
+             background-color: white;
+             position: absolute;
+             top:50%;
+             right: 50%;
+             z-index: 11;"></div>
+    <div id="dt_to"
+         style="
+             position: absolute;
+             top:50%;
+             right: 50%;
+             background-color: rgba(255,255,255,.7);
+             z-index: 11;"></div>
+
+</div>
+
+<div id="auth_dialog" class="modal fade"  role="dialog">
+    <style>
+        .modal-header#auth-header{
+            padding:9px 15px;
+            border-bottom:1px solid #eee;
+            background-color: whitesmoke;
+            -webkit-border-top-left-radius: 5px;
+            -webkit-border-top-right-radius: 5px;
+            -moz-border-radius-topleft: 5px;
+            -moz-border-radius-topright: 5px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .modal-body#auth_body{
+            padding:9px 15px;
+            border-bottom:1px solid black;
+            border-top:1px solid black;
+            border-right:1px solid black;
+            border-left:1px solid black;
+            color: white;
+            background-color: whitesmoke ;
+            -webkit-border-top-left-radius: 0px;
+            -webkit-border-top-right-radius: 0px;
+            -moz-border-radius-topleft: 0px;
+            -moz-border-radius-topright: 0px;
+            border-top-left-radius: 0px;
+            border-top-right-radius: 0px;
+        }
+        .modal-footer#auth_footer {
+            padding: 9px 15px;
+            border-bottom: 1px solid black;
+            border-top: 0px;
+            color: white;
+            background-color: whitesmoke;
+            -webkit-border-top-left-radius: 5px;
+            -webkit-border-top-right-radius: 5px;
+            -moz-border-radius-topleft: 5px;
+            -moz-border-radius-topright: 5px;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+    </style>
+    <div class="modal-dialog modal-sm" style="background-color: whitesmoke">
+        <div class="modal-content">
+            <div id="auth-header" class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" >&times;</button>
+            </div>
+            <div id="auth_body" class="modal-body">
+                <div>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                        <input type="text" class="form-control" data-translate="bfc39df16534455648afdbdf761cad44" placeholder="Put Username" name="uname" required>
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                        <input type="email" class="form-control" data-translate="95bab09e015aa657732aff4c267585d9" placeholder="Put E-mail" name="email"  required>
+                    </div>
+
+                    <!--a href="#"><p class="psw" align="right" data-translate="Forgot ">Forgot password?</p></a-->
+                    <!--<div class="container" style="background-color:#f1f1f1">-->
+                    <!--<button type="button" class="cancelbtn" onclick="OnClickCancel();">Cancel</button>-->
+                    <!--<span class="psw">Forgot <a href="#">password?</a></span>-->
+                    <!--</div>-->
+                </div>
+            </div>
+            <div id="auth_footer" class="modal-footer">
+                <button id="registry_but" class="btn btn-default" data-translate="99dea78007133396a7b8ed70578ac6ae"
+                        style="background-color: grey;float: right">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="menu_dialog"  class="modal fade"  role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <style>
+                .modal-header{
+                    padding:9px 15px;
+                    border-bottom:1px solid #eee;
+                    background-color: #0e0e0e;
+                    -webkit-border-top-left-radius: 5px;
+                    -webkit-border-top-right-radius: 5px;
+                    -moz-border-radius-topleft: 5px;
+                    -moz-border-radius-topright: 5px;
+                    border-top-left-radius: 5px;
+                    border-top-right-radius: 5px;
+                    font-family: Arial, Helvetica, sans-serif;
+                }
+                .modal-body{
+                    padding:9px 15px;
+                    border-bottom:1px solid black;
+                    border-top:1px solid black;
+                    border-right:1px solid black;
+                    border-left:1px solid black;
+                    color: white;
+                    background-color: black ;
+                    -webkit-border-top-left-radius: 0px;
+                    -webkit-border-top-right-radius: 0px;
+                    -moz-border-radius-topleft: 0px;
+                    -moz-border-radius-topright: 0px;
+                    border-top-left-radius: 0px;
+                    border-top-right-radius: 0px;
+                }
+                .modal-footer {
+                    padding: 9px 15px;
+                    border-bottom: 1px solid black;
+                    border-top: 0px;
+                    color: white;
+                    background-color: black;
+                    -webkit-border-top-left-radius: 5px;
+                    -webkit-border-top-right-radius: 5px;
+                    -moz-border-radius-topleft: 5px;
+                    -moz-border-radius-topright: 5px;
+                    border-top-left-radius: 5px;
+                    border-top-right-radius: 5px;
+                }
+                .comment{
+                    text-align:left;
+                    width: 100%;
+                    color: red;
+                    font-family:'Segoe Script';
+                    font-size: large;
+                    background-color: #0a0a0a
+                }
+                textarea:focus {
+                    outline: none !important;
+                    border-color: #719ECE;
+                    box-shadow: 0 0 10px #719ECE;
+                }
+                .tab-content::-webkit-scrollbar {
+                    width: 0 !important;
+                }
+            </style>
+            <div class="modal-header">
+                <div>
+                    <h4 class="modal-title"  style="display: inline-block">Modal Header</h4>
+                    <h4 class="modal-title-date"  style="display: inline-block">Date</h4>
+                    <h4 class="modal-table-number"  style="display: none">Table</h4>
+                    <h4 class="modal-menu-number"  style="display: none">Menu</h4>
+                    <button type="button" class="btn btn-default btn-sm cancel_menu" style="display: none;margin-left: 20px;">
+                        <span class="glyphicon glyphicon-trash" data-translate="ea4788705e6873b424c65e91c2846b19">Cancel</span>
+                    </button>
+                    <button type="button" class="close" data-dismiss="modal" >
+                        <img  src="./images/ic_stop.png"  style="display: inline-block; height: 30px" title="close">
+                    </button>
+                </div>
+            </div>
+            <div id="modal-body" class="modal-body" >
+                <ul class="nav nav-tabs"></ul>
+                <div class="tab-content" style=" overflow-y:auto; overflow-x:hidden; height:320px;"></div>
+            </div>
+
+            <div class="modal-footer" style="display:none;"  contenteditable="true" >
+                 <textarea  class="input comment" data-translate="9d44e336e31130bea94764accc8a426a" rows="3" cols="50"
+                            placeholder="Add Comments"></textarea>
+            </div>
+        </div>
+    </div>
+    <style>
+        .item_title:focus{
+            outline: none !important;
+            border-color: #719ECE;
+            box-shadow: 0 0 10px #719ECE;
+        }
+        .item_title{
+            display: inline-block;
+            font-family:'Segoe Script';
+            font-size: x-large;
+        }
+        .item_content{
+            position:relative;
+            height: 200px;
+            padding: 5px;
+
+        }
+        .content_text{
+            font-family:'Segoe Script';
+            font-size: medium;
+            /*height: 200px;*/
+            /*width:60%;*/
+            border-width: 0px;
+            background-color:white;
+            overflow:auto;
+            user-select: none;
+            -webkit-appearance: textarea;
+        }
+        .image_div{
+            position: absolute;
+            padding:15px;
+            right:0px;
+            bottom:0;
+        }
+        .item_price{
+            color: #0088bb;
+            position: relative;
+            font-weight:normal;
+            font-size:24px;
+            float:right
+        }
+    </style>
+    <div  id="menu_item_tmplt"
+          style="display: none;
+            border-radius: 5px;
+            border: 2px solid gray;
+            padding: 5px;
+            margin-bottom: 5px;
+            width: 100%;" contenteditable="false">
+        <div>
+            <label  class="btn">
+                <input type="checkbox" class="checkbox-inline" style="display: none">
+                <i class="fa fa-square-o fa-2x"></i><i class="fa fa-check-square-o fa-2x"></i>
+                <span class="glyphicon glyphicon-time" style="display: none; position: relative; left: -25px"></span>
+            </label>
+            <span class="input item_title" tabindex="0" placeholder="Input title">&nbsp;&nbsp;&nbsp;</span>
+            <div class="input item_price"><i class="fa fa-euro"></i></div>
+        </div>
+        <div class="item_content">
+            <textarea  class="input content_text" contenteditable="false" style="position:absolute;height:200px; background-color: transparent; z-index: 11">&nbsp;&nbsp;&nbsp;</textarea>
+            <img class="input img-fluid w3-image" src="" style="position:absolute;display:block;height:180px;padding-left:10px;z-index: 10;">
+        </div>
+    </div>
+    <input type="file" id="file" multiple style="display: none; height: 60px;"/>
+</div>
+
+
+</body>
+</html>
