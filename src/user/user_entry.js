@@ -9,7 +9,7 @@ let utils = require('../utils');
 
 
 import {User} from './user';
-let Dict = require('../dict/dict.js');
+import {Dict} from '../dict/dict.js';
 const langs = require("../dict/languages");
 const ISO6391 = require('iso-639-1');
 var countries = require("i18n-iso-countries");
@@ -29,6 +29,8 @@ let md5 = require('md5');
 require('aframe-orbit-controls-component-2');
 // import registerClickDrag from 'aframe-click-drag-component';
 // registerClickDrag(AFRAME);
+
+require('aframe-text-geometry-component');
 
 let TWEEN = require('@tweenjs/tween.js');
 
@@ -132,7 +134,7 @@ $(document).on('readystatechange', function () {
             $('#datetimepicker').css('transform', 'scale('+scale+','+scale+')');
         }, false);
 
-        let scale = (window.innerWidth+window.innerHeight)/1000 + .5;
+        let scale = (window.innerWidth+window.innerHeight)/1000 + .3;
         $('#datetimepicker').css('transform', 'scale('+scale+','+scale+')');
 
         $('.glyphicon-calendar').on('click',function (ev) {
@@ -165,7 +167,6 @@ $(document).on('readystatechange', function () {
         let lat_param = utils.getParameterByName('lat');
         let lon_param = utils.getParameterByName('lon');
 
-        window.user = new User(md5(JSON.stringify(now)));
 
         var url = http + host_port + '?' + //
             "func=init" +
@@ -191,10 +192,27 @@ $(document).on('readystatechange', function () {
             // },
             success: function (data) {
 
+
+                window.user = new User(md5(JSON.stringify(now)));
+
                 if(typeof data =='string')
                     data = JSON.parse(data);
+
+                if(data.ddd){
+                    if($('#ddd').find('a-scene').length===0) {
+                        $('#ddd').append(data.ddd);
+                        setTimeout(function () {
+                            let renderer = new THREE.WebGLRenderer();
+                            renderer.render($('a-camera')[0].object3D.el.sceneEl, $('a-camera')[0].object3D.children["0"]);
+
+                        }, 100);
+                    }
+
+                }
+
                 if (data.menu) {
-                    window.user.menu.menuObj = data.menu;
+
+                    window.user.menu.menuObj = JSON.parse(data.menu);
 
                     $('#datetimepicker').datetimepicker();
                     $('#datetimepicker').data("DateTimePicker").owner = $('#date');
@@ -204,7 +222,8 @@ $(document).on('readystatechange', function () {
                     if($('#date')[0])
                         $('#date')[0].setAttribute('text', 'value', mom.format('DD.MM.YYYY'));
 
-                    window.dict = new Dict(data.dict);
+                    let dict_obj = JSON.parse(data.data).dict;
+                    window.dict = new Dict(dict_obj);
                     window.dict.set_lang(window.sets.lang, $('#main_window'));
                     window.dict.set_lang(window.sets.lang, $('#ddd'));
                     window.dict.set_lang(window.sets.lang, $('#auth_body'));
@@ -218,6 +237,7 @@ $(document).on('readystatechange', function () {
                         this.class_obj.menu.menuObj = JSON.parse(data.menu);
                         this.class_obj.menu_date = data.maxdate;
                     }
+
                     cb();
                 }else {
                     if (data.msg)

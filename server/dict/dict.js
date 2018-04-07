@@ -1,105 +1,86 @@
-'use strict'
-export {Dict};
+//export {Dict};
 var md5 = require('md5');
-var urlencode = require('urlencode');
 
-class Dict {
+module.exports = class Dict {
 
-    constructor(data) {
-        this.dict = data;
+    constructor(data){
+        this.dict = data.dict;
     }
 
-    getDict() {
+    getDict(){
         return this.dict;
     }
 
 
 // Function for swapping dictionaries
-    set_lang(lang, el) {
+    set_lang (lang, el) {
         let keyAr = Object.keys(this.dict);
         let dtAr = $(el).find("[data-translate]");
-        for (let i = 0; i < dtAr.length; i++) {
+        for(let i=0;i<dtAr.length;i++){
             let item = dtAr[i];
             let key = $(item).attr("data-translate").toLowerCase();
-            if (this.dict[key]) {
-
-                let val = this.dict[key][lang] ? this.dict[key][lang] : this.dict[key]['en'];
+            if ($.inArray(key,keyAr)!==-1) {
+                let val = this.dict[key][lang]?this.dict[key][lang]:this.dict[key]['en'];
 
                 if(item.isEntity)
-                    item.setAttribute('text','value',val);
+                    item.setAttribute('text','value',urlencode.decode(val));
                 if($(item).text())
-                    $(item).text(val);
+                    $(item).text(urlencode.decode(val));
                 if($(item).val())
-                    $(item).val(val);
+                    $(item).val(urlencode.decode(val));
                 if($(item).attr("title"))
-                    $(item).attr("title", val);
+                    $(item).attr("title", urlencode.decode(val));
                 if($(item).attr("placeholder"))
-                    $(item).attr("placeholder", val);
+                    $(item).attr("placeholder", urlencode.decode(val));
                 if($(item).attr("value"))
-                    $(item).attr("value", val);
+                    $(item).attr("value", urlencode.decode(val));
 
             }
         }
     }
 
-    getValByKey(lang, key) {
+    getValByKey(lang,key){
 
-        try {
-            let val = this.dict[key][lang] ?
-                this.dict[key][lang] :
-                (this.dict[key]['en'] ? this.dict[key]['en'] : '');
-            return val;
-        } catch (ex) {
-            return '';
-        }
+        return this.dict[key][lang]?
+            this.dict[key][lang]:
+            (this.dict[key]['en']?this.dict[key]['en']:'');
     }
 
     getDictValue(lang, value) {
-        let res = $.grep(Object.values(this.dict), function (a) {
-            for (let l in Object.values(a))
-                if (a[Object.keys(a)[l]] === value)
+        let res = $.grep(Object.values(this.dict),function (a) {
+            for(let l in Object.values(a))
+                if(a[Object.keys(a)[l]]===value)
                     return a[lang];
         });
 
-        if (res.length > 0 && res[0][lang])
+        if(res.length>0 && res[0][lang])
             return res[0][lang];
         else
-            return value;
+            value;
     }
 
 
-    Translate(from, to, cb) {
+    Translate(sel_lang, admin, cb) {
 
-        if (from === to) {
-            cb();
-            return;
-        }
+        let lang = $('.selectpicker option:selected').val().toLowerCase().substring(0, 2);
         let dict = this.getDict();
+
         let trAr = {};
         let dtAr = $('[data-translate]');
         for (let i = 0; i < dtAr.length; i++) {
             let key = $(dtAr[i]).attr('data-translate').toLowerCase();
-            let val = $(dtAr[i]).text() || $(dtAr[i]).val();
-            if (dtAr[i].getAttribute('text') && dtAr[i].getAttribute('text').value)
-                val = dtAr[i].getAttribute('text').value;
-            if (!val)
-                continue;
-
-            if (dict[key] && !dict[key][to]) {
-                let from = Object.keys(dict[key])[0];
-                trAr[key] = {[from]: dict[key][from]}
-            }
-            // else if ((!dict[key] && !dict[key][to]) && !trAr[key])
-            //     trAr[key] = {[from]: val};
+            let val = $(dtAr[i]).text()||$(dtAr[i]).val();
+            if ((!dict[key] || !dict[key][sel_lang]) && !trAr[key])
+                trAr[key] = {[lang]: val};
         }
 
-
-        if (Object.keys(trAr).length > 0) {
+        if(Object.keys(trAr).length>0) {
 
             let data_obj = {
                 "func": "translate",
                 "data": JSON.stringify(trAr),
-                "to": to
+                "from": lang,
+                "to": sel_lang
             }
 
             $.ajax({
@@ -108,7 +89,7 @@ class Dict {
                 dataType: 'json',
                 data: data_obj,
                 dict: dict,
-                cb: cb,
+                cb:cb,
                 async: true,   // asynchronous request? (synchronous requests are discouraged...)
                 success: function (resp) {
                     //$("[data-translate='" + this.key + "']").parent().val(resp);
@@ -117,30 +98,31 @@ class Dict {
                 error: function (xhr, status, error) {
                     //let err = eval("(" + xhr.responseText + ")");
                     console.log(error.Message);
-                    this.cb();
+                    //alert(xhr.responseText);
                 },
 
                 complete: function (data) {
                     if (data.status == 200) {
                         let add = data.responseJSON;
-                        for (let key in add) {
+                        for(let key in add) {
                             //window.dict.dict = Object.assign(this.dict, add);
-                            if (!window.dict.dict[key])
+                            if(!window.dict.dict[key])
                                 window.dict.dict[key] = {};
-                            for (let l in add[key]) {
-                                if (window.dict.dict[key][l])
+                            for(let l in add[key]) {
+                                if(window.dict.dict[key][l])
                                     window.dict.dict[key][l] = {};
                                 window.dict.dict[key][l] = add[key][l];
                             }
                         }
+                        window.dict.set_lang(sel_lang,$("#menu_dialog") );
 
-                        if (this.cb)
+                        if(this.cb)
                             this.cb();
                     }
                 },
             });
-        } else {
-            if (cb)
+        }else{
+            if(cb)
                 cb();
         }
     }

@@ -36,6 +36,7 @@ String.prototype.replaceAll = function(search, replace){
 }
 
 
+
 module.exports = {
 
     GetTokenLoop : function (server) {
@@ -70,16 +71,28 @@ module.exports = {
 
     },
 
-    HandleRequest:function (q, res) {
+    startConnection:function () {
 
+        console.error('CONNECTING');
         if(!global.con_obj) {
-            global.con_obj = mysql.createConnection(con_param);
 
+            global.con_obj = mysql.createConnection(con_param);
             global.con_obj.connect(function (err) {
-                if (err)
-                    return err;
+                if (err) {
+                    console.error('CONNECT FAILED', err.code);
+                    this.startConnection();
+                }
+                else
+                    console.error('CONNECTED');
+            });
+            global.con_obj.on('error', function (err) {
+                if (err.fatal)
+                    this.startConnection();
             });
         }
+    },
+
+    HandleRequest:function (q, res) {
 
         switch (q.func) {
             case 'init':
@@ -143,9 +156,11 @@ function SetOrderUpd(data){
     process.env.upd_order = data;
 }
 
+
+
+
 function InitDict(q, cb) {
 
-    var con = mysql.createConnection(con_param);
     var sql = "SELECT obj.id, obj.data as data"+
         " FROM  objects as obj"+
         " WHERE obj.latitude="+q.lat+" AND obj.longitude="+q.lon;
@@ -165,7 +180,7 @@ function InitDict(q, cb) {
 
 function InitUser(q, res) {
 
-    var sql =  "SELECT obj.id, obj.owner, obj.data as obj_data, o.data as order_data, DATE_FORMAT(o.date,'%Y-%m-%d') as date"+
+    var sql =  "SELECT obj.id, obj.owner, obj.data as obj_data, obj.ddd as ddd, o.data as order_data, DATE_FORMAT(o.date,'%Y-%m-%d') as date"+
         " FROM  objects as obj, orders as o"+
         " WHERE obj.latitude="+q.lat+" AND obj.longitude="+q.lon+
         " AND obj.id=o.obj_id AND (o.data IS NOT NULL OR o.data='') ORDER BY o.date DESC";
@@ -173,33 +188,17 @@ function InitUser(q, res) {
     global.con_obj.query(sql, function (err, result) {
         if (err)
             throw err;
+
         if (result.length > 0) {
 
-            let menu;
-            if(isJSON(result[0].order_data)){
-                menu = JSON.parse(result[0].order_data);
-            }else {
-                //console.log('Wrong data format');
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                res.end('Wrong data format');
-                return;
-            }
-            let dict;
-            if(isJSON(result[0].obj_data)){
-                dict = JSON.parse(result[0].obj_data).dict;
-            }else {
-                //console.log('Wrong data format');
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                res.end('Wrong data format');
-                return;
-            }
-
-            if (menu){
-                    //res.writeHead(200, {'Content-Type': 'application/json'});
-                res.writeHead(200,{'Content-Type': 'text/event-stream'});
-                res.end(JSON.stringify({dict: dict,menu:menu,maxdate:result[0].date}));
-
-            }
+            //res.writeHead(200, {'Content-Type': 'application/json'});
+            res.writeHead(200,{'Content-Type': 'text/event-stream'});
+            res.end(JSON.stringify({
+                data: result[0].obj_data,
+                ddd: result[0].ddd,
+                menu: result[0].order_data,
+                maxdate:result[0].date
+            }));
 
         }else {
             res.writeHead(200, {'Content-Type': 'application/json'});
@@ -214,7 +213,7 @@ function InitAdmin(q, res) {
     var sql = "SELECT obj.id, obj.owner, obj.data as obj_data, o.data as menu_data"+
         " FROM  objects as obj, orders as o"+
         " WHERE obj.latitude="+q.lat+" AND obj.longitude="+q.lon+
-        " AND obj.id=o.obj_id AND o.data<>'' AND o.data<>'{}' AND o.data IS NOT NULL"+
+        " AND obj.id=o.obj_id AND o.data<>''  AND o.data IS NOT NULL"+
         " ORDER BY o.date DESC LIMIT 1";
 
     global.con_obj.query(sql, function (err, result) {
@@ -233,19 +232,11 @@ function InitAdmin(q, res) {
                 return;
             }
             let menu_data = (result[0].menu_data);//?result[0].menu_data:"{\"menu\":[\"tab_1\"]}";
-            let dict;
-            if(isJSON(result[0].obj_data)){
-                dict = JSON.parse(result[0].obj_data).dict;
-            }else {
-                //console.log('Wrong data format');
-                res.writeHead(200, {'Content-Type': 'application/json'});
-                res.end('Wrong data format');
-                return;
-            }
+
 
             if (owner.uid == q.uid) {
                 res.writeHead(200, {'Content-Type': 'application/json'});
-                res.end(JSON.stringify({auth: 'OK',dict: dict,menu:menu_data}));
+                res.end(JSON.stringify({auth: 'OK', data: result[0].obj_data, menu: menu_data}));
                 return;
             }
             if (!owner.uid) {
@@ -262,17 +253,18 @@ function InitAdmin(q, res) {
                 });
             }else{
                 res.writeHead(200, {'Content-Type': 'application/json'});
-                res.end(JSON.stringify({msg:'Demo Mode',auth: 'ERROR',dict: dict,menu:menu_data}));
+                res.end(JSON.stringify({msg:'Demo Mode',auth: 'ERROR',data: result[0].obj_data, menu: menu_data}));
             }
 
         }else{
             res.writeHead(200, {'Content-Type': 'application/json'});
-            res.end(JSON.stringify({"dict":result[0].dict,"menu":["tab_1"]}));
+            res.end(JSON.stringify({"data": result[0].obj_data,"menu": "[tab_1]"}));
         }
     });
 }
 
 function select_query(q, res) {
+
 
     let sql = "SELECT DATE_FORMAT(o.date,'%Y-%m-%d') as date, o.data as order_data, o.reserved as reserved" +
         " FROM  orders as o, objects as obj" +
@@ -287,25 +279,24 @@ function select_query(q, res) {
             res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify({err: err}));
         }
-        if(result[0]) {
+        if(result && result[0]) {
             handleMysqlResult(q, res, result);
 
         }else{
-            res.writeHead(200, {'Content-Type': 'application/json'});
+            //res.writeHead(200, {'Content-Type': 'application/json'});
             res.end(JSON.stringify({"menu":'undefined'}))
         }
     });
 }
 
-function handleMysqlResult(q,res, result){
+function handleMysqlResult(q, res, result){
 
     var ColorHash = require('color-hash');
     var order = {"reseed": []};
 
-
-    if(md5(result[0].reserved) === q.order_hash){
+    if(!result[0].reserved || md5(result[0].reserved) === q.order_hash){
         res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end(JSON.stringify({"menu":'undefined'}));
+        res.end(JSON.stringify({"menu":md5(result[0].order_data)}));
         return;
     }
 
@@ -313,6 +304,7 @@ function handleMysqlResult(q,res, result){
         res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify({"menu":'undefined'}));
         return;
+
     }else {
 
         let user = (isJSON(urlencode.decode(q.user)) ? JSON.parse(urlencode.decode(q.user)) : q.admin);
@@ -355,6 +347,7 @@ function handleMysqlResult(q,res, result){
             }
         }
         order.order_hash = md5(result[0].reserved);
+        order.reserved = urlencode.encode(JSON.stringify(order.reserved));
         res.writeHead(200, {'Content-Type': 'application/json'});
         res.end(JSON.stringify(order));
     }
@@ -367,15 +360,6 @@ function GetReserved(q, res){
 }
 
 function UpdateOrderUser(q, res){
-
-    if(!global.con_obj) {
-        global.con_obj = mysql.createConnection(con_param);
-
-        global.con_obj.connect(function (err) {
-            if (err)
-                return err;
-        });
-    }
 
     var sql_select = "SELECT o.reserved, o.id as order_id" +
         " FROM  orders as o, objects as obj" +
@@ -515,8 +499,17 @@ function UpdateOrderAdmin(q, res){
 
 function UpdateMenu(q, res){
 
+    let admin;
+    if(isJSON(q.admin)){
+        admin = JSON.parse(q.admin);
+    }else{
+        res.writeHead(200, {'Content-Type': 'application/json'});
+        res.end();
+        return;
+    }
+
     var sql_select =
-        "SELECT obj.id as obj_id, o.id as order_id, o.data as order_data, DATE_FORMAT(o.date,'%Y-%m-%d') as date" +
+        "SELECT obj.id as obj_id, o.id as order_id, o.data as order_data, obj.data as obj_data, DATE_FORMAT(o.date,'%Y-%m-%d') as date" +
         " FROM  orders as o, objects as obj" +
         " WHERE o.obj_id=obj.id "+
         " AND obj.latitude=" + q.lat + " AND obj.longitude=" + q.lon+
@@ -528,18 +521,36 @@ function UpdateMenu(q, res){
             res.end(JSON.stringify({err: err}));
             return;
         }
+
         let values;
+        if(q.dict){// && result[0].obj_data.length<q.dict.length){
+            let data = JSON.parse(result[0].obj_data);
+            let dict = q.dict;
+
+            data.dict = JSON.parse(dict);
+            values = [JSON.stringify(data)];
+
+            var sql ="UPDATE objects SET data=?   WHERE id="+result[0].obj_id;
+            //console.log(sql);
+
+            global.con_obj.query(sql,values, function (err, result) {
+                if (result) {
+
+                }
+            });
+        }
+
         if (q.date === result[0].date) {
-            values = [q.menu,result[0].order_id ];
+            values = [urlencode.decode(q.menu),result[0].order_id ];
             var sql =
                 'UPDATE orders SET  data=?, date=now(), reserved=orders.reserved '+
                 ' WHERE orders.id =?';
-                //' ON DUPLICATE KEY UPDATE data=\'{\"menu\":\"' + urlencode.decode(q.menu) + '\"}\'';
+            //' ON DUPLICATE KEY UPDATE data=\'{\"menu\":\"' + urlencode.decode(q.menu) + '\"}\'';
         }else {
-            values = [result[0].obj_id,q.menu,q.date];
+            values = [result[0].obj_id,urlencode.decode(q.menu),q.date,'{"19:00 - 24:00":{},"13:00 - 17:00":{}}'];
             var sql =
-                'INSERT INTO orders SET obj_id =?, data=?, date=now(), reserved=orders.reserved';
-                //+' ON DUPLICATE KEY UPDATE data=\'{\"menu\":\"' + urlencode.decode(q.menu) + '\"}\'';
+                'INSERT INTO orders SET obj_id =?, data=?, date=?, reserved=?';
+            //+' ON DUPLICATE KEY UPDATE data=\'{\"menu\":\"' + urlencode.decode(q.menu) + '\"}\'';
         }
 
         global.con_obj.query(sql, values, function (err, result) {
@@ -561,7 +572,7 @@ function UpdateReservation(q, res){
 
     var sql = "SELECT *, o.id as order_id " +
         " FROM  orders as o, objects as obj" +
-        " WHERE obj.latitude=" + q.lat + " AND obj.longitude=" + q.lon +
+        " WHERE  o.obj_id=obj.id AND obj.latitude=" + q.lat + " AND obj.longitude=" + q.lon +
         " AND DATE_FORMAT(o.date,'%Y-%m-%d')='" + q.date + "'";
 
     global.con_obj.query(sql, function (err, result) {
@@ -612,7 +623,7 @@ function UpdateReservation(q, res){
                 input[time] = {};
             if (select[time][user.uid]) {
                 input[time][user.uid][q.table] = menus;
-                    //input[user.uid].reserved[t][q.table] = menus;
+                //input[user.uid].reserved[t][q.table] = menus;
 
             } else {
                 input[time][user.uid] = {};
@@ -670,47 +681,17 @@ function UpdateReservation(q, res){
     });
 }
 
-function UpdateDict(q,res){
-
-    let admin;
-    if(isJSON(q.admin)){
-        admin = JSON.parse(q.admin);
-    }else{
-        res.writeHead(200, {'Content-Type': 'application/json'});
-        res.end();
-        return;
-    }
+function UpdateDict(q, res){
 
     var sql_select = "SELECT obj.id as obj_id, obj.data as data" +
         " FROM objects as obj" +
         " WHERE obj.latitude=" + admin.lat + " AND obj.longitude=" + admin.lon;
 
     global.con_obj.query(sql_select, function (err, result) {
-        if (err){
-            res.writeHead(200, {'Content-Type': 'application/json'});
-            res.end(JSON.stringify({err: err}));
-            return;
-        }
 
         if (result.length > 0) {
 
-            let data = JSON.parse(result[0].data);
-            data.dict = JSON.parse(q.dict.replace(/'/g,"&apos;"));
 
-            var sql ="UPDATE objects SET data='"+ JSON.stringify(data)+"' WHERE id="+result[0].obj_id;
-            //console.log(sql);
-
-            global.con_obj.query(sql, function (err, result) {
-                if (err ) {
-                    res.writeHead(200, {'Content-Type': 'application/json'});
-                    res.end(JSON.stringify({err: err}));
-                    return;
-                }
-                if (result) {
-                    res.writeHead(200, {'Content-Type': 'application/json'});
-                    res.end(JSON.stringify({result: 'OK'}));
-                }
-            });
 
         }else{
 

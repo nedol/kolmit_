@@ -45,6 +45,8 @@ class Admin{
 
         try {
 
+            $('.dt_val').val(this.date);
+
             $('#datetimepicker').on('dp.change',this,this.GetReserved);
 
             var url = http + host_port + '/?' + //
@@ -83,7 +85,7 @@ class Admin{
                             };
                             localStorage.setItem("admin", JSON.stringify(uObj));
 
-                            window.dict = new Dict(data.dict);
+                            window.dict = new Dict(JSON.parse(urlencode.decode(JSON.parse(data.data).dict)));
                             window.dict.set_lang(window.sets.lang, $('#main_window'));
 
                             localStorage.setItem("lang", window.sets.lang);
@@ -93,7 +95,8 @@ class Admin{
                             cb(data);
                         }else if (data.auth =='OK') {
                             if(data.menu) {
-                                window.dict = new Dict(data.dict);
+                                let dict = JSON.parse(data.data).dict;
+                                window.dict = new Dict(dict);
                                 window.dict.set_lang(window.sets.lang, $('#main_window'));
 
                                 localStorage.setItem("lang", window.sets.lang);
@@ -105,7 +108,8 @@ class Admin{
                             this.class_obj.DocReady();
 
                         }else{
-                            window.dict = new Dict(data.dict);
+                            let dict = JSON.parse(data.data).dict;
+                            window.dict = new Dict(dict);
                             window.dict.set_lang(window.sets.lang, $('#main_window'));
                             this.class_obj.menu.menuObj = JSON.parse(data.menu);
                             this.class_obj.DocReady();
@@ -128,31 +132,42 @@ class Admin{
 
     DocReady(cb) {
 
+        let time = $('.period_list').find('a')[0].text;
+        $('.sel_time').text(time);
+
         this.sse = new SSE();
         this.sse.SetOrderUpdLstnr("admin="+ this.uid,this, function (resp) {
-            if(resp.reserved)
-                if (Object.keys(resp.reserved).length > 0) {
+            if(resp.menu!=='undefined') {
+                if (resp.reserved) {
+                    resp.reserved = JSON.parse(urlencode.decode(resp.reserved));
+                    if (Object.keys(resp.reserved).length > 0) {
 
-                    let time = $('.period_list').find('a')[0].text;
-                    $('.sel_time').text(time);
+                        this.class_obj.order = resp.reserved;
 
-                    this.class_obj.order = resp.reserved;
+                        let time = $('.sel_time').text();
+                        if (time==='closed') {
+                            time = $('.period_list').find('a')[0].text;
+                            $('.sel_time').text(time);
+                        }
 
-                    this.class_obj.order_hash = resp.order_hash;
-                    this.class_obj.ClearTableReserve();
-                    this.class_obj.SetTables(resp.reserved);
+                        this.class_obj.order_hash = resp.order_hash;
+                        this.class_obj.ClearTableReserve();
+                        this.class_obj.SetTables(resp.reserved);
 
-                    for(let i in resp.reserved[time]){
-                        if(resp.reserved[time][i] && Object.keys(resp.reserved[time][i])[0] === this.class_obj.menu.table_id){
-                            this.class_obj.menu.order[i] = resp.reserved[time][i];
-                            $("#menu_dialog").find('.tab-pane').empty();
-                            $("#menu_dialog").find('li.tab_inserted').empty();
-                            $("#menu_dialog").find('.w3-button').css('color', '');
-                            this.class_obj.menu.FillOrder();
+                        for (let i in resp.reserved[time]) {
+                            if (resp.reserved[time][i] && Object.keys(resp.reserved[time][i])[0] === this.class_obj.menu.table_id) {
+                                this.class_obj.menu.order[i] = resp.reserved[time][i];
+                                $("#menu_dialog").find('.tab-pane').empty();
+                                $("#menu_dialog").find('li.tab_inserted').empty();
+                                $("#menu_dialog").find('.w3-button').css('color', '');
+                                this.class_obj.menu.FillOrder();
+                            }
                         }
                     }
-
                 }
+            }else{
+                $('.sel_time').text('closed');
+            }
         });
 
         let scene = document.querySelector('#scene');
@@ -164,6 +179,9 @@ class Admin{
         let vector = new THREE.Vector3();
         let raycaster = new THREE.Raycaster();
         let dir = new THREE.Vector3();
+        let dbl_clk_timer = 0;
+        let clk_timer = 0;
+        let touch;
 
         $(canvasEl).dblclick(function (event) {
             console.log('On dblclick canvas ');
@@ -178,9 +196,6 @@ class Admin{
             clk_timer = new Date();
         });
 
-        let dbl_clk_timer = 0;
-        let clk_timer = 0;
-        let touch;
         canvasEl.addEventListener('touchstart', function(event) {
             clk_timer = new Date();
             //event.preventDefault();
@@ -289,6 +304,7 @@ class Admin{
                         $(a.object.el).attr('class') === 'table' ||
                         $(a.object.el).attr('class') === 'menu' ||
                         $(a.object.el).attr('id') === 'menu' ||
+                        $(a.object.el).attr('id') === 'main_menu' ||
                         $(a.object.el).attr('class') ==='free' ||
                         $(a.object.el).attr('class') ==='floor') {
                         $(a.object.el).trigger('touch', [event, a]);
@@ -378,7 +394,6 @@ class Admin{
             $('#period_2').attr('visible','false');
             $('.sel_time').find('option').css('visibility','visible');
 
-            $('.sel_time').text('closed');
 
             $(this).data("DateTimePicker").toggle();
         });
@@ -391,7 +406,7 @@ class Admin{
 
         $("#floor").on('touch',this, function (event, org_event, intersection) {
             let pos = intersection.point;
-            $('#camera')[0].setAttribute("orbit-controls", "autoRotate",'true');
+            // $('#camera')[0].setAttribute("orbit-controls", "autoRotate",'');
             new TWEEN.Tween($('#target')[0].object3D.position).to(
                 pos
                 , 1000)
@@ -432,9 +447,9 @@ class Admin{
         ev.data.menu.OpenMenu(ev);
     }
 
-    UpdateMenu(menu, date){
+    UpdateMenu(menu, dict, date){
 
-        if(mode){
+        if(window.demoMode){
             this.menu.menu_obj = menu;
             return;
         }
@@ -445,9 +460,16 @@ class Admin{
             "lat":this.lat_param,
             "lon":this.lon_param,
             "date":date,
-            "menu":JSON.stringify(menu),
+            "menu":urlencode.encode(JSON.stringify(menu)),
+            "dict": JSON.stringify(dict).replace(/'/g,'%27').replace(/\n/g,'%0D').replace(/\n/g,'%0D').replace(/"/g,'\"'),
             "lang":window.sets.lang
         }
+
+        // $.post(http+host_port,
+        //     data_obj,
+        //     function(data, status){
+        //         window.admin.menu.menuObj = menu;
+        //     });
 
         $.ajax({
             url:  http+host_port,
@@ -529,7 +551,7 @@ class Admin{
                     //     window.admin.SetTables(resp.reserved);
                     // }
 
-                    if(isJSON(resp.menu))
+                    if(resp.menu && resp.menu!=='undefined')
                         window.admin.menu.menuObj = resp.menu;
 
                 },
@@ -575,25 +597,30 @@ class Admin{
             from_1 = parseInt(Object.keys(order)[0].split(' - ')[0].replace(":", ""));
             to_1 = parseInt(Object.keys(order)[0].split(' - ')[1].replace(":", ""));
         }
-        $('.free').on('touch', this, this.OnTouchMenu);
 
-        for (let u in arr) {
-            for (let t in arr[u]) {
-                let menuAr = $('#' + t).find('a-entity.free').toArray();
-                for (let m in menuAr) {
-                    let menu_id = $(menuAr[m]).attr('id');
-                    if (arr[u][t][menu_id] && arr[u][t][menu_id]['order']) {
-                        menuAr[m].setAttribute('material', 'color', colorHash.hex(u));
-                        for (let d in arr[u][t][menu_id]['order']) {
-                            if (arr[u][t][menu_id]['order'][d]['accepted']) {
+        if(arr && Object.keys(arr).length>0) {
 
-                            }
-                            if (arr[u][t][menu_id]['order'][d]['ordered']) {
-                                menuAr[m].setAttribute('text', 'color', 'red');
+            let time = $('.period_list').find('a')[0].text;
+            $('.sel_time').text(time);
+
+            for (let u in arr) {
+                for (let t in arr[u]) {
+                    let menuAr = $('#' + t).find('a-entity.free').toArray();
+                    for (let m in menuAr) {
+                        let menu_id = $(menuAr[m]).attr('id');
+                        if (arr[u][t][menu_id] && arr[u][t][menu_id]['order']) {
+                            menuAr[m].setAttribute('material', 'color', colorHash.hex(u));
+                            for (let d in arr[u][t][menu_id]['order']) {
+                                if (arr[u][t][menu_id]['order'][d]['accepted']) {
+
+                                }
+                                if (arr[u][t][menu_id]['order'][d]['ordered']) {
+                                    menuAr[m].setAttribute('text', 'color', 'red');
+                                }
                             }
                         }
-                    }
 
+                    }
                 }
             }
         }
@@ -616,6 +643,78 @@ class Admin{
                 i--;
             }
         }
+    }
+
+    UpdateReservation(event, table_id, data_obj,cb) {
+
+        let time = $('.sel_time').text();
+        if(!this.order[time])
+            this.order[time]={};
+        if (!this.order[time][this.uid])
+            this.order[time][this.uid] = {};
+        if (!this.order[time][this.uid][table_id])
+            this.order[time][this.uid][table_id] = data_obj?data_obj[this.uid][table_id]:
+                {'menu_1':{'order':{}},'menu_2':{'order':{}}};
+
+        if(window.demoMode) {
+            this.ClearTableReserve();
+            this.SetTables(this.order,this);
+            return;
+        }
+        let url = http+host_port;
+        let data =
+            "func=updatereservation"+
+            "&user="+localStorage.getItem('user')+
+            "&lat="+event.data.lat_param+
+            "&lon="+event.data.lon_param+
+            "&time="+time+
+            "&date="+event.data.date+
+            "&table="+table_id+
+            "&menus="+urlencode.encode(JSON.stringify(this.order[time][this.uid][table_id]))+
+            "&lang="+window.sets.lang;
+//'{"'+res[0].id + '":{"order": {},"from":"'+$('#period_1').find('.from')[0].getAttribute('text').value+'","to":"'+$('#period_1').find('.to')[0].getAttribute('text').value+'"}}';
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            dataType: 'json',
+            data: data,
+            class_obj:event.data,
+            cb:cb,
+            success: function (resp) {
+                let arr = resp;
+                if(isJSON(resp))
+                    arr = JSON.parse(resp);
+                if(resp.user) {
+                    localStorage.setItem("user", resp.user);//
+                }
+                if(!arr) {
+                    new TWEEN.Tween($('#target')[0].object3D.position).to({
+                        y: 0,
+                        x: 0,//_x * visible_width,
+                        z: 0 //_y * visible_height
+                    }, 1000)
+                        .repeat(0)//Infinity)
+                        .onUpdate(function () { // Called after tween.js updates
+                            //document.querySelector('#camera').setAttribute('camera', 'fov', '60');
+                        })
+                        .easing(TWEEN.Easing.Quadratic.In).start();
+                } else {
+
+                }
+            },
+            error: function(xhr, status, error){
+                //let err = eval("(" + xhr.responseText + ")");
+                localStorage.removeItem("user");//
+                console.log(error.Message);
+                //alert(xhr.responseText);
+            },
+            complete: function (data) {
+                //alert(data.responseText);
+                if(this.cb)
+                    this.cb();
+            },
+        });
     }
 
     OnClickTable(event) {
@@ -697,7 +796,7 @@ class Admin{
             "&lat="+this.lat_param+
             "&lon="+this.lon_param+
             "&date="+date+
-            "&order="+urlencode.encode(JSON.stringify(this.order))+
+            "&order="+JSON.stringify(this.order).replace(/'/g,'%27').replace(/\n/g,'%0D').replace(/\n/g,'%0D').replace(/"/g,'\"')+
             "&lang="+window.sets.lang;
 
         $.ajax({
@@ -734,13 +833,14 @@ class Admin{
 
         if(window.demoMode){
             window.dict.dict = dict;
+            cb();
             return;
         }
 
         let data_obj = {
             "func": "updatedict",
             "admin": JSON.stringify({uid:this.uid,lon:this.lon_param,lat:this.lat_param}),
-            "dict": JSON.stringify(dict),
+            "dict": JSON.stringify(dict).replace(/'/g,'%27').replace(/\n/g,'%0D').replace(/\n/g,'%0D').replace(/"/g,'\"')
         }
         $.ajax({
             url: http + host_port,

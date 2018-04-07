@@ -1,5 +1,7 @@
 'use strict'
 export {User};
+
+
 let md5 = require('md5');
 var isJSON = require('is-json');
 let utils = require('../utils');
@@ -14,12 +16,19 @@ var ColorHash = require('color-hash');
 require('bootstrap/js/modal.js');
 require('bootstrap-datetimepicker-npm/build/js/bootstrap-datetimepicker.min');
 
-let hammer = require('jquery-hammerjs');
+//let hammer = require('jquery-hammerjs');
 
 // require("../../lib/aframe-orbit-controls-component.min")
 
 require('aframe-orbit-controls-component-2');
-let renderer = new THREE.WebGLRenderer();
+
+import 'aframe-gif-shader'
+import 'aframe-gif-component'
+// let renderer = new THREE.WebGLRenderer();
+
+import {AR} from '../ar/ar';
+
+import {Dict} from '../dict/dict.js';
 
 
 class User{
@@ -32,7 +41,7 @@ class User{
        this.zoom_param = utils.getParameterByName('zoom');
        this.email = utils.getParameterByName('admin');
 
-       $('body').hammer().bind("pan", this.PanHandler);
+       //$('body').hammer().bind("pan", this.PanHandler);
 
         // var mc = new Hammer($('body')[0]);
         // mc.on("panleft panright tap press", function(ev) {
@@ -40,12 +49,14 @@ class User{
         // });
 
        this.date = $('#datetimepicker').data("DateTimePicker").date().format('YYYY-MM-DD');
-
+       $('.dt_val').val(this.date);
        this.menu = new MenuUser();
 
        this.menu_date;
 
        this.order={};
+
+       this.ar;
 
         let colorHash = new ColorHash();
         this.color = colorHash.hex(uid);
@@ -73,29 +84,42 @@ class User{
             // }
         });
 
+        //$('#flr')["0"].gif.play();
+
+        let time = $('.period_list').find('a')[0].text;
+        $('.sel_time').text(time);
+
         this.sse = new SSE();
-        this.sse.SetOrderUpdLstnr('user='+localStorage.getItem('user'),this, function (resp,this_obj) {
+        this.sse.SetOrderUpdLstnr('user=' + localStorage.getItem('user'), this, function (resp, this_obj) {
 
-            if (resp.reserved) {
-                let time = $('.period_list').find('a')[0].text;
-                $('.sel_time').text(time);
+            if (resp.menu !== 'undefined') {
+                if (resp.reserved) {
 
-                this_obj.order_hash = resp.order_hash;
-                this_obj.order=resp.reserved;
-                this_obj.ClearTableReserve();
-                this_obj.SetTables(resp.reserved,this_obj);
-                $('#period_1').attr('visible','true');
-                $('#period_2').attr('visible','true');
+                    let time = $('.sel_time').text();
+                    if (time === 'closed') {
+                        time = $('.period_list').find('a')[0].text;
+                        $('.sel_time').text(time);
+                    }
 
-                // $('.sel_time').find('option').css('visibility','visible');
-                //$('.sel_time').val($('.period_list').find('a')[0].value);
-                //$('.sel_time').find('.closed').remove();
+                    this_obj.order_hash = resp.order_hash;
+                    this_obj.order = JSON.parse(urlencode.decode(resp.reserved));
+                    this_obj.ClearTableReserve();
+                    this_obj.SetTables(this_obj.order, this_obj);
+                    $('#period_1').attr('visible', 'true');
+                    $('#period_2').attr('visible', 'true');
 
-                //this.class_obj.menu.menuObj = JSON.parse(resp.menu);
-                // for(let i in resp.tables){
-                //     this_obj.menu.order[i] = resp.tables[i];
-                //     this_obj.menu.FillMenu();
-                // }
+                    // $('.sel_time').find('option').css('visibility','visible');
+                    //$('.sel_time').val($('.period_list').find('a')[0].value);
+                    //$('.sel_time').find('.closed').remove();
+
+                    //this.class_obj.menu.menuObj = JSON.parse(resp.menu);
+                    // for(let i in resp.tables){
+                    //     this_obj.menu.order[i] = resp.tables[i];
+                    //     this_obj.menu.FillMenu();
+                    // }
+                }
+            } else {
+                $('.sel_time').text('closed');
             }
         });
 
@@ -103,74 +127,83 @@ class User{
         let camera = document.querySelector('#camera');
         let canvasEl = scene.canvas;
 
-        $(canvasEl).on('dblclick',this,function (event) {
+        let dbl_clk_timer = 0;
+        let clk_timer = 0;
+        let touch;
+        let event_0;
+
+        $(canvasEl).on('dblclick', this, function (event) {
             console.log('On dblclick canvas ');
             onDocumentMouseDown(event)
         });
 
-        $(canvasEl).on('click',this,function (event) {
+        $(canvasEl).on('click', this, function (event) {
             onDocumentMouseDown(event)
         });
-        $(canvasEl).on('mousedown',this,function (event) {
+        $(canvasEl).on('mousedown', this, function (event) {
             clk_timer = new Date();
+            event_0 = event;
+            //console.log('mousedown:' + event.clientX + ':' + event.clientY);
         });
 
-        let dbl_clk_timer = 0;
-        let clk_timer = 0;
-        let touch;
-        canvasEl.addEventListener('touchstart', function(event) {
+        canvasEl.addEventListener('touchstart', function (event) {
             clk_timer = new Date();
-            //event.preventDefault();
-            if(dbl_clk_timer == 0) {
+            event.preventDefault();
+            event_0 = event;
+            if (dbl_clk_timer == 0) {
                 dbl_clk_timer = 1;
                 touch = event.touches[0];
-                dbl_clk_timer = setTimeout(function(){
+                dbl_clk_timer = setTimeout(function () {
                     dbl_clk_timer = 0;
                 }, 400);
             }
             else {
-                event.clientX = (event.touches[0].clientX+touch.clientX)/2;
-                event.clientY = (event.touches[0].clientY+touch.clientY)/2;
+                event.clientX = (event.touches[0].clientX + touch.clientX) / 2;
+                event.clientY = (event.touches[0].clientY + touch.clientY) / 2;
                 onDocumentMouseDown(event);
                 dbl_clk_timer = 0;
             }
         })
 
         $(canvasEl).on('mouseup', this, function (event) {
-            if((new Date() - clk_timer)>1000) {
-                var e = $.Event( "lngtouch" );
+            if ((new Date() - clk_timer) > 1000) {
+                var e = $.Event("lngtouch");
                 e.clientX = event.clientX;
                 e.clientY = event.clientY;
                 onDocumentMouseDown(e);
             }
-            else if((new Date() - clk_timer)<150) {
-                var e = $.Event( "shrttouch" );
+            else if ((new Date() - clk_timer) < 150) {
+                var e = $.Event("shrttouch");
                 e.clientX = event.clientX;
                 e.clientY = event.clientY;
+                console.log('mouseup:' + e.clientX + ':' + e.clientY);
                 onDocumentMouseDown(e);
             }
             clk_timer = 0;
+            return false;
         });
 
         canvasEl.addEventListener('touchend', function (event) {
-            if((new Date() - clk_timer)>1000) {
-                var e = $.Event( "lngtouch" );
+            if ((new Date() - clk_timer) > 1000) {
+                var e = $.Event("lngtouch");
                 e.clientX = event.changedTouches[0].clientX;
                 e.clientY = event.changedTouches[0].clientY;
                 onDocumentMouseDown(e);
-            }else if((new Date() - clk_timer)<150){
-                var e = $.Event( "shrttouch" );
+            } else if ((new Date() - clk_timer) < 150) {
+                var e = $.Event("shrttouch");
                 e.clientX = event.changedTouches[0].clientX;
                 e.clientY = event.changedTouches[0].clientY;
                 onDocumentMouseDown(e);
             }
             clk_timer = 0;
+            return false;
         });
 
         let mouse = new THREE.Vector2();
         let intersects = [];
         let vector = new THREE.Vector3();
         let raycaster = new THREE.Raycaster();
+
         let dir = new THREE.Vector3();
 
         function onDocumentMouseDown(event) {
@@ -179,9 +212,9 @@ class User{
             let class_obj = event.data;
             intersects = [];
 
-            mouse.x = ( event.clientX / scene.renderer.domElement.clientWidth ) * 2 - 1;
-            mouse.y = -( event.clientY / scene.renderer.domElement.clientHeight ) * 2 + 1;
-            raycaster.setFromCamera(mouse, camera.object3D.children[0]);
+            mouse.x = (event.clientX / scene.renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = -(event.clientY / scene.renderer.domElement.clientHeight) * 2 + 1;
+
 
             let ToIntersect = [];
             scene.object3D.traverse(function (child) {
@@ -189,8 +222,12 @@ class User{
                     ToIntersect.push(child);
                 }
             });
-
-            intersects = raycaster.intersectObjects(ToIntersect, true);
+            $.grep(camera.object3D.children, function (a) {
+                if (a.type === 'PerspectiveCamera') {
+                    raycaster.setFromCamera(mouse, a);
+                    intersects = raycaster.intersectObjects(ToIntersect, true);
+                }
+            });
 
             if (intersects.length > 0) {
                 if (event.type === 'dblclick' || event.type === 'touchstart') {
@@ -208,36 +245,38 @@ class User{
                 if (event.type === 'lngtouch') {
                     $.grep(intersects, function (a) {
                         let el = a.object.el;
-                        if($(a.object.el).attr('class') ==='free') {
+                        if ($(a.object.el).attr('class') === 'free') {
                             $(el).trigger('lngtouch', [event, a]);
-                            return false;
                         }
                     });
                 }
 
-                if(event.type==='click'){
-                    $.grep(intersects,function (a) {
-                        if( $(a.object.el).attr('id')==='menu' ||
-                            $(a.object.el).attr('id')==='lang_text' ||
-                            $(a.object.el).attr('class')==='period') {
+                if (event.type === 'click') {
+                    $.grep(intersects, function (a) {
+                        if ($(a.object.el).attr('id') === 'lang_text' ||
+                            $(a.object.el).attr('class') === 'period') {
                             $(a.object.el).trigger('touch', [event, a]);
                         }
                     });
                 }
 
                 if (event.type === 'shrttouch') {
-                    $.grep(intersects,function (a) {
-                        //let a = intersects[0];
-                        let distance = camera.object3D.position.distanceTo(a.point);
-                        if( $(a.object.el).attr('class') === 'wall' ||
-                            $(a.object.el).attr('class') === 'table' ||
-                            $(a.object.el).attr('class') === 'menu' ||
-                            $(a.object.el).attr('id') === 'menu' ||
-                            $(a.object.el).attr('class') ==='free' ||
-                            $(a.object.el).attr('class') ==='plane') {
-                            $(a.object.el).trigger('touch', [event, a]);
-                        }
+                    $.grep(intersects, function (a) {
+
                     });
+
+                    let a = intersects[1];
+                    if ($(a.object.el).attr('class') === 'panorama' ||
+                        $(a.object.el).attr('class') === 'table' ||
+                        $(a.object.el).attr('class') === 'menu' ||
+                        $(a.object.el).attr('id') === 'hunt_text' ||
+                        $(a.object.el).attr('id') === 'menu' ||
+                        $(a.object.el).attr('class') === 'free' ||
+                        $(a.object.el).attr('class') === 'bnet') {
+                        $(a.object.el).trigger('touch', [event, a, intersects]);
+                    }
+
+                    //});
                 }
 
                 //}
@@ -255,7 +294,7 @@ class User{
             }
         }
 
-        $("#lang_text").on('touch',this, function (event){
+        $("#lang_text").on('touch', this, function (event) {
             event.preventDefault();
             event.stopPropagation();
             $('#select_lang').css('visibility', 'visible');
@@ -263,20 +302,24 @@ class User{
 
         });
 
-        $('#datetimepicker').on("dp.change",this, function (ev) {
+        $('.dt_val').on("click touchstart", function () {
+            $('#datetimepicker').data("DateTimePicker").toggle();
+        });
+
+        $('#datetimepicker').on("dp.change", this, function (ev) {
 
             ev.data.GetReserved(ev);
 
             $('.dt_val').val($('#datetimepicker').data("DateTimePicker").date().format('YYYY-MM-DD'));
 
-            if($('#date')[0])
+            if ($('#date')[0])
                 $('#date')[0].setAttribute('text', 'value', $(this).data("DateTimePicker").date().format('DD.MM.YYYY'));
             ev.data.ClearTableReserve();
             ev.data.order_hash = undefined;
-            $('#period_1').attr('visible','false');
-            $('#period_2').attr('visible','false');
+            $('#period_1').attr('visible', 'false');
+            $('#period_2').attr('visible', 'false');
 
-            if( $('.sel_time').find('.closed').length===0){
+            if ($('.sel_time').find('.closed').length === 0) {
                 $('.sel_time').text("closed");
             }
 
@@ -284,11 +327,11 @@ class User{
 
         });
 
-        $('#dt_from').on("dp.change",this, function (ev) {
+        $('#dt_from').on("dp.change", this, function (ev) {
 
-            let date_from =  new moment($('#period_1').find('.from')[0].getAttribute('text').value, 'HH:mm');
+            let date_from = new moment($('#period_1').find('.from')[0].getAttribute('text').value, 'HH:mm');
             let date = moment($(this).data("DateTimePicker").date().format('HH:mm'), 'HH:mm');
-            if(date.isBefore(date_from)) {
+            if (date.isBefore(date_from)) {
                 $(this).data("DateTimePicker").toggle();
                 return true;
             }
@@ -296,10 +339,10 @@ class User{
             //$('#period_1').find('.to')[0].setAttribute('text', 'value', mom.add(4, 'h').format('HH:00'));
 
             ev.data.ClearTableReserve();
-            ev.data.SetTables(ev.data.order,ev.data);
+            ev.data.SetTables(ev.data.order, ev.data);
             $(this).data("DateTimePicker").toggle();
         });
-        $('.sel_time').on("change",this,function (ev) {
+        $('.sel_time').on("change", this, function (ev) {
             let from = ev.target[ev.target.selectedIndex].value.split(' ')[0];
             let to = ev.target[ev.target.selectedIndex].value.split(' ')[1];
             $('#dt_from').val(from);
@@ -307,128 +350,76 @@ class User{
             $('#period_1').find('.from')[0].setAttribute('text', 'value', from);
             $('#period_1').find('.to')[0].setAttribute('text', 'value', to);
             ev.data.ClearTableReserve();
-            ev.data.SetTables(ev.data.order,ev.data);
+            ev.data.SetTables(ev.data.order, ev.data);
         });
-        $('#dt_to').on("dp.change",this, function (ev) {
+        $('#dt_to').on("dp.change", this, function (ev) {
 
             let date_to = new moment($('#period_1').find('.to')[0].getAttribute('text').value, 'HH:mm');//;
             let date_from = new moment($('#period_1').find('.from')[0].getAttribute('text').value, 'HH:mm');
-            if(date_to.isBefore(date_from)) {
+            if (date_to.isBefore(date_from)) {
                 $(this).data("DateTimePicker").toggle();
                 return true;
             }
             $('#period_1').find('.to')[0].setAttribute('text', 'value', date_to.format('HH:00'));
 
             ev.data.ClearTableReserve();
-            ev.data.SetTables(ev.data.order,ev.data);
+            ev.data.SetTables(ev.data.order, ev.data);
 
             $(this).data("DateTimePicker").toggle();
         });
-        $('#date').on("click touchstart",this,function (ev) {
+        $('#date').on("click touchstart", this, function (ev) {
             $('#datetimepicker').data("DateTimePicker").toggle();
         });
-        $('.period').find('.from').on("click touchstart",this,function (ev) {
-            if($(ev.delegateTarget.parentEl).attr('id')==='period_1')
+        $('.period').find('.from').on("click touchstart", this, function (ev) {
+            if ($(ev.delegateTarget.parentEl).attr('id') === 'period_1')
                 $('#dt_from').data("DateTimePicker").toggle();
         });
-        $('.period').find('.to').on("click touchstart", this,function (ev) {
-            if($(ev.delegateTarget.parentEl).attr('id')==='period_1')
+        $('.period').find('.to').on("click touchstart", this, function (ev) {
+            if ($(ev.delegateTarget.parentEl).attr('id') === 'period_1')
                 $('#dt_to').data("DateTimePicker").toggle();
         });
 
-        $(".free").on('touch',this, function(event, org_event, a) {
+        $(".free").on('touch', this, this.OnFreeTouch);
 
-            if(a.distance/camera.object3D.scale.z>10){
-                return;
-            }
-            //console.log('On click table '+event.target.id);
-            if (event) {
-                if($(event.target).attr('class')!=='table')
-                    event.target =  $(event.target).closest('.table')[0];
-                if (event.data.order) {
-                    let table = event.target.id;
+        // $("a-plane#main_menu").on('dbltouch', this, function (event, org_event, intersection) {
+        //     let pos = $(this)["0"].object3D.position;
+        //
+        //     let targ_pos = new TWEEN.Tween($('#target')[0].object3D.position).to(
+        //         pos
+        //         , 1000)
+        //         .repeat(0)//Infinity)
+        //         .onUpdate(function () { // Called after tween.js updates
+        //
+        //             //controls = new THREE.OrbitControls( $('a-camera')[0].object3D.children["0"]);
+        //         })
+        //         .easing(TWEEN.Easing.Quadratic.In);
+        //
+        //     let cam_scale = new TWEEN.Tween($('a-camera')[0].object3D.scale).to(
+        //         {z: 2}
+        //         , 1000)
+        //         .repeat(0)//Infinity)
+        //         .onUpdate(function () { // Called after tween.js updates
+        //
+        //             //controls = new THREE.OrbitControls( $('a-camera')[0].object3D.children["0"]);
+        //         })
+        //         .easing(TWEEN.Easing.Quadratic.In);
+        //
+        //     $('a-camera')[0].setAttribute('orbit-controls', 'autoRotate', 'false');
+        //
+        //     //cam_pos.start();
+        //     targ_pos.chain(cam_scale);
+        //     targ_pos.start();
+        //
+        // });
 
-                    if( $('#datetimepicker').data("DateTimePicker").defaultDate() > $('#datetimepicker').data("DateTimePicker").maxDate()
-                        && !event.data.order_hash)
-                        return;//TODO
-
-                    if (event.data.order[event.data.uid] && event.data.order[event.data.uid][table]) {
-                        // } else {
-                        //     let reserve =
-                        //         '{"menu_1": {"order": {},"from":"'+$('#period_1').find('.from')[0].getAttribute('text').value+'","to":"'+$('#period_1').find('.to')[0].getAttribute('text').value+'"},' +
-                        //         '"menu_2": {"order": {},"from":"'+$('#period_1').find('.from')[0].getAttribute('text').value+'","to":"'+$('#period_1').find('.to')[0].getAttribute('text').value+'"}' +
-                        //         '}';
-                        //     event.data.ConfirmReservation(event, event.target.id, reserve);
-                        // }
-                    }
-                    let time = $('.sel_time').text();
-                    let reserve = Object.assign({}, event.data.order[time]);
-                    if(!reserve[event.data.uid])
-                        reserve[event.data.uid]= {};
-                    if(!reserve[event.data.uid][table])
-                        reserve[event.data.uid][table] = {};
-
-                    let res = $('#' + event.target.id + '>.free');
-                    if (res.length === 1) {
-                        reserve[event.data.uid][table][res[0].id] =
-                            {"order": {},"from":$('#period_1').find('.from')[0].getAttribute('text').value,"to":$('#period_1').find('.to')[0].getAttribute('text').value};
-
-                        event.data.ConfirmReservation(event, event.target.id,reserve);
-
-                    }else if(res.length===2){
-
-                        reserve[event.data.uid][table]['menu_1'] = {"order": {},"from":$('#period_1').find('.from')[0].getAttribute('text').value,"to":$('#period_1').find('.to')[0].getAttribute('text').value};
-                        reserve[event.data.uid][table]['menu_2'] = {"order": {},"from":$('#period_1').find('.from')[0].getAttribute('text').value,"to":$('#period_1').find('.to')[0].getAttribute('text').value};
-
-                        event.data.ConfirmReservation(event, event.target.id, reserve);
-                    }
-                }
-            }
-
-        });
-
-        $("a-plane#main_menu").on('dbltouch',this, function(event, org_event, intersection){
-            let pos = $(this)["0"].object3D.position;
-
-            let targ_pos = new TWEEN.Tween($('#target')[0].object3D.position).to(
-                pos
-                , 1000)
-                .repeat(0)//Infinity)
-                .onUpdate(function () { // Called after tween.js updates
-                   
-                    //controls = new THREE.OrbitControls( $('a-camera')[0].object3D.children["0"]);
-                })
-                .easing(TWEEN.Easing.Quadratic.In);
-
-            let cam_scale = new TWEEN.Tween($('a-camera')[0].object3D.scale).to(
-                {z:5}
-                , 1000)
-                .repeat(0)//Infinity)
-                .onUpdate(function () { // Called after tween.js updates
-                   
-                    //controls = new THREE.OrbitControls( $('a-camera')[0].object3D.children["0"]);
-                })
-                .easing(TWEEN.Easing.Quadratic.In);
-
-            $('a-camera')[0].setAttribute('orbit-controls','autoRotate','false');
-
-            //cam_pos.start();
-            targ_pos.chain(cam_scale);
-            targ_pos.start();
-
-        });
-
-        $("a-plane#main_menu").on('touch',this, function (event){
-            event.preventDefault();
+        $("a-entity#menu").on('touch', this, function (event) {
             event.stopPropagation();
-
-            if(event)
-                event.data.menu.OpenMenu(event);
+            event.data.menu.OpenMenu(event);
         });
 
-        $(".period").on('touch',this, function (event, org_event, el) {
-            let period_1_pos =  Object.assign({}, $('#period_1')[0].object3D.position);
-            let period_2_pos =  Object.assign({}, event.currentTarget.object3D.position);
+        $(".period").on('touch', this, function (event, org_event, el) {
+            let period_1_pos = Object.assign({}, $('#period_1')[0].object3D.position);
+            let period_2_pos = Object.assign({}, event.currentTarget.object3D.position);
             let to_p1 = new TWEEN.Tween(event.currentTarget.object3D.position).to(
                 period_1_pos
                 , 1000)
@@ -441,10 +432,10 @@ class User{
                 period_2_pos
                 , 1000)
                 .onUpdate(function () { // Called after tween.js updates
-                    $('#period_1').find('.from')[0].setAttribute('text','color','gray');
-                    $('#period_1').attr('id','period_2');
-                    $(event.currentTarget).find('.from')[0].setAttribute('text','color','black');
-                    $(event.currentTarget).attr('id','period_1');
+                    $('#period_1').find('.from')[0].setAttribute('text', 'color', 'gray');
+                    $('#period_1').attr('id', 'period_2');
+                    $(event.currentTarget).find('.from')[0].setAttribute('text', 'color', 'black');
+                    $(event.currentTarget).attr('id', 'period_1');
 
                 })
                 .easing(TWEEN.Easing.Quadratic.In);
@@ -453,80 +444,147 @@ class User{
             to_p1.start();
         });
 
-        $(".table").on('touch',this, function(event, org_event, a ) {
+        $(".table").on('touch', this, this.OnTableTouch);
 
-            // if(a.distance/camera.object3D.scale.z<10){
-            // }
+        $(".bnet").on('touch', this, function (event, org_event, el, intersects) {
+            //     event.data.toOrigin();
 
-            var pos = a.point;
+            if($('.bnet')[0].components.visible.data === true) {
+                $('.bnet')[0].setAttribute('visible', false);
+                $('#net').css('display', 'block');
 
-            $('#camera')[0].setAttribute("orbit-controls", "dampingFactor",'0.5');
-            $('#camera')[0].setAttribute("orbit-controls", "maxPolarAngle",'.05');
-            $('#camera')[0].setAttribute("orbit-controls", "autoRotate",'false');
+                setTimeout(function (user) {
+                    let val = window.dict.getValByKey(window.sets.lang,'f339961a061ebf5dde5d1047147706d6');
+                    $('#hunt_text')[0].setAttribute('text', 'value', val);//Don\'t forget to put the net back please');
+                    user.ar = new AR();
+                }, 1000, event.data);
+            }else{
+                $('.bnet')[0].setAttribute('visible', true);
+                $('#net').css('display', 'none');
 
+                setTimeout(function (user) {
+                    $('#hunt_text')[0].setAttribute('text','value','Enjoy');
+                    user.ar = {};
+                }, 1000, event.data);
+            }
 
-            var to_pos = new TWEEN.Tween($('#target')[0].object3D.position).to({
-                y: pos.y,
-                x: pos.x,//_x * visible_width,
-                z: pos.z //_y * visible_height
-            }, 1000)
-                .repeat(0)//Infinity)
-                .onUpdate(function () {
-
-                    $('#camera')[0].setAttribute("orbit-controls", "dampingFactor",'0.05');
-                    $('#camera')[0].setAttribute("orbit-controls", "distance",'.5');
-                    setTimeout(function () {
-                        $('#camera')[0].setAttribute("orbit-controls", "maxPolarAngle",'1.2');
-                    },1000);
-                    // $('#camera')[0].setAttribute("orbit-controls", "maxPolarAngle",'1.2');
-                    //$('#camera')[0].setAttribute("orbit-controls", "rotateTo", {x:pos.x,y:25,z:pos.z});
-                    //$('#camera')[0].setAttribute("orbit-controls",'distance',5);
-                })
-                .easing(TWEEN.Easing.Quadratic.In);
+        });
 
 
 
+        $(".panorama").on('touch', this, function (ev) {
+            ev.data.toOrigin();
+        });
 
-            new TWEEN.Tween($('a-camera')[0].object3D.scale).to(
-                $('a-camera')[0].object3D.scale.z+=.5
-                , 1000)
+
+    }
+
+    OnTableTouch(event, org_event, a, intersects ) {
+
+        //     event.data.toOrigin();
+        let pos = intersects[0].point;
+        let to_pos = new TWEEN.Tween($('#target')[0].object3D.position).to(
+            pos
+            , 1000)
+            .repeat(0)//Infinity)
+            .onUpdate(function () { // Called after tween.js updates
+                //$('#camera')[0].setAttribute('camera','active',true);
+            })
+            .easing(TWEEN.Easing.Quadratic.In).start();
+
+        let cam_scale = new TWEEN.Tween($('a-camera')[0].object3D.scale).to(
+            {z:3}
+            , 1000)
+            .repeat(0)//Infinity)
+            .onUpdate(function () { // Called after tween.js updates
+                //renderer.render($('a-camera')[0].object3D.el.sceneEl, $('a-camera')[0].object3D.children["0"]);
+                $('#camera')["0"].setAttribute("orbit-controls","autoRotate", 'false');
+            })
+            .easing(TWEEN.Easing.Quadratic.In).start();
+
+    }
+
+    OnFreeTouch(event, org_event, a) {
+
+        // if(a.distance/camera.object3D.scale.z>10){
+        //     return;
+        // }
+        //console.log('On click table '+event.target.id);
+        if (event) {
+            if($(event.target).attr('class')!=='table')
+                event.target =  $(event.target).closest('.table')[0];
+            if (event.data.order) {
+                let table = event.target.id;
+
+                if( $('#datetimepicker').data("DateTimePicker").defaultDate() > $('#datetimepicker').data("DateTimePicker").maxDate()
+                    && !event.data.order_hash)
+                    return;//TODO
+
+                if (event.data.order[event.data.uid] && event.data.order[event.data.uid][table]) {
+                    // } else {
+                    //     let reserve =
+                    //         '{"menu_1": {"order": {},"from":"'+$('#period_1').find('.from')[0].getAttribute('text').value+'","to":"'+$('#period_1').find('.to')[0].getAttribute('text').value+'"},' +
+                    //         '"menu_2": {"order": {},"from":"'+$('#period_1').find('.from')[0].getAttribute('text').value+'","to":"'+$('#period_1').find('.to')[0].getAttribute('text').value+'"}' +
+                    //         '}';
+                    //     event.data.ConfirmReservation(event, event.target.id, reserve);
+                    // }
+                }
+                let time = $('.sel_time').text();
+                let reserve = Object.assign({}, event.data.order[time]);
+                if(!reserve[event.data.uid])
+                    reserve[event.data.uid]= {};
+                if(!reserve[event.data.uid][table])
+                    reserve[event.data.uid][table] = {};
+
+                let mAr = Array.from($('#' + event.target.id + '>.free'));
+                if (mAr.length>0) {
+                    for(let m in mAr) {
+                        reserve[event.data.uid][table][mAr[m].id] = {
+                            "order": {}
+                        };
+                    }
+                    event.data.ConfirmReservation(event, event.target.id, reserve);
+                }
+            }
+        }
+
+    }
+
+    OnMenuTouch(event, org_event,a) {
+
+        // if(a.distance/camera.object3D.scale.z>10){
+        //     return;
+        // }
+        if($(event.currentTarget).attr('class')==='menu') {
+            new TWEEN.Tween(event.target.object3D.rotation).to({
+                //rotation: 360
+                y: THREE.Math.degToRad(225)
+                //y: Math.random() * 2 * Math.PI,
+                //z: Math.random() * 2 * Math.PI
+            }, 2000)
                 .repeat(0)//Infinity)
                 .onUpdate(function () { // Called after tween.js updates
-                    //renderer.render($('a-camera')[0].object3D.el.sceneEl, $('a-camera')[0].object3D.children["0"]);
-                    $('#camera')["0"].setAttribute("orbit-controls","rotateTo", '1 1 0');
+
                 })
-                .easing(TWEEN.Easing.Quadratic.In).start();
+                .easing(TWEEN.Easing.Elastic.Out);
 
-
-            // to_pos.chain(cam_scale);
-            // to_pos.start();
-
-            // document.querySelector('#camera').setAttribute('camera', 'fov', '40');
-        });
-
-        $("#plane").on('touch',this, function (event, org_event, intersection) {
-
-            let pos = intersection.point;
-            $('#camera')[0].setAttribute("orbit-controls", "autoRotate",'true');
-            new TWEEN.Tween($('#target')[0].object3D.position).to(
-                pos
-                , 1000)
+            event.data.menu.OpenOrder(event);
+        }
+        if($(event.currentTarget).attr('class')==='free') {
+            new TWEEN.Tween(event.target.object3D.rotation).to({
+                //rotation: 360
+                y: THREE.Math.degToRad(225)
+                //y: Math.random() * 2 * Math.PI,
+                //z: Math.random() * 2 * Math.PI
+            }, 2000)
                 .repeat(0)//Infinity)
                 .onUpdate(function () { // Called after tween.js updates
-                    //renderer.render($('a-camera')[0].object3D.el.sceneEl, $('a-camera')[0].object3D.children["0"]);
-                    //controls = new THREE.OrbitControls( $('a-camera')[0].object3D.children["0"]);
+
                 })
-                .easing(TWEEN.Easing.Quadratic.In).start();
+                .easing(TWEEN.Easing.Elastic.Out);
 
-
-
-
-        });
-
-        $(".wall").on('touch',this, function (event, org_event, intersection) {
-            event.data.toOrigin();
-        });
-
+            event.data.menu.OpenOrder(event);
+        }
     }
 
     OnClickTimeRange(ev){
@@ -548,7 +606,7 @@ class User{
             .onUpdate(function () { // Called after tween.js updates
                
             })
-            .easing(TWEEN.Easing.Quadratic.In);
+            .easing(TWEEN.Easing.Quadratic.In).start();
 
         let cam_scale = new TWEEN.Tween($('a-camera')[0].object3D.scale).to(
             {z:1}
@@ -557,11 +615,8 @@ class User{
             .onUpdate(function () { // Called after tween.js updates
                
             })
-            .easing(TWEEN.Easing.Quadratic.In);
+            .easing(TWEEN.Easing.Quadratic.In).start();
 
-        cam_scale.chain(targ_pos);
-        cam_scale.start();
-        
         $('a-camera')[0].setAttribute('orbit-controls','autoRotate','true');
     }
 
@@ -574,31 +629,38 @@ class User{
         let  arr = order[time];
 
         if(arr && Object.keys(arr).length>0) {
+            //АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя
+            //ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 
             for(let u in arr) {
                 for (let t in arr[u]) {
-                    for (let m in arr[u][t]) {
-                        if (arr[u][t][m]) {
-                            let menu_1 = $('#' + t).find('#' + m);
-                            if (menu_1[0] && arr[u][t][m]['order']) {
+                    let mAr =  Array.from($('#' + t).find('.free'));
+                    for (let m in mAr) {
+                        if (arr[u][t][mAr[m].id]) {
+                            let menu = mAr[m];
+                            $(menu).off();
+                            if (menu && arr[u][t][mAr[m].id]['order']) {
                                 //do I have the same table search
                                 if (u === class_obj.uid) {
-
-                                    $(menu_1).attr('class', 'menu');
-                                    menu_1[0].setAttribute('text', 'value', 'menu');
-                                    menu_1[0].setAttribute('text', 'color', 'gray');
-                                    menu_1[0].setAttribute('text', 'zOffset', '.1');
-                                    if (arr[u][t][m]['order'] && arr[u][t][m]['order']['ordered']) {
-                                        menu_1[0].setAttribute('color', 'red');
+                                    $(menu).attr('class', 'menu');
+                                    $(menu).on('touch', this, this.OnMenuTouch);
+                                    menu.setAttribute('text', 'value', 'menu');
+                                    menu.setAttribute('text', 'color', 'gray');
+                                    //menu.setAttribute('text', 'zOffset', '.1');
+                                    menu.setAttribute('color', 'yellow');
+                                    if (arr[u][t][mAr[m].id]['order'] && arr[u][t][mAr[m].id]['order']['ordered']) {
+                                        menu.setAttribute('color', 'red');
                                     }
-                                    //$(menu_1[0]).on('click touch', this, this.OnTouchMenu);
+                                    //$(menu[0]).on('click touch', this, this.OnTouchMenu);
                                 } else {
-                                    $(menu_1).attr('class', 'reserve');
-                                    menu_1[0].setAttribute('text', 'value', 'reserved');
-                                    menu_1[0].setAttribute('text', 'color', 'blue');
-                                    menu_1[0].setAttribute('text', 'width', '5');
-                                    menu_1[0].setAttribute('text', 'zOffset', '.1');
-                                    menu_1[0].setAttribute('text', 'wrapCount', '8');
+                                    $(menu).attr('class', 'reserve');
+                                    let val = window.dict.getDictValue( window.sets.lang,'reserved');
+                                    menu.setAttribute('text', 'value', val);
+                                    menu.setAttribute('data-translate','7f005c3fa691e77c52d3297cc2699072');
+                                    menu.setAttribute('text', 'color', 'blue');
+                                    menu.setAttribute('text', 'width', '5');
+                                    //menu.setAttribute('text', 'zOffset', '.1');
+                                    menu.setAttribute('text', 'wrapCount', '8');
                                 }
 
                                 //class_obj.toOrigin();
@@ -606,50 +668,28 @@ class User{
                             }
                         }
                     }
-                    }
+                    window.dict.set_lang(window.sets.lang,$('#ddd'));
                 }
             }
-            if(arr[class_obj.uid]) {
-                // let pos = $('#' + Object.keys(arr[class_obj.uid])[0]).attr('position');//table position
-                // if (pos) {
-                //     tween = new TWEEN.Tween($('#target')[0].object3D.position).to({
-                //         y: pos.y,
-                //         x: pos.x,//_x * visible_width,
-                //         z: pos.z //_y * visible_height
-                //     }, 1000)
-                //         .repeat(0)//Infinity)
-                //         .onUpdate(function () { // Called after tween.js updates
-                //
-                //         })
-                //         .easing(TWEEN.Easing.Quadratic.In).start();
-                // }
-                //class_obj.toOrigin();
-                $('a-camera')[0].setAttribute('orbit-controls','autoRotate','true');
-            }
+        }
+        if(arr && arr[class_obj.uid]) {
+            // let pos = $('#' + Object.keys(arr[class_obj.uid])[0]).attr('position');//table position
+            // if (pos) {
+            //     tween = new TWEEN.Tween($('#target')[0].object3D.position).to({
+            //         y: pos.y,
+            //         x: pos.x,//_x * visible_width,
+            //         z: pos.z //_y * visible_height
+            //     }, 1000)
+            //         .repeat(0)//Infinity)
+            //         .onUpdate(function () { // Called after tween.js updates
+            //
+            //         })
+            //         .easing(TWEEN.Easing.Quadratic.In).start();
+            // }
+            //class_obj.toOrigin();
+            $('a-camera')[0].setAttribute('orbit-controls','autoRotate','true');
+        }
 
-
-        $('.menu').off();
-        $('.menu').on('touch',class_obj, function(event, org_event,a) {
-
-            if(a.distance/camera.object3D.scale.z>10){
-                return;
-            }
-            if($(event.currentTarget).attr('class')==='menu') {
-                new TWEEN.Tween(event.target.object3D.rotation).to({
-                    //rotation: 360
-                    y: THREE.Math.degToRad(225)
-                    //y: Math.random() * 2 * Math.PI,
-                    //z: Math.random() * 2 * Math.PI
-                }, 2000)
-                    .repeat(0)//Infinity)
-                    .onUpdate(function () { // Called after tween.js updates
-
-                    })
-                    .easing(TWEEN.Easing.Elastic.Out);
-
-                event.data.menu.OpenOrder(event);
-            }
-        });
     }
 
     PanHandler(ev){
@@ -709,6 +749,7 @@ class User{
                     if(isJSON(resp.menu))
                         this.class_obj.menu.menuObj = JSON.parse(resp.menu);
 
+
                 },
                 error: function (xhr, status, error) {
                     //let err = eval("(" + xhr.responseText + ")");
@@ -739,7 +780,9 @@ class User{
 
     ConfirmReservation(event,table_id,reserve) {
 
-        if (localStorage.getItem("user")) {
+        if (localStorage.getItem("user") || window.demoMode) {
+            if(!localStorage.getItem("user"))
+                localStorage.setItem("user",md5(new Date()));
             let isConfirm = confirm("Confirm your reservation");
             if (isConfirm) {
                event.data.UpdateReservation(event,table_id, reserve );
@@ -890,8 +933,11 @@ class User{
 
     ClearTableReserve() {
 
+
         $('.menu').attr('class', 'free');
         $('.reserve').attr('class', 'free');
+        $('.free').off();
+        $('.free').on('touch', this, this.OnFreeTouch);
 
         for (let i = 0; i < $('.free').length; i++) {
             if ($('.free')[i].object3D.visible) {

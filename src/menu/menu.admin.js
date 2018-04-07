@@ -66,18 +66,18 @@ class MenuAdmin extends Menu{
         function moveImage(image){
             $(image).mousedown(function() {
                 $(this).data("dragging", true);
-                console.log("dragging","true");
+                //console.log("dragging","true");
             });
 
             $(image).mouseup(function() {
                 $(this).data("dragging", false);
-                console.log("dragging","false");
+                //console.log("dragging","false");
             });
 
             $(image).mousemove(function(e) {
                 if (!$(this).data("dragging"))
                     return;
-                console.log("X:"+ ((e.clientX - $(this).width())-120)+"  Y:"+ (e.clientY - $(this).height()/2))
+                //console.log("X:"+ ((e.clientX - $(this).width())-120)+"  Y:"+ (e.clientY - $(this).height()/2))
                 $(this).css("left", e.clientX - $(this).width()-120);
                 //$(this).css("top", e.clientY - ($(this).height()/2 +20));
                 // $(this).offset({
@@ -103,8 +103,8 @@ class MenuAdmin extends Menu{
         for (let tab in this.menu) {
             if(!tab) continue;
             if($('[href="#'+tab+'"]').length===0) {
-                $('<li class="tab_inserted"  draggable="true" ondragstart="drag(event)"><a data-toggle="tab"  contenteditable="true" data-translate="'+md5(tab)+'"  href="#'+tab+'">'+tab+'</a></li>').insertBefore($('#add_tab_li'));
-                $('<div id="'+tab+'" class="tab-pane fade tab_inserted" style="border: none"></div>').insertBefore($('#add_tab_div'));
+                $('<li class="tab_inserted" draggable="true" ondragstart="drag(event)"><a data-toggle="tab"  contenteditable="true" data-translate="'+md5(tab)+'"  href="#'+tab+'">'+tab+'</a></li>').insertBefore($('#add_tab_li'));
+                $('<div id="'+tab+'" class="tab-pane fade div_tab_inserted" style="border: none"></div>').insertBefore($('#add_tab_div'));
             }
 
             for (let i in this.menu[tab]) {
@@ -120,7 +120,11 @@ class MenuAdmin extends Menu{
                 $(menu_item).find('.item_title').attr('contenteditable', 'true');
                 $(menu_item).find('.item_price').attr('contenteditable', 'true');
                 if(this.menu[tab][i].title){
-                    $(menu_item).find('.item_title').text(window.dict.dict[this.menu[tab][i].title][window.sets.lang]);
+                   try {
+                       $(menu_item).find('.item_title').text(window.dict.dict[this.menu[tab][i].title][window.sets.lang]);
+                   }catch(ex){
+                       ;
+                    }
                     $(menu_item).find('.item_title').attr('data-translate', this.menu[tab][i].title);
                 }
                 $(menu_item).find('.item_price').text(this.menu[tab][i].price);
@@ -210,7 +214,7 @@ class MenuAdmin extends Menu{
         $($(sp).find('[lang='+window.sets.lang+']')[0]).prop("selected", true).trigger('change');
 
         if(!evnts['changed.bs.select']) {
-            //$(sp).on('changed.bs.select', this, this.OnChangeLang);
+            $(sp).on('changed.bs.select', this, this.OnChangeLang);
         }
 
         evnts = $._data($('#add_tab').get(0), "events");
@@ -234,11 +238,11 @@ class MenuAdmin extends Menu{
 
                     $("#" + el).on('load', {el:el}, function (ev) {
                         if(!thumb)
-                        createThumb($("#" + ev.data.el)[0], $("#" + ev.data.el).width(), $("#" + ev.data.el).height(), el, function (thmb, el) {
-                            thumb = true;
-                            $("#" + el).attr('src', thmb.src);
-                            moveImage($("#" + el));
-                        });
+                            createThumb($("#" + ev.data.el)[0], $("#" + ev.data.el).width(), $("#" + ev.data.el).height(), el, function (thmb, el) {
+                                thumb = true;
+                                $("#" + el).attr('src', thmb.src);
+                                moveImage($("#" + el));
+                            });
                     })
 
                 }
@@ -257,7 +261,7 @@ class MenuAdmin extends Menu{
 
         $('<li class="tab_inserted"><a data-toggle="tab" contenteditable="true" data-translate="'+md5(tab)+'"  href="#'+tab+'">'+tab+'</a></li>').insertBefore($('#add_tab_li'));
 
-        $('<div id="'+tab+'" class="tab-pane fade tab_inserted" style="border: none">'+'</div>').insertBefore($('#add_tab_div'));
+        $('<div id="'+tab+'" class="tab-pane fade div_tab_inserted" style="border: none">'+'</div>').insertBefore($('#add_tab_div'));
 
     }
 
@@ -267,7 +271,7 @@ class MenuAdmin extends Menu{
 
         ev.data.changed = true;
 
-        let tab = $('.nav-tabs').find('li.active').children().attr('href');
+        let tab = $('.nav-tabs').find('li.active').find('a').attr('href');
         ev.preventDefault(); // avoid to execute the actual submit of the form.
         ev.stopPropagation();
 
@@ -289,7 +293,7 @@ class MenuAdmin extends Menu{
         let hash = md5(new Date());
         window.dict.dict[hash] = {};
         $(menu_item).find('.item_title').attr('data-translate',hash);
-        $(menu_item).find('.item_price').text('1 €');
+        $(menu_item).find('.item_price').text('1');
         $(menu_item).find('.content_text').text('content_text');
         hash = md5(new Date()+1);
         window.dict.dict[hash] = {};
@@ -339,10 +343,10 @@ class MenuAdmin extends Menu{
             $(menu_item).find('.img-fluid').css('right','5px');
         });
 
-        $(tab).append($(menu_item)[0]);
+        $(tab).append(menu_item);
 
         if ($(menu_item).find('.item_content').css('display') == 'block')
-            $(menu_item).find('.item_content').slideToggle("fast");
+           $(menu_item).find('.item_content').slideToggle("fast");
 
         $(tmplt).insertAfter('#menu_dialog');
 
@@ -412,7 +416,7 @@ class MenuAdmin extends Menu{
             let sel_lang = $('.sp_dlg option:selected').val().toLowerCase().substring(0, 2);
             if(lang!==sel_lang){
                 ev.data.changed = true;
-                window.dict.Translate(sel_lang, false, function () {
+                window.dict.Translate(false, sel_lang,  function () {
 
                 });
             }
@@ -437,9 +441,12 @@ class MenuAdmin extends Menu{
         $("#menu_dialog").on('hide.bs.modal',
             {this:this, table_id:event.target.parentEl.id,menu_id:event.target.id},this.CloseOrder);
 
-        $("#menu_dialog").find('.pre_order_but').css('color', '');
+        $("#menu_dialog").find('.cancel_menu').off('click touchstart');
+        $("#menu_dialog").find('.cancel_menu').on('click touchstart',this,function (ev) {
+            ev.data.CancelMenu(ev);
+        });
 
-        $('.pre_order_list').empty();
+        $("#menu_dialog").find('.cancel_menu').css('display','inline-block');
 
         for(let u in this.order) {
             if(this.order[u][this.table_id] && this.order[u][this.table_id][this.menu_id]) {
@@ -478,7 +485,7 @@ class MenuAdmin extends Menu{
             $("#menu_dialog").find('.time_range').removeClass(this.active_class);
             $("#menu_dialog").find('.time_range[from="' + from + '"]').addClass(this.active_class);
             $("#menu_dialog").find('.tab-pane').empty();
-            $("#menu_dialog").find('li.tab_inserted').empty();
+            // $("#menu_dialog").find('li.tab_inserted').empty();
             $("#menu_dialog").find('.pre_order_but').text(from+'-'+to);
             $('<span class="caret"></span></button>').appendTo($("#menu_dialog").find('.pre_order_but'));
             this.from = from;
@@ -488,13 +495,35 @@ class MenuAdmin extends Menu{
         }
     }
 
+    CancelMenu(ev){
+        ev.stopPropagation();
+        ev.preventDefault();
+        let isCancel = confirm("Cancel the reservation?");
+        if (isCancel) {
+            let menu = ev.data.menu_id;
+            let table = ev.data.table_id;
+            let time = $('.sel_time').text();
+            ev.data = ev.data.parent;
+            $("#menu_dialog").find('.cancel_menu').off(ev);
+            if(this.order[ev.data.uid][table][menu]){
+                let reserve = Object.assign({},ev.data.order);
+                delete reserve[time][ev.data.uid][table][menu];
+                ev.data.UpdateReservation(ev,table,reserve[time],function (ev) {
+                    $('#menu_dialog').modal('hide');
+                });
+            }
+        }
+
+        $('#order_menu_button').dropdown("toggle")
+    }
+
     FillOrder(){
 
         for (let tab in this.menu) {
             if(!tab) continue;
             if($('[href="#'+tab+'"]').length===0) {
                 $('<li class="tab_inserted"><a data-toggle="tab"  data-translate="'+md5(tab)+'"  href="#'+tab+'">'+tab+'</a></li>').insertBefore($('#add_tab_li'));
-                $('<div id="'+tab+'" class="tab-pane fade tab_inserted" style="border: none"></div>').insertBefore($('#add_tab_div'));
+                $('<div id="'+tab+'" class="tab-pane fade div_tab_inserted" style="border: none"></div>').insertBefore($('#add_tab_div'));
             }
 
             for (let i in this.menu[tab]) {
@@ -520,11 +549,13 @@ class MenuAdmin extends Menu{
                 $(menu_item).find('.img-fluid').css('visibility','visible');
                 $(menu_item).find('.content_text').css('visibility','visible');
 
-                $(menu_item).find('.item_title').text(this.menu[tab][i].title);
+                $(menu_item).find('.item_title').text(urlencode.decode(this.menu[tab][i].title));
                 $(menu_item).find('.item_title').attr('data-translate', this.menu[tab][i].title);
                 $(menu_item).find('.item_price').text(this.menu[tab][i].price);
                 $(menu_item).find('.content_text').text(this.menu[tab][i].content);
                 $(menu_item).find('.content_text').attr('data-translate', this.menu[tab][i].content);
+                if(this.menu[tab][i].width)
+                    $(menu_item).find('.content_text').css('width',(this.menu[tab][i].width));
                 $(menu_item).find('.img-fluid').attr('src', this.menu[tab][i].img);
                 $(menu_item).find('.img-fluid').css('left',this.menu[tab][i].img_left);
 
@@ -621,7 +652,7 @@ class MenuAdmin extends Menu{
                     this_order[u][table_id][menu_id]['order'][key] = {};
                 if (!this_order[u][table_id][menu_id]['order'][key]['accepted'])
                     this_order[u][table_id][menu_id]['order'][key]['accepted'] =
-                         new moment().format();
+                        new moment().format();
 
             }else{
                 try {
@@ -643,6 +674,8 @@ class MenuAdmin extends Menu{
         ev.data.this.changed = false;
         ev.data.table_id = null;
 
+        $(':checkbox').prop('checked', false);
+
         $("#menu_dialog").off('hide.bs.modal');
         $('#add_item').off('click');
         $('.item_title').off('click');
@@ -650,7 +683,8 @@ class MenuAdmin extends Menu{
         $("#menu_dialog").find('.comment').val('');
         $("#menu_dialog").find('.comment').css('display','none');
 
-        $("#menu_dialog").find('li.tab_inserted').empty();
+        $("#menu_dialog").find(':checked').prop('checked', false);
+
         $("#menu_dialog").find('.tab-pane').empty();
 
         $('.pre_order_list').empty();
@@ -669,7 +703,7 @@ class MenuAdmin extends Menu{
         var menuObj = {};
 
 
-        $('div.tab_inserted').each(function (index, value) {
+        $('div.div_tab_inserted').each(function (index, value) {
             let id = $(value).attr('id');
             let val = $($('[data-translate="' + md5(id) + '"]')[0]).text();
 
@@ -689,7 +723,8 @@ class MenuAdmin extends Menu{
                 for (let i = 0; i < miAr.length; i++) {
                     let item = {};
                     item.status = JSON.stringify($(miAr[i]).find(':checkbox').prop('checked'));
-                    let hash = $(miAr[i]).find('.item_title').attr('data-translate');
+                    let title = $(miAr[i]).find('.item_title');
+                    let hash = $(title).attr('data-translate');
                     let text = $(miAr[i]).find('.item_title').text();
 
                     if (text.length === 0 || !text.trim())
@@ -697,21 +732,31 @@ class MenuAdmin extends Menu{
                     if(!window.dict.dict[hash])
                         window.dict.dict[hash] = {};
                     if (text !== window.dict.dict[hash][lang]) {
+                        let obj = Object.assign({},window.dict.dict[hash]);
+                        delete window.dict.dict[hash];
+                        hash = md5(text);
+                        window.dict.dict[hash] = obj;
                         window.dict.dict[hash][lang] = text;
+                        $(title).attr('data-translate',hash);
                     }
                     item.title = hash;
                     item.price = $(miAr[i]).find('.item_price').text();
+
                     if($(miAr[i]).find('.content_text').css('visibility')==='visible') {
-                        let w = $(miAr[i]).find('.content_text').width();
-                        let h = $(miAr[i]).find('.content_text').height();
-                        hash = $(miAr[i]).find('.content_text').attr('data-translate');
-                        text = $(miAr[i]).find('.content_text').val();
-                        if(!hash)
-                            hash = md5(text);
-                        if (!window.dict.dict[hash])
+                        let cont_text = $(miAr[i]).find('.content_text');
+                        let w = $(cont_text).width();
+                        let h = $(cont_text).height();
+                        hash = $(cont_text).attr('data-translate');
+                        text = $(cont_text).val().replace(/'/g,'%27').replace(/\n/g,'%0D').replace(/"/g,'%22');
+                        if(!window.dict.dict[hash])
                             window.dict.dict[hash] = {};
                         if (text !== window.dict.dict[hash][lang]) {
-                            window.dict.dict[hash][lang] = urlencode.encode(text);
+                            let obj = Object.assign({},window.dict.dict[hash]);
+                            delete window.dict.dict[hash];
+                            hash = md5(text);
+                            window.dict.dict[hash] = obj;
+                            window.dict.dict[hash][lang] = text;
+                            $(cont_text).attr('data-translate',hash);
                         }
                         item.content = hash;
                         item.width = w;
@@ -732,16 +777,14 @@ class MenuAdmin extends Menu{
             }
         });
 
-        window.admin.UpdateDict(window.dict.dict, function () {
-            //window.admin.menu.menuObj = menuObj;
-            window.admin.UpdateMenu(menuObj, date);
-        });
+        window.admin.UpdateMenu(menuObj, window.dict.dict, date);
+
     }
 
     CloseMenu(ev) {
         let menu = ev.data;
         //if(ev.data.changed)
-            menu.SaveMenu(ev,$('.sp_dlg option:selected').val());
+        menu.SaveMenu(ev,$('.sp_dlg option:selected').val());
 
         $("#menu_dialog").find('.tab-pane').empty();
 
@@ -749,8 +792,9 @@ class MenuAdmin extends Menu{
         $('.item_title').off('click');
         //$('#add_item').off('click',this.AddMenuItem);
         //$('.modal-body').find('.add_tab').off('click', this.AddTab);
+        $('.div_tab_inserted').remove();
         $('.tab_inserted').remove();
-        $('.sp_dlg').off('changed.bs.select', this.OnChangeLang);
+        $('.sp_dlg').off('changed.bs.select');
         $("#menu_dialog").find('.toolbar').css('display', 'none');
         $('input:file').off('change');
     }
