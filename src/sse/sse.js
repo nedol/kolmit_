@@ -12,12 +12,14 @@ module.exports = class SSE{
 
         let url = http + host_port + '?' + //
             user +
-            "&func=getorderupd" +
+            "&proj=bm"+
+            "&func=getreserved" +
             "&order_hash="+class_obj.order_hash+
             "&lat=" + class_obj.lat_param +
             "&lon=" + class_obj.lon_param +
             "&date=" + $('#datetimepicker').data("DateTimePicker").date().format('YYYY-MM-DD') +
             "&lang=" + window.sets.lang;
+
         $.ajax({
             url: url,
             method: "GET",

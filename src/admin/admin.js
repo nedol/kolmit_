@@ -4,9 +4,8 @@ export {Admin};
 let utils = require('../utils');
 var isJSON = require('is-json');
 
-let Dict = require('../dict/dict.js');
 import {MenuAdmin} from '../menu/menu.admin';
-import {dict,set_lang} from '../dict/dict.js';
+import {Dict} from '../dict/dict.js?v=4';
 
 var oc = require('aframe-orbit-controls-component-2');
 let renderer = new THREE.WebGLRenderer();
@@ -27,7 +26,7 @@ class Admin{
 
     constructor(uObj) {
 
-        this.uid = uObj.uid;
+        this.uid = (window.demoMode?'e2f6cb3e58815222c734f661820df37e':uObj.uid);
         this.email = uObj.email;
         this.lat_param = utils.getParameterByName('lat');
         this.lon_param = utils.getParameterByName('lon');
@@ -50,7 +49,8 @@ class Admin{
             $('#datetimepicker').on('dp.change',this,this.GetReserved);
 
             var url = http + host_port + '/?' + //
-                "func=auth" +
+                "proj=bm"+
+                "&func=auth" +
                 "&lang="+window.sets.lang+
                 "&uid="+ this.uid+
                 "&email="+this.email+
@@ -85,7 +85,7 @@ class Admin{
                             };
                             localStorage.setItem("admin", JSON.stringify(uObj));
 
-                            window.dict = new Dict(JSON.parse(urlencode.decode(JSON.parse(data.data).dict)));
+                            window.dict = new Dict(JSON.parse(JSON.parse(data.data).dict));
                             window.dict.set_lang(window.sets.lang, $('#main_window'));
 
                             localStorage.setItem("lang", window.sets.lang);
@@ -108,7 +108,8 @@ class Admin{
                             this.class_obj.DocReady();
 
                         }else{
-                            let dict = JSON.parse(data.data).dict;
+                            let str = data.data;
+                            let dict = JSON.parse(str).dict;
                             window.dict = new Dict(dict);
                             window.dict.set_lang(window.sets.lang, $('#main_window'));
                             this.class_obj.menu.menuObj = JSON.parse(data.menu);
@@ -142,7 +143,8 @@ class Admin{
                     resp.reserved = JSON.parse(urlencode.decode(resp.reserved));
                     if (Object.keys(resp.reserved).length > 0) {
 
-                        this.class_obj.order = resp.reserved;
+                        this.class_obj.order = resp.reserved
+                        this.class_obj.menu.menuObj = resp.menu;
 
                         let time = $('.sel_time').text();
                         if (time==='closed') {
@@ -154,15 +156,15 @@ class Admin{
                         this.class_obj.ClearTableReserve();
                         this.class_obj.SetTables(resp.reserved);
 
-                        for (let i in resp.reserved[time]) {
-                            if (resp.reserved[time][i] && Object.keys(resp.reserved[time][i])[0] === this.class_obj.menu.table_id) {
-                                this.class_obj.menu.order[i] = resp.reserved[time][i];
-                                $("#menu_dialog").find('.tab-pane').empty();
-                                $("#menu_dialog").find('li.tab_inserted').empty();
-                                $("#menu_dialog").find('.w3-button').css('color', '');
-                                this.class_obj.menu.FillOrder();
-                            }
-                        }
+                        // for (let i in resp.reserved) {
+                        //     if (time===i && Object.keys(resp.reserved[i])[0] === this.class_obj.menu.table_id) {
+                        //         this.class_obj.menu.order[i] = resp.reserved[time][i];
+                        //         $("#menu_dialog").find('.tab-pane').empty();
+                        //         $("#menu_dialog").find('li.tab_inserted').empty();
+                        //         $("#menu_dialog").find('.w3-button').css('color', '');
+                        //         this.class_obj.menu.FillOrder();
+                        //     }
+                        // }
                     }
                 }
             }else{
@@ -455,13 +457,14 @@ class Admin{
         }
 
         let data_obj={
+            "proj":"bm",
             "func":"updatemenu",
             "admin":localStorage.getItem('admin'),
             "lat":this.lat_param,
             "lon":this.lon_param,
             "date":date,
             "menu":urlencode.encode(JSON.stringify(menu)),
-            "dict": JSON.stringify(dict).replace(/'/g,'%27').replace(/\n/g,'%0D').replace(/\n/g,'%0D').replace(/"/g,'\"'),
+            "dict": JSON.stringify(dict),
             "lang":window.sets.lang
         }
 
@@ -481,7 +484,7 @@ class Admin{
                 window.admin.menu.menuObj = menu;
             },
             error: function(xhr, status, error){
-                //let err = eval("(" + xhr.responseText + ")");
+
                 console.log(error.Message);
                 //alert(xhr.responseText);
             },
@@ -507,7 +510,8 @@ class Admin{
         try {
 
             var url = http + host_port + '?' + //
-                "admin="+ ev.data.uid +
+                "proj=bm"+
+                "&admin="+ ev.data.uid +
                 "&func=getreserved" +
                 "&lat=" + window.admin.lat_param +
                 "&lon=" + window.admin.lon_param +
@@ -663,7 +667,8 @@ class Admin{
         }
         let url = http+host_port;
         let data =
-            "func=updatereservation"+
+            "proj=bm"+
+            "&func=updatereservation"+
             "&user="+localStorage.getItem('user')+
             "&lat="+event.data.lat_param+
             "&lon="+event.data.lon_param+
@@ -791,7 +796,8 @@ class Admin{
 
         let url = http+host_port
         let data =
-            "func=updateorder"+
+            "proj=bm"+
+            "&func=updateorder"+
             "&admin="+localStorage.getItem('admin')+
             "&lat="+this.lat_param+
             "&lon="+this.lon_param+
@@ -838,6 +844,7 @@ class Admin{
         }
 
         let data_obj = {
+            "proj":"bm",
             "func": "updatedict",
             "admin": JSON.stringify({uid:this.uid,lon:this.lon_param,lat:this.lat_param}),
             "dict": JSON.stringify(dict).replace(/'/g,'%27').replace(/\n/g,'%0D').replace(/\n/g,'%0D').replace(/"/g,'\"')

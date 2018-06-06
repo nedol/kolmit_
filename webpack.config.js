@@ -10,7 +10,8 @@ module.exports = {
     context: __dirname+'/src',
 
     entry: {
-        user:'./user/user_entry.js',
+
+        pano:'./user/user_entry.js',        user:'./user/user_entry.js',
         admin:'./admin/admin_entry.js'
     },
     output: {

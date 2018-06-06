@@ -2,11 +2,11 @@
 
 // require("imports-loader?this=>window! ./../../lib/jquery.mobile-1.4.5.min.js");
 // require('jquery-mobile-babel-safe');
-
 require("../global");
 
 let utils = require('../utils');
 
+let axios  = require('axios');
 
 import {User} from './user';
 import {Dict} from '../dict/dict.js';
@@ -29,6 +29,8 @@ let md5 = require('md5');
 require('aframe-orbit-controls-component-2');
 // import registerClickDrag from 'aframe-click-drag-component';
 // registerClickDrag(AFRAME);
+import 'aframe-gif-shader'
+import 'aframe-gif-component'
 
 require('aframe-text-geometry-component');
 
@@ -42,11 +44,9 @@ $(document).on('readystatechange', function () {
         return;
     }
 
-    //$('#dtp_langs').load('./dtp_langs.html', function () {
-        init();
-    //});
-
-    function init() {
+    $('#dtp_langs').load('./dtp_langs.html', function () {
+        Init();
+    });
 
         if(localStorage.getItem('lang')){
             window.sets.lang = localStorage.getItem('lang');
@@ -168,18 +168,38 @@ $(document).on('readystatechange', function () {
         let lon_param = utils.getParameterByName('lon');
 
 
-        var url = http + host_port + '?' + //
-            "func=init" +
+
+
+        var url = http + host_port + '?' +
+            "proj=bm"+
+            "&func=init" +
             "&lang=fr"+
             "&lat="+lat_param+
             "&lon="+lon_param+
             "&date="+now;
+            let par = {};
+            par.proj = 'bm';
+            par.func = 'init';
+            par.lang= 'fr';
+            par.lat=lat_param;
+            par.lon=lon_param;
+            par.date=now;
+
+        // axios.post(http + host_port, par)
+        //     .then(function (response) {
+        //         console.log('Recieved response from server');
+        //         //if(!rtc_client.rtc_params['rem_desc'] || !rtc_client.rtc_params['rem_cand'])
+        //
+        //     })
+        //     .catch(function (error) {//waiting for rem_client
+        //         console.log('Error');
+        //     });
 
         $.ajax({
             url: url,
             method: "GET",
             dataType: 'json',
-            //headers: {"access-control-allow-origin": "*"},
+            //headers: {"access-control-a llow-origin": "*"},
             //data:formData,
             contentType: false,
             cache: false,
@@ -191,7 +211,6 @@ $(document).on('readystatechange', function () {
             //     withCredentials: true
             // },
             success: function (data) {
-
 
                 window.user = new User(md5(JSON.stringify(now)));
 
@@ -207,7 +226,6 @@ $(document).on('readystatechange', function () {
 
                         }, 100);
                     }
-
                 }
 
                 if (data.menu) {
@@ -254,7 +272,6 @@ $(document).on('readystatechange', function () {
             },
         });
 
-    }
 });
 
 function Init() {

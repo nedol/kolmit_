@@ -667,7 +667,6 @@ class MenuAdmin extends Menu{
 
         //localStorage.setItem(date, JSON.stringify(order));
         if(ev.data.this.changed) {
-
             class_obj.UpdateOrder(this_order, date);
         }
 
@@ -752,7 +751,7 @@ class MenuAdmin extends Menu{
                             window.dict.dict[hash] = {};
                         if (text !== window.dict.dict[hash][lang]) {
                             let obj = Object.assign({},window.dict.dict[hash]);
-                            delete window.dict.dict[hash];
+                            //delete window.dict.dict[hash];
                             hash = md5(text);
                             window.dict.dict[hash] = obj;
                             window.dict.dict[hash][lang] = text;

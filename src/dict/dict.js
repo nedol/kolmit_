@@ -24,6 +24,11 @@ class Dict {
             if (this.dict[key]) {
 
                 let val = this.dict[key][lang] ? this.dict[key][lang] : this.dict[key]['en'];
+                try {
+                    val = urlencode.decode(val);
+                }catch(ex){
+                    ;
+                }
 
                 if(item.isEntity)
                     item.setAttribute('text','value',val);
@@ -97,6 +102,7 @@ class Dict {
         if (Object.keys(trAr).length > 0) {
 
             let data_obj = {
+                "proj":"bm",
                 "func": "translate",
                 "data": JSON.stringify(trAr),
                 "to": to

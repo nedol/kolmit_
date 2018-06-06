@@ -668,7 +668,7 @@ class User{
                             }
                         }
                     }
-                    window.dict.set_lang(window.sets.lang,$('#ddd'));
+                    //window.dict.set_lang(window.sets.lang,$('#ddd'));
                 }
             }
         }
@@ -708,7 +708,8 @@ class User{
         try {
 
             let url = http + host_port + '?' + //
-                "user="+ localStorage.getItem('user')+
+                "proj=bm"+
+                "&user="+ localStorage.getItem('user')+
                 "&func=getreserved" +
                 "&lat=" + (ev?ev.data.lat_param:this.lat_param) +
                 "&lon=" + (ev?ev.data.lon_param:this.lon_param) +
@@ -746,8 +747,8 @@ class User{
                         return;
                     }
 
-                    if(isJSON(resp.menu))
-                        this.class_obj.menu.menuObj = JSON.parse(resp.menu);
+                    if(resp.menu)
+                        this.class_obj.menu.menuObj = resp.menu;
 
 
                 },
@@ -808,7 +809,8 @@ class User{
 
         let url = http+host_port;
         let data =
-            "func=updateorder"+
+            "proj=bm"+
+            "&func=updateorder"+
             "&user="+localStorage.getItem('user')+
             "&lat="+this.lat_param+
             "&lon="+this.lon_param+
@@ -877,7 +879,8 @@ class User{
         }
         let url = http+host_port;
         let data =
-            "func=updatereservation"+
+            "proj=bm"+
+            "&func=updatereservation"+
             "&user="+localStorage.getItem('user')+
             "&lat="+event.data.lat_param+
             "&lon="+event.data.lon_param+
