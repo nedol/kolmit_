@@ -16,48 +16,48 @@ app.get('/', function (req, res) {
     // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
     var q = url.parse(req.url, true).query;
-    server.HandleRequest(q, res)
+    server.HandleRequest(req, q, res)
 })
 
-// app.get("/update_reserve", (req, res) => {
-//
-//     res.setHeader('Access-Control-Allow-Origin', '*');
-//     // Request methods you wish to allow
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-//     // Request headers you wish to allow
-//     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-//     // Set to true if you need the website to include cookies in the requests sent
-//     // to the API (e.g. in case you use sessions)
-//     res.setHeader('Access-Control-Allow-Credentials', true);
-//     let data = JSON.stringify(server.GetReserveData());
-//     res.writeHead(200,{'Content-Type': 'text/event-stream'});
-//     console.log(data);
-//     res.end('data: ' + data + '\n\n');
-//     setTimeout(function () {
-//         server.SetReserveData(undefined);
-//     },1500);
-//
-// });
+app.get("/update_reserve", (req, res) => {
 
-// app.get("/update_order", (req, res) => {
-//
-//     res.setHeader('Access-Control-Allow-Origin', '*');
-//     // Request methods you wish to allow
-//     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-//     // Request headers you wish to allow
-//     res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-//     // Set to true if you need the website to include cookies in the requests sent
-//     // to the API (e.g. in case you use sessions)
-//     res.setHeader('Access-Control-Allow-Credentials', true);
-//     let upd = JSON.stringify(server.GetOrderUpd());
-//     res.writeHead(200,{'Content-Type': 'text/event-stream'});
-//     console.log(upd);
-//     res.end('data: ' + upd + '\n\n');
-//     setTimeout(function () {
-//         server.SetOrderUpd(undefined);
-//     },1500);
-//
-// });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    let data = JSON.stringify(server.GetReserveData());
+    res.writeHead(200,{'Content-Type': 'text/event-stream'});
+    console.log(data);
+    res.end('data: ' + data + '\n\n');
+    setTimeout(function () {
+        server.SetReserveData(undefined);
+    },1500);
+
+});
+
+app.get("/update_order", (req, res) => {
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Request methods you wish to allow
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    // Request headers you wish to allow
+    res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    // Set to true if you need the website to include cookies in the requests sent
+    // to the API (e.g. in case you use sessions)
+    res.setHeader('Access-Control-Allow-Credentials', true);
+    let upd = JSON.stringify(server.GetOrderUpd());
+    res.writeHead(200,{'Content-Type': 'text/event-stream'});
+    console.log(upd);
+    res.end('data: ' + upd + '\n\n');
+    setTimeout(function () {
+        server.SetOrderUpd(undefined);
+    },1500);
+
+});
 
 // POST method route
 app.post('/', function (req, res) {
@@ -71,8 +71,8 @@ app.post('/', function (req, res) {
     // to the API (e.g. in case you use sessions)
     res.setHeader('Access-Control-Allow-Credentials', true);
     processPost(req, res, function (req,res) {
-        //console.log(req.post);
-        server.HandleRequest(req.post, res);
+        var q = url.parse(req.url, true).query;
+        server.HandleRequest(req, req.post, res);
     });
 })
 
