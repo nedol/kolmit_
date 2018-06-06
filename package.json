@@ -57,7 +57,6 @@
     "file-exists": "^5.0.1",
     "flag-icon-css": "^2.9.0",
     "font-awesome": "^4.7.0",
-    "fs": "0.0.1-security",
     "google-translate-api": "^2.3.0",
     "hammer": "0.0.5",
     "html2canvas": "^1.0.0-alpha.10",
