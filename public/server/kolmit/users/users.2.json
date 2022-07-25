@@ -1,0 +1,45 @@
+{
+  "Admin": [
+    {
+      "role": "admin",
+      "dep": "Admin",
+      "name": {
+        "first": "Robin",
+        "last": "Rolland"
+      },
+      "email": "Robin.rolland@example.com",
+      "picture": {
+        "medium": "https://randomuser.me/api/portraits/med/men/94.jpg"
+      },
+      "desc": "Description"
+    },
+    {
+      "role": "admin",
+      "dep": "Admin",
+      "name": {
+        "first": "new",
+        "last": "user"
+      },
+      "email": "input user@email",
+      "picture": {
+        "medium": "../assets/operator.png"
+      },
+      "desc": "input user' description"
+    }
+  ],
+  "HR": [
+    {
+      "role": "admin",
+      "dep": "HR",
+      "picture": {
+        "medium": "../assets/operator.png"
+      },
+      "name": {
+        "first": "Thibault",
+        "last": "Aubert"
+      },
+      "email": "Thibault.Aubert@example.com",
+      "desc": "Thibault Aubert' description"
+    }
+  ]
+}

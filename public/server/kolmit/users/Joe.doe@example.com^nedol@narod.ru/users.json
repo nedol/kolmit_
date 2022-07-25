@@ -1,0 +1,26 @@
+[
+  {
+    "id":"1",
+    "alias": "PR",
+    "admin":     {
+      "role": "admin",
+      "name":  "Joe Doe",
+      "email": "Joe.doe@example.com",
+      "picture": {
+        "medium": "../assets/operator.svg"
+      },
+      "desc": "Админ отдела"
+    },
+    "staff":[
+        {
+            "role": "operator",
+            "picture": {
+                "medium": "../assets/operator.svg"
+            },
+            "name": "Sam Jam",
+            "email": "pr@example.ru",
+            "desc": "pr operator"
+        }
+    ]    
+  }
+]

@@ -1,0 +1,32 @@
+{
+  "HR": [
+    {
+      "role": "admin",
+      "dep": "HR",
+      "picture": {
+        "medium": "../operator/assets/operator.png"
+      },
+      "name": {
+        "first": "User",
+        "last": "One"
+      },
+      "email": "thibault.aubert@example.com",
+      "desc": ""
+    }
+  ],
+  "Admin": [
+    {
+      "role": "admin",
+      "dep": "Admin",
+      "name": {
+        "first": "Admin",
+        "last": "Name"
+      },
+      "email": "robin.rolland@example.com",
+      "picture": {
+        "medium": "https://randomuser.me/api/portraits/med/men/94.jpg"
+      },
+      "desc": "Description"
+    }
+  ]
+}

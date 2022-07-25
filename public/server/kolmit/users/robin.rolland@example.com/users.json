@@ -1,0 +1,48 @@
+{
+  "0": {
+    "alias": "Админы",
+    "admin": {
+      "role": "admin",
+      "name": "Main Admin",
+      "email": "robin.rolland@example.com",
+      "picture": {
+        "medium": "https://randomuser.me/api/portraits/med/men/94.jpg"
+      },
+      "desc": "Admin of admins"
+    },
+    "staff": [
+      {
+        "role": "oper",
+        "name": "Oper Admin",
+        "email": "oper@example.com",
+        "picture": {
+          "medium": "https://randomuser.me/api/portraits/med/men/93.jpg"
+        },
+        "desc": "Oper in admins"
+      }
+    ]
+  },
+  "1": {
+    "alias": "HR",
+    "admin": {
+      "role": "admin",
+      "name": "HR Admin",
+      "email": "hr_admin@example.com",
+      "picture": {
+        "medium": "https://randomuser.me/api/portraits/med/men/84.jpg"
+      },
+      "desc": "Admin of HR"
+    },
+    "staff": [
+      {
+        "role": "oper",
+        "name": "HR Oper",
+        "email": "hr_oper@example.com",
+        "picture": {
+          "medium": "https://randomuser.me/api/portraits/med/men/74.jpg"
+        },
+        "desc": "Oper in HR"
+      }
+    ]
+  }
+}
