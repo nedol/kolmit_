@@ -243,8 +243,10 @@
 
   });
 
+   //status changed postMessage from iframe
   function OnMessage(params) {
-    user_status = params.data.status;
+    if(params.data.status)
+      user_status = params.data.status;
   }
 
   function OnClickUpload(ev) {

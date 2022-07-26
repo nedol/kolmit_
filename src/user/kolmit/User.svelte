@@ -40,7 +40,7 @@
 
   let profile = false;
 
-  // $: if (status) window.postMessage({ status: status }, "*");
+  $: if (status) window.postMessage({ status: status }, "*");
 
   let progress = {
     display: "none",

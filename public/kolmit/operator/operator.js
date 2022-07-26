@@ -19457,8 +19457,9 @@ var app = (function () {
     		}
     	});
 
+    	//status changed postMessage from iframe
     	function OnMessage(params) {
-    		$$invalidate(8, user_status = params.data.status);
+    		if (params.data.status) $$invalidate(8, user_status = params.data.status);
     	}
 
     	function OnClickUpload(ev) {
