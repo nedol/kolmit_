@@ -26251,8 +26251,6 @@ var app = (function () {
     	let files;
     	let list;
     	let profile = false;
-
-    	// $: if (status) window.postMessage({ status: status }, "*");
     	let progress = { display: "none", value: 0 };
 
     	let local = {
@@ -26550,6 +26548,10 @@ var app = (function () {
     	}
 
     	$$self.$$.update = () => {
+    		if ($$self.$$.dirty[0] & /*status*/ 2) {
+    			if (status) window.postMessage({ status }, "*");
+    		}
+
     		if ($$self.$$.dirty[0] & /*selected*/ 1) {
     			if (selected) switch (selected) {
     				case 2:
