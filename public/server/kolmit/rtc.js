@@ -199,13 +199,21 @@ module.exports = class RTC {
     
 
             case 'offer':
+            try{
                 this.SetParams( q, ws);
                 this.BroadcastOperatorStatus(q, 'offer');
+            }catch(ex){
 
+            }
                 break;
+
             case 'call':
-                this.SetParams( q, ws);
-                this.HandleCall( q);
+            try{
+                    this.SetParams( q, ws);
+                    this.HandleCall( q);
+            }catch(ex){
+
+            }
 
                 break;
 
@@ -399,8 +407,11 @@ module.exports = class RTC {
     
                     }else{
                         if(result[0]){
-                            let users = JSON.parse(result[0].users);     
-                            users[q.dep.id] = q.dep;                       
+                            let users = JSON.parse(result[0].users);    
+                            let ind = _.findIndex(users,{'id':q.dep.id});
+                            if(ind===-1)
+                                return; 
+                            users[ind] = q.dep;                       
                             vals = [JSON.stringify(users), q.em, q.abonent||q.em ];
                             this.sql = "UPDATE users SET users=?, last=CURRENT_TIMESTAMP(), editor=? WHERE  operator=? ";
             
