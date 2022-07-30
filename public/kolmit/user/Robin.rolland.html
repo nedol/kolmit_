@@ -11,6 +11,37 @@
 
 </head>
 
+<script>
+	window.addEventListener("message", (event) => {
+		// if (event.origin !== "http://example.org:8080")
+		// 	return;
+
+	},false);
+	function OnLoad(iframe){		
+		const rect = iframe.previousElementSibling.getBoundingClientRect();
+		if(iframe && iframe.previousElementSibling){
+			if( iframe.previousElementSibling.tagName.toLowerCase() ==="img"){					
+				iframe.style.width = iframe.previousElementSibling.width+'px';
+				iframe.style.height = iframe.previousElementSibling.height+'px';
+				iframe.style.top =  rect.top + window.scrollY +'px';
+				iframe.style.left =  rect.left + window.scrollX+'px';
+			}else if( iframe.previousElementSibling.tagName.toLowerCase() ==="svg"){
+				iframe.style.width = iframe.previousElementSibling.width.baseVal.valueAsString+'px';
+				iframe.style.height = iframe.previousElementSibling.height.baseVal.valueAsString+'px';
+				iframe.style.top =  rect.top + window.scrollY +'px';
+				iframe.style.left =  rect.left + window.scrollX+'px';
+			}else{
+				iframe.style.maxWidth = '100px'
+				iframe.style.maxHeight = '100px'
+			}
+		}
+		
+		iframe.contentWindow.postMessage(
+			JSON.stringify({ message: "this should be delivered to an iframe" })
+		);
+	}
+</script>
+
 <body>	
 	<div style="width: 50%; height: 50%;">
 		<!-- <img src="/build/assets/kolobot.jpg" width="100%" height="100%">  -->
@@ -21,8 +52,10 @@
 			</g>
 		</svg>
 		<!-- <div></div> -->
-		<iframe class="kolmit" src="./iframe.html?em=robin.rolland@example.com&abonent=nedol@narod.ru" scrolling="no" frameBorder="0" style="position: absolute;top:0;left:0;">
 
+		<iframe class="kolmit" src="./iframe.html?em=robin.rolland@example.com&abonent=nedol@narod.ru" scrolling="no" frameBorder="0" 
+			style="position: absolute;top:0;left:0;"
+			onload="OnLoad(this)"
 		</iframe>
 	</div>
 </body>

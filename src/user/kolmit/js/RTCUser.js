@@ -153,10 +153,9 @@ export default class RTCUser extends RTCBase {
 
         if (data.func === 'redirect') {
 
-            that.abonent = data.abonent.abonent;
-            that.abonent =  data.abonent.abonent;
+            that.em =  data.abonent.operator;
             // that.pcPull['all'].params = data.abonent.pcPull;
-            that.InitRTC(data.abonent.abonent,function () {
+            that.InitRTC(data.abonent.operator,function () {
                 that.Call();
             });
         }

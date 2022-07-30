@@ -1,8 +1,9 @@
 <!-- <Collapse>     -->
   {#if dep.id!=='0'}
   <button class="collapsible" {owner} bind:this={button}  on:click={OnCollClick}> 
-    <input type="text" {readonly} style="border-width: 0px;" on:change={OnDepChange} on:click={OnClickInput} bind:value={dep.alias}  placeholder="input dep name"/>
-    {#if !abonent && edited_display}
+    <input type="text" {readonly} style="border-width: 0px;" on:change={OnDepChange} on:click={OnClickInput} 
+      bind:value={dep.alias}  placeholder="input dep name"/>
+    {#if edited_display}
     <svg height="30" width="30"  on:click={RemoveDep(dep.id)} style="position: relative;float:right">
       <glyph glyph-name="minus-circle" unicode="&#xefc0;" horiz-adv-x="50" />
       <g class="currentLayer">
@@ -19,7 +20,7 @@
     {#if dep.admin}     
       <div>
         <Oper id={dep.admin.id}
-        bind:status={status} {operator} {dep} {abonent} bind:user={dep.admin} {update} {readonly} {rtc}></Oper>
+          bind:status={status} {operator} {dep} {abonent} bind:user={dep.admin} {update} {readonly} {rtc}></Oper>
       </div>
 
     {/if}
@@ -113,7 +114,7 @@
 
 
 
-  import {signal} from '../js/signalingChannel.js'
+  import {signal} from '../js/stores.js'
     let signalch = false;
     const us_signal = signal.subscribe((data) => {
       if(data){
@@ -130,7 +131,7 @@
   })();
 
 
-  let readonly = true;
+  let readonly = false;
   let content;
   
 
@@ -162,16 +163,9 @@
 
   import {editable} from '../js/stores.js'
   const us_edit = editable.subscribe((data) => {
-    edited_display = data;
-    if(!abonent){
+      edited_display = data;
       readonly = !edited_display;
-    }
     
-    if(abonent){
-      if(dep.admin && operator.email===owner){
-        readonly = !edited_display;             
-      }
-    }
   });
 
   import {langs} from '../js/stores.js'
@@ -189,7 +183,8 @@
   onDestroy(us_edit,us_lang,us_pswd);
 
   function OnClickInput(ev){
-    if(!ev.currentTarget.value &&  (dep.admin.email===owner || !abonent)){
+    if(edited_display)
+    if(dep.admin.email===owner || !abonent){
       ev.currentTarget.readOnly = false;
     }
   }

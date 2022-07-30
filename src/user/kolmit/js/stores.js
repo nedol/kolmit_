@@ -26,3 +26,7 @@ let lang = 'en';
     }
     langs.set(lang);
 })();
+
+export let msg_1 = writable();
+
+export let signal = writable();

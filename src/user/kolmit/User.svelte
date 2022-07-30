@@ -1,3 +1,76 @@
+{#if profile}
+  <Profile bind:profile bind:selected />
+{/if}
+<!-- <Window /> -->
+
+<CallButtonUser
+  on:click={OnClickCallButton}
+  on:mute={OnMute}
+  bind:status
+  {OnLongPress}
+>
+  <!-- <b style="position: absolute;left:22px;top:10px;color:#0e0cff;font-size: 12px;" >{call_cnt}</b> -->
+</CallButtonUser>
+
+<AudioLocal {...local.audio} bind:paused={local.audio.paused} />
+
+<AudioRemote {...remote.audio} bind:srcObject={remote.audio.srcObject} />
+
+<VideoLocal slot="local" {...local.video} />
+
+{#if video_button_pos}
+  <i
+    class="video icofont-ui-video-chat"
+    on:click={OnClickVideoButton}
+    style="display:{video_button_display};position:absolute;right:0px;top:0;color:lightgrey;margin:0px;font-size:30px;z-index:20"
+  />
+{/if}
+
+<VideoRemote slot="remote" {...remote.video}>
+  <i
+    class="fa fa-spinner fa-spin"
+    style="position:absolute;top:50%;left:50%;font-size:44px;"
+  />
+</VideoRemote>
+
+<RecordedVideo />
+<Download />
+
+<div
+  class="call_text"
+  style="cb_display: block; position:absolute;top:30px; overflow: hidden;overflow-y: auto; left:0;
+        widht:100%;max-height:300px;z-index:101"
+/>
+
+{#if select.display}
+  <DropdownList
+    bind:display={select.display}
+    bind:selected
+    bind:list
+    bind:status
+  />
+{/if}
+<input
+  class="file-upload"
+  on:change={OnChangeFile}
+  accept=".*|audio/*,video/*,image/*"
+  bind:files
+  id="files"
+  name="files"
+  type="file"
+  style="display: none"
+/>
+
+
+<progress
+  id="dataProgress"
+  class=""
+  value={progress.value}
+  max="100"
+  duration="200"
+  style="display:{progress.display};position:absolute;top:50%;width:100px;"
+/>
+
 <script>
   import { onMount } from "svelte";
   import { onDestroy } from "svelte";
@@ -341,75 +414,3 @@
     }
   }
 </script>
-
-{#if profile}
-  <Profile bind:profile bind:selected />
-{/if}
-<!-- <Window /> -->
-
-<CallButtonUser
-  on:click={OnClickCallButton}
-  on:mute={OnMute}
-  bind:status
-  {OnLongPress}
->
-  <!-- <b style="position: absolute;left:22px;top:10px;color:#0e0cff;font-size: 12px;" >{call_cnt}</b> -->
-</CallButtonUser>
-
-<AudioLocal {...local.audio} bind:paused={local.audio.paused} />
-
-<AudioRemote {...remote.audio} bind:srcObject={remote.audio.srcObject} />
-
-<VideoLocal slot="local" {...local.video} />
-
-{#if video_button_pos}
-  <i
-    class="video icofont-ui-video-chat"
-    on:click={OnClickVideoButton}
-    style="display:{video_button_display};position:absolute;right:0px;top:0;color:lightgrey;margin:0px;font-size:30px;z-index:20"
-  />
-{/if}
-
-<VideoRemote slot="remote" {...remote.video}>
-  <i
-    class="fa fa-spinner fa-spin"
-    style="position:absolute;top:50%;left:50%;font-size:44px;"
-  />
-</VideoRemote>
-
-<RecordedVideo />
-<Download />
-
-<div
-  class="call_text"
-  style="cb_display: block; position:absolute;top:30px; overflow: hidden;overflow-y: auto; left:0;
-        widht:100%;max-height:300px;z-index:101"
-/>
-
-{#if select.display}
-  <DropdownList
-    bind:display={select.display}
-    bind:selected
-    bind:list
-    bind:status
-  />
-{/if}
-<input
-  class="file-upload"
-  on:change={OnChangeFile}
-  accept=".*|audio/*,video/*,image/*"
-  bind:files
-  id="files"
-  name="files"
-  type="file"
-  style="display: none"
-/>
-
-<progress
-  id="dataProgress"
-  class=""
-  value={progress.value}
-  max="100"
-  duration="200"
-  style="display:{progress.display};position:absolute;top:50%;width:100px;"
-/>

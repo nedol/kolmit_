@@ -1,8 +1,8 @@
 <div class="deps_div" style="height: 100vh; overflow-y: scroll;" >
   {#each cc_data as dep, i}  
     <br>
-        <Dep {dep} bind:tarif={tarif} {status}  {rtc} bind:edited_display={edited_display} owner={dep.admin.email} {operator} {abonent}
-        update={GetUsers} RemoveDep={RemoveDep}/>
+        <Dep {dep} bind:tarif={tarif} {status}  {rtc} bind:edited_display={edited_display} owner={dep.admin.email} 
+        {operator} {abonent} update={GetUsers} RemoveDep={RemoveDep}/>
 
   {/each}
   {#if edited_display }
@@ -38,7 +38,8 @@
   export let abonent;
   
   let rtc = window.operator;
-  $: if(rtc) GetUsers();
+  $: if(rtc) 
+      GetUsers();
 
   export let status;
 
@@ -54,7 +55,7 @@
     psw = data;
   });
 
-  import {signal} from '../js/signalingChannel.js'
+  import {signal} from '../js/stores.js'
   let signalch = false;
   const us_signal = signal.subscribe((data) => {
     if(data){
@@ -129,14 +130,15 @@ async function AddDep(){
         resolve(resp)
       });  
     }))['dep'] ;
-    data[res.id] = res;
+
+    cc_data[res.id] = res;
   }
 }
 
 async function RemoveDep(id){
 
-  let ind = _.findIndex( data, {"id":id}); 
-  if(confirm("Delete Dep "+ (data[ind].alias?data[ind].alias:'')+"?")){ 
+  let ind = _.findIndex( cc_data, {"id":id}); 
+  if(confirm("Delete Dep "+ (cc_data[ind].alias?cc_data[ind].alias:'')+"?")){ 
 
     let par = {};
     par.proj = 'kolmit';
@@ -149,7 +151,7 @@ async function RemoveDep(id){
     par.uid = rtc.uid;
     par.psw = psw;
 
-    data  = (await new Promise((resolve, reject)=>{
+    cc_data  = (await new Promise((resolve, reject)=>{
           signalch.SendMessage(par, (data)=>{
           resolve(data)
         });  

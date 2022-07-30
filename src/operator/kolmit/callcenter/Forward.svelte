@@ -7,24 +7,22 @@
     export let status;
  
     export let rtc;
-    export let abonent;
+    export let operator;
 
     async function OnClick(){
 
-        let iframe = document.querySelector("[src*='"+abonent+"']");
+        let iframe = document.querySelector("[src*='"+operator+"']");
         let cb = iframe.contentWindow.document.querySelector('.callButton');
-        cb.dispatchEvent(new Event('mute'));
+        // cb.dispatchEvent(new Event('mute'));
 
         let promise = new Promise(function(resolve, reject) {
             if(rtc.DC)
-                rtc.DC.SendRedirect({abonent}, resolve);
+                rtc.DC.SendRedirect({operator}, resolve);
         });
 
         let data  = await promise;
 
-        status = 'mute'; 
-        rtc.OnMessage({func:'mute'}); 
-     
+        status = 'mute';     
     }
 
 

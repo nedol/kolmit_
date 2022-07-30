@@ -87,7 +87,7 @@ export class DataChannelUser extends DataChannel{
         };
     }
 
-    SendFile(data, name){
+    SendFile(data, name, resolve){
         // if(this.forward){
         //     data.email = this.forward;
         //     this.forward = '';
@@ -114,6 +114,7 @@ export class DataChannelUser extends DataChannel{
 
                 this.dc.send(JSON.stringify({type:'eof',file:name,length:data.byteLength}), function (data) {
                     console.log(data);
+                    resolve();
                 });
             }
         }catch(ex){

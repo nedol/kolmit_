@@ -18761,7 +18761,7 @@ var app = (function () {
             };
         }
 
-        SendFile(data, name){
+        SendFile(data, name, resolve){
             // if(this.forward){
             //     data.email = this.forward;
             //     this.forward = '';
@@ -18788,6 +18788,7 @@ var app = (function () {
 
                     this.dc.send(JSON.stringify({type:'eof',file:name,length:data.byteLength}), function (data) {
                         console.log(data);
+                        resolve();
                     });
                 }
             }catch(ex){
@@ -19008,7 +19009,12 @@ var app = (function () {
                 return;
             }
             try {
-                that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));
+                if(that.ws.readyState===1)
+                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
+                else {
+                    that.openSocket(); 
+                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
+                }
 
             }catch(ex){
                 return false;
@@ -19199,11 +19205,12 @@ var app = (function () {
                 }
                 if(that.pcPull[pc_key].con) {
                     that.pcPull[pc_key].con.close();
-                    //that.pcPull[pc_key].con = null
+                    that.pcPull[pc_key].con = null;
                 }
             }
 
             let params = that.pcPull[pc_key]?that.pcPull[pc_key].params:{};
+            
             that.pcPull[pc_key] = null;
             that.pcPull[pc_key] = new Peer(that, pc_config, pc_key);
             that.pcPull[pc_key].signch  = null;
@@ -19465,10 +19472,9 @@ var app = (function () {
 
             if (data.func === 'redirect') {
 
-                that.abonent = data.abonent.abonent;
-                that.abonent =  data.abonent.abonent;
+                that.em =  data.abonent.operator;
                 // that.pcPull['all'].params = data.abonent.pcPull;
-                that.InitRTC(data.abonent.abonent,function () {
+                that.InitRTC(data.abonent.operator,function () {
                     that.Call();
                 });
             }
@@ -25693,7 +25699,7 @@ var app = (function () {
     	};
     }
 
-    // (365:0) {#if video_button_pos}
+    // (21:0) {#if video_button_pos}
     function create_if_block_1(ctx) {
     	let i;
     	let mounted;
@@ -25733,7 +25739,7 @@ var app = (function () {
     	};
     }
 
-    // (373:0) <VideoRemote slot="remote" {...remote.video}>
+    // (29:0) <VideoRemote slot="remote" {...remote.video}>
     function create_default_slot(ctx) {
     	let i;
 
@@ -25755,7 +25761,7 @@ var app = (function () {
     	};
     }
 
-    // (389:0) {#if select.display}
+    // (45:0) {#if select.display}
     function create_if_block(ctx) {
     	let dropdownlist;
     	let updating_display;

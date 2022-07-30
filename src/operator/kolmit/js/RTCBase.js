@@ -180,11 +180,12 @@ export  class RTCBase{
             // }
             if(this.pcPull[pc_key].con) {
                 this.pcPull[pc_key].con.close();
-                //this.pcPull[pc_key].con = null
+                this.pcPull[pc_key].con = null;
             }
         }
 
         let params = this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
+
         this.pcPull[pc_key] = null;
         this.pcPull[pc_key] = new Peer(this, pc_config, pc_key);
         this.pcPull[pc_key].signch = this.signch;

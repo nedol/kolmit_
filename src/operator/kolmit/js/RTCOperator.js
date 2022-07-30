@@ -4,14 +4,14 @@ import  {RTCBase} from "./RTCBase";
 
 import {log} from './utils'
 
-import {langs} from './stores.js'
+import {langs,msg_1} from './stores.js'
 
 let lang = 'en';
 const us_lang = langs.subscribe((data) => {
         lang = data;
 });
 
-export const msg = writable(''); 
+// export const msg = writable(''); 
 
 export default class  RTCOperator extends RTCBase{
 
@@ -251,7 +251,7 @@ export default class  RTCOperator extends RTCBase{
         let that = this;
         
         //log(data,that);
-        // msg.set(data);
+        msg_1.set(data);
 
         if (data.func === 'call') {
    

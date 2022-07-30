@@ -7,7 +7,7 @@
       on:click={OnClickUpload}
       style="border-radius: 5px; float:right"
     />
-    {#if !readonly}
+    {#if !edited_display}
       <input
         bind:this={upload}
         class="file-upload"
@@ -22,7 +22,7 @@
     {/if}
 
     <!-- src="/kolmit/user/iframe.html?em=oper@komi&abonent={user.email}" -->
-    {#if readonly}
+    <!-- {#if edited_display} -->
       {#if user.email && operator.email !== user.email}
         <iframe
           class="user_frame"
@@ -34,10 +34,10 @@
           title=""
         />
       {/if}
-    {/if}
+    <!-- {/if} -->
 
-    {#if !readonly}
-      <!-- {#if (!abonent && user.role === "operator") || (abonent && user.role === "operator")} -->
+    {#if edited_display}
+      {#if (operator.email!==user.email && user.role === "operator")}
         <svg
           height="30"
           width="30"
@@ -57,7 +57,7 @@
             />
           </g>
         </svg>
-      <!-- {/if} -->
+      {/if}
     {/if}
   </div>
 
@@ -69,7 +69,7 @@
         placeholder={placeholder_name}
         on:change={OnChange}
         bind:value={user.name}
-        {readonly}
+        readonly  = {readonlyOper}
         style="width:80%;"
       />
       <input
@@ -89,7 +89,7 @@
       placeholder={placeholder_desc}
       on:change={OnChange}
       bind:value={user.desc}
-      {readonly}
+      readonly  = {readonlyOper}
       style="width:85%;overflow:auto;max-height: 100px;resize:none"
     />
   </div>
@@ -98,7 +98,7 @@
     style="display: flex;flex-flow: row nowrap; align-items: flex-start;flex-direction: column;">
 
     {#if (user_status === "active" || user_status === "call" || user_status === "talk") && (status === "call" || status === "talk") && user.email !== operator.email}
-      <Forward bind:status {rtc} abonent={user.email}>
+      <Forward bind:status {rtc} operator={user.email}>
         <img
           src="../assets/call-forward.svg"
           alt=""
@@ -106,13 +106,16 @@
           height="30px"
         />
       </Forward>
-
-      <img
+    {/if}
+    {#if  user_status === "talk" || (status === "talk" && user.email === operator.email)}
+      <FileTransfer {status} {rtc} operator={user.email}>
+        <img
         src="../assets/file-transfer.svg"
         alt=""
         width="30px"
         height="30px"
-      />
+        />
+      </FileTransfer>
     {/if}
   </div>
 </div>
@@ -150,6 +153,7 @@
   import loadImage from "blueimp-load-image/js/load-image.js";
   import "blueimp-load-image/js/load-image-scale.js";
   import Forward from "./Forward.svelte";
+  import FileTransfer from "./FileTransfer.svelte"
   import _ from "lodash";
 
 
@@ -158,30 +162,6 @@
   const us_lang = langs.subscribe((data) => {
     lang = data;
   });
-
-  import { dicts } from "../js/dict.js";
-  let Dict;
-  const us_dict = dicts.subscribe((data) => {
-    if (data) {
-      Dict = data;
-    }
-  });
-
-  import { signal } from "../js/signalingChannel.js";
-  let signalch = false;
-  const us_signal = signal.subscribe((data) => {
-    if (data) {
-      signalch = data;
-    }
-  });
-
-  import { pswd } from "../js/stores.js";
-  let psw;
-  const us_pswd = pswd.subscribe((data) => {
-    psw = data;
-  });
-
-  onDestroy(us_signal, us_lang, us_dict, us_pswd);
 
   export let operator;
   export let id;
@@ -199,31 +179,59 @@
     placeholder_desc,
     upload;
 
+  import { dicts } from "../js/dict.js";
+  let Dict;
+  const us_dict = dicts.subscribe((data) => {
+    if (data) {
+      Dict = data;
+      placeholder_name = Dict.getValByKey(lang, "input operator name");
+      placeholder_email = Dict.getValByKey(lang, "input operator email");
+      placeholder_desc = Dict.getValByKey(lang, "input description");
+    }
+  });
+
+  import { signal } from "../js/stores.js";
+  let signalch = false;
+  const us_signal = signal.subscribe((data) => {
+    if (data) {
+      signalch = data;
+    }
+  });
+
+  import { pswd } from "../js/stores.js";
+  let psw;
+  const us_pswd = pswd.subscribe((data) => {
+    psw = data;
+  });
+
+  onDestroy(us_signal, us_lang, us_dict, us_pswd);
+
     
-  export let readonly = true;
+  export let edited_display;
+  let readonlyOper = true;
   let readonlyAdm = true;
 
-  $: if (readonly) {
-    placeholder_name = "";
-    placeholder_email = "";
-    placeholder_desc = "";
-  } else {
-    placeholder_name = Dict.getValByKey(lang, "input operator name");
-    placeholder_email = Dict.getValByKey(lang, "input operator email");
-    placeholder_desc = Dict.getValByKey(lang, "input description");
-  }
+  import {editable} from '../js/stores.js'
+  const us_edit = editable.subscribe((data) => {
+      edited_display = data;
 
-  $: if (!abonent) {
-    if (dep.id === "0" && user.role === "admin") {
-      readonlyAdm = true;
-    } else {
-      readonlyAdm = readonly;
-    }
-  } else {
-    if (dep.id !== "0") {
-      readonlyAdm = readonly;
-    }
-  }
+      readonlyOper = !edited_display;  
+      readonlyAdm = !edited_display;   
+  });
+
+  // $: if (readonly) {
+  //   readonlyOper = readonly;
+
+  //   if (dep.id === "0" && user.role === "admin") {
+  //     readonlyAdm = true;
+  //   } else {
+  //     readonlyAdm = readonly;
+  //   }
+  // } else {
+  //   if (dep.id !== "0") {
+  //     readonlyAdm = readonly;
+  //   }
+  // }
 
   user.email = user.email ? user.email : "";
 
@@ -251,7 +259,7 @@
 
   function OnClickUpload(ev) {
     let event = new MouseEvent("click", {
-      bubbles: true,
+      bubbles: false,
       cancelable: true,
       view: window,
     });

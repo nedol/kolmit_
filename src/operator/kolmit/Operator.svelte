@@ -142,7 +142,7 @@ let selected;
 let call_cnt, status, inter;
 let video_button_display = false;
 let edited_display = false;
-let oper_admin;
+
 
 
 import {editable} from './js/stores.js'
@@ -173,7 +173,7 @@ const us_pswd = pswd.subscribe((data) => {
 });
 
 
-import {signal} from './js/signalingChannel.js'
+import {signal} from './js/stores.js'
 const us_signal = signal.subscribe((signalch) => {
         if(signalch){
 
@@ -197,8 +197,8 @@ const us_msg_1 = msg_1.subscribe((data) => {
         console.log();
         // if(window.operator.&& window.operator.OnMessage)
         //         window.operator.OnMessage(data);
-        
-        OnMessage(data);
+        if(data)
+                OnMessage(data);
 });
 
 
@@ -263,9 +263,7 @@ let profile = {
         display:'none'
 }
 
-let select = {
-        display: false
-}
+
 
 function onTransFile(params) {
         let event =  new MouseEvent('click', {
@@ -286,7 +284,7 @@ switch(selected){
                 break;
    
         case 10:
-                select.display = false;
+
                 break;
 
         }

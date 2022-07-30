@@ -24,3 +24,5 @@ let lang = 'en', psw = '';
 export let posterst = writable();
 
 export let msg_1 = writable();
+
+export let signal = writable();

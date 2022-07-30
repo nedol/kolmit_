@@ -185,11 +185,12 @@ export class RTCBase{
             }
             if(that.pcPull[pc_key].con) {
                 that.pcPull[pc_key].con.close();
-                //that.pcPull[pc_key].con = null
+                that.pcPull[pc_key].con = null;
             }
         }
 
         let params = that.pcPull[pc_key]?that.pcPull[pc_key].params:{};
+        
         that.pcPull[pc_key] = null;
         that.pcPull[pc_key] = new Peer(that, pc_config, pc_key);
         that.pcPull[pc_key].signch  = null;

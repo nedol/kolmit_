@@ -1,9 +1,10 @@
 'use strict';
 
 import {log} from './utils'
-import { writable } from 'svelte/store';
+
 import {msg_1} from './stores.js'
 
+import {signal} from './stores.js'
 // export const msg = writable(''); 
 
 export default class SignalingChannel{
@@ -15,8 +16,14 @@ export default class SignalingChannel{
         this.timeout = 10000;
         this.cb = {};
 
+        this.openSocket();
+
+    }
+
+    openSocket(){
+
         if(!this.ws)
-            this.ws = new WebSocket(host.host_ws);
+            this.ws = new WebSocket(this.host.host_ws);
 
             this.ws.onerror = function (error) {
                 log('Connect Error: ' + error.toString());
@@ -32,8 +39,7 @@ export default class SignalingChannel{
             this.ws.onclose = function () {
                 log('echo-protocol Connection Closed');
                 this.ws = new WebSocket(this.url);
-            }
-    
+            }   
 
     }
 
@@ -82,7 +88,12 @@ export default class SignalingChannel{
             }
         }
         try {
-            that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
+            if(that.ws.readyState===1)
+                that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
+            else{
+                that.openSocket(); 
+                that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
+            }
         }catch(ex){
             return false;
         }   
@@ -92,7 +103,7 @@ export default class SignalingChannel{
 
 }
 
-export let signal = writable();
+
 (async ()=>{
     const host = (await (await fetch('/kolmit/host.json')).json());
     new SignalingChannel(host);    

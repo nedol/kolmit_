@@ -90,7 +90,12 @@ export class SignalingChannel{
             return;
         }
         try {
-            that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));
+            if(that.ws.readyState===1)
+                that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
+            else{
+                that.openSocket(); 
+                that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
+            }
 
         }catch(ex){
             return false;

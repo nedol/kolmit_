@@ -84,7 +84,7 @@
   
 
 
-	import {signal} from '../operator/kolmit/js/signalingChannel.js'
+	import {signal} from '../operator/kolmit/js/stores.js'
 	let signch; 
 	const us_signal = signal.subscribe((data) => {
 		if(data){
