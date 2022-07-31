@@ -383,6 +383,9 @@
 
       const event = new Event("inactive");
       window.frameElement.dispatchEvent(event);
+
+      location.reload();
+
       // window.frameElement.style.width = '60px'
       // window.frameElement.style.height = '60px'
     }

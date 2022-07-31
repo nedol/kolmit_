@@ -11,6 +11,8 @@ export default class RTCUser extends RTCBase {
     constructor(abonent,type, em, uid) {
 
         super(abonent,type, em, uid);
+
+        this.redirected = false;
    
         this.component = '';
 
@@ -152,7 +154,7 @@ export default class RTCUser extends RTCBase {
         }
 
         if (data.func === 'redirect') {
-
+            
             that.em =  data.abonent.operator;
             // that.pcPull['all'].params = data.abonent.pcPull;
             that.InitRTC(data.abonent.operator,function () {

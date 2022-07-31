@@ -26,11 +26,9 @@
                 </div> 
         </div>
 
-        <div style="position:absolute;flex:1 1 0%">           
+        <div style="position:absolute;flex:1 1 0%"> 
  
-            
                         <VideoLocal {...local.video}>
-
                                 <svelte:fragment slot="footer">
                                         <div bind:this={container}></div>                                        
                                 </svelte:fragment>
@@ -452,10 +450,10 @@ function OnMessage(data, resolve) {
                 remote.text.email = '';
                 remote.text.display = 'none';
                  // local.video.poster = UserSvg;
-                window.operator.OnInactive();
+                // window.operator.OnInactive();
                 if(status==='talk'){
                         status ='inactive';
-                        // window.operator.OnInactive();
+                        window.operator.OnInactive();
                 }else if(status==='call'){
                         status='inactive';
                         window.operator.OnMute();
