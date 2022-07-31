@@ -124,10 +124,10 @@ export class RTCBase{
     }
 
 
-    TransFile() {
+    TransFile(fileInput) {
         let that = this;
         async function handleFileInputChange() {
-            const file = that.fileInput.files[0];
+            const file = fileInput.files[0];
             if (!file) {
                 log('No file chosen');
             } else {
@@ -146,9 +146,14 @@ export class RTCBase{
             }
             fileReader.readAsArrayBuffer(file);
         }
-        that.fileInput.removeEventListener('change',that.fileInput.onchange );
-        that.fileInput.onchange  =  handleFileInputChange;
-        that.fileInput.dispatchEvent(new Event("click"));
+        fileInput.removeEventListener('change',fileInput.onchange );
+        fileInput.onchange  =  handleFileInputChange;
+        let event =  new PointerEvent('click', {
+                bubbles: false,
+                cancelable: true,
+                view: window,
+                });
+        fileInput.dispatchEvent(event);
     }
 
 

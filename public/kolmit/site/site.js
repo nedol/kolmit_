@@ -1669,7 +1669,10 @@ var app = (function () {
 
     		// cb.dispatchEvent(new Event('mute'));
     		let promise = new Promise(function (resolve, reject) {
-    				if (rtc.DC) rtc.DC.SendRedirect({ operator }, resolve);
+    				if (rtc.DC) {
+    					rtc.DC.SendRedirect({ operator }, resolve);
+    					rtc.OnMessage({ func: 'mute' });
+    				}
     			});
 
     		await promise;
@@ -1702,8 +1705,8 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	const default_slot_template = /*#slots*/ ctx[8].default;
-    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[7], null);
+    	const default_slot_template = /*#slots*/ ctx[5].default;
+    	const default_slot = create_slot(default_slot_template, ctx, /*$$scope*/ ctx[4], null);
 
     	return {
     		c() {
@@ -1729,14 +1732,14 @@ var app = (function () {
 
     			append(div, t);
     			append(div, input_1);
-    			/*input_1_binding*/ ctx[9](input_1);
+    			/*input_1_binding*/ ctx[6](input_1);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
-    					listen(input_1, "change", /*OnChangeFile*/ ctx[3]),
-    					listen(input_1, "change", /*input_1_change_handler*/ ctx[10]),
-    					listen(div, "click", /*OnClick*/ ctx[2])
+    					listen(input_1, "change", /*OnChangeFile*/ ctx[2]),
+    					listen(input_1, "change", /*input_1_change_handler*/ ctx[7]),
+    					listen(div, "click", OnClick)
     				];
 
     				mounted = true;
@@ -1744,8 +1747,8 @@ var app = (function () {
     		},
     		p(ctx, [dirty]) {
     			if (default_slot) {
-    				if (default_slot.p && (!current || dirty & /*$$scope*/ 128)) {
-    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[7], !current ? -1 : dirty, null, null);
+    				if (default_slot.p && (!current || dirty & /*$$scope*/ 16)) {
+    					update_slot(default_slot, default_slot_template, ctx, /*$$scope*/ ctx[4], !current ? -1 : dirty, null, null);
     				}
     			}
     		},
@@ -1761,40 +1764,57 @@ var app = (function () {
     		d(detaching) {
     			if (detaching) detach(div);
     			if (default_slot) default_slot.d(detaching);
-    			/*input_1_binding*/ ctx[9](null);
+    			/*input_1_binding*/ ctx[6](null);
     			mounted = false;
     			run_all(dispose);
     		}
     	};
     }
 
+    function OnClick(ev) {
+    	let event = new PointerEvent('click',
+    	{
+    			bubbles: false,
+    			cancelable: true,
+    			view: window
+    		});
+
+    	//     input.onclick();
+    	document.getElementById('file').dispatchEvent(event);
+    } // let iframe = document.querySelector("[src*='"+operator+"']");
+    // if(iframe.contentWindow.user)
+
     function instance$k($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
-    	let { status } = $$props;
     	let files;
-    	let { rtc } = $$props;
     	let { operator } = $$props;
     	let input;
 
-    	function OnClick(ev) {
-    		// let event =  new PointerEvent('click', {
-    		//     bubbles: false,
-    		//     cancelable: true,
-    		//     view: window,
-    		//     });
-    		// //     input.onclick();
-    		// document.getElementById('file').dispatchEvent(event);
-    		let iframe = document.querySelector("[src*='" + operator + "']");
-
-    		if (iframe.contentWindow.user) iframe.contentWindow.user.TransFile(input);
-    	}
-
+    	//     iframe.contentWindow.user.TransFile(input);
     	async function OnChangeFile(e) {
     		try {
     			let iframe = document.querySelector("[src*='" + operator + "']");
 
     			let promise = new Promise(function (resolve, reject) {
-    					if (iframe.contentWindow.user) iframe.contentWindow.user.DC.SendFile(e.target.files[0], e.target.files[0].name, resolve); //todo:
+    					let fileReader = new FileReader();
+
+    					if (iframe.contentWindow.user) {
+    						fileReader.onload = e => {
+    							// log('FileRead.onload ', e);
+    							// iframe.contentWindow.user.DC.SendFile(,e.target.files[0].name, resolve);//todo:
+    							iframe.contentWindow.user.DC.SendFile(e.target.result, file.name);
+    						};
+
+    						fileReader.readAsArrayBuffer(e.target.files[0]);
+    					} else {
+    						fileReader.onload = e => {
+    							// log('FileRead.onload ', e);
+    							// iframe.contentWindow.user.DC.SendFile(,e.target.files[0].name, resolve);//todo:
+    							window.operator.DC.SendFile(e.target.result, file.name);
+    						};
+
+    						fileReader.readAsArrayBuffer(e.target.files[0]);
+    					}
     				});
 
     			let data = await promise;
@@ -1816,19 +1836,14 @@ var app = (function () {
     	}
 
     	$$self.$$set = $$props => {
-    		if ('status' in $$props) $$invalidate(4, status = $$props.status);
-    		if ('rtc' in $$props) $$invalidate(5, rtc = $$props.rtc);
-    		if ('operator' in $$props) $$invalidate(6, operator = $$props.operator);
-    		if ('$$scope' in $$props) $$invalidate(7, $$scope = $$props.$$scope);
+    		if ('operator' in $$props) $$invalidate(3, operator = $$props.operator);
+    		if ('$$scope' in $$props) $$invalidate(4, $$scope = $$props.$$scope);
     	};
 
     	return [
     		files,
     		input,
-    		OnClick,
     		OnChangeFile,
-    		status,
-    		rtc,
     		operator,
     		$$scope,
     		slots,
@@ -1840,7 +1855,7 @@ var app = (function () {
     class FileTransfer extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { status: 4, rtc: 5, operator: 6 });
+    		init(this, options, instance$k, create_fragment$k, safe_not_equal, { operator: 3 });
     	}
     }
 
@@ -19570,7 +19585,7 @@ var app = (function () {
     	};
     }
 
-    // (100:4) {#if (user_status === "active" || user_status === "call" || user_status === "talk") && (status === "call" || status === "talk") && user.email !== operator.email}
+    // (100:4) {#if status === "talk" && (user_status === "active")  && user.email !== operator.email}
     function create_if_block_1$6(ctx) {
     	let forward;
     	let updating_status;
@@ -19643,7 +19658,7 @@ var app = (function () {
     		c() {
     			img = element("img");
     			if (!src_url_equal(img.src, img_src_value = "../assets/call-forward.svg")) attr(img, "src", img_src_value);
-    			attr(img, "alt", "");
+    			attr(img, "alt", "call-forward");
     			attr(img, "width", "30px");
     			attr(img, "height", "30px");
     		},
@@ -19715,7 +19730,7 @@ var app = (function () {
     		c() {
     			img = element("img");
     			if (!src_url_equal(img.src, img_src_value = "../assets/file-transfer.svg")) attr(img, "src", img_src_value);
-    			attr(img, "alt", "");
+    			attr(img, "alt", "file-transfer");
     			attr(img, "width", "30px");
     			attr(img, "height", "30px");
     		},
@@ -19750,7 +19765,7 @@ var app = (function () {
     	let if_block1 = /*user*/ ctx[1].email && /*operator*/ ctx[3].email !== /*user*/ ctx[1].email && create_if_block_5$1(ctx);
     	let if_block2 = /*edited_display*/ ctx[2] && create_if_block_3$2(ctx);
     	let if_block3 = /*Dict*/ ctx[12] && create_if_block_2$4(ctx);
-    	let if_block4 = (/*user_status*/ ctx[7] === "active" || /*user_status*/ ctx[7] === "call" || /*user_status*/ ctx[7] === "talk") && (/*status*/ ctx[0] === "call" || /*status*/ ctx[0] === "talk") && /*user*/ ctx[1].email !== /*operator*/ ctx[3].email && create_if_block_1$6(ctx);
+    	let if_block4 = /*status*/ ctx[0] === "talk" && /*user_status*/ ctx[7] === "active" && /*user*/ ctx[1].email !== /*operator*/ ctx[3].email && create_if_block_1$6(ctx);
     	let if_block5 = (/*user_status*/ ctx[7] === "talk" || /*status*/ ctx[0] === "talk" && /*user*/ ctx[1].email === /*operator*/ ctx[3].email) && create_if_block$8(ctx);
 
     	return {
@@ -19905,11 +19920,11 @@ var app = (function () {
     				set_input_value(textarea, /*user*/ ctx[1].desc);
     			}
 
-    			if ((/*user_status*/ ctx[7] === "active" || /*user_status*/ ctx[7] === "call" || /*user_status*/ ctx[7] === "talk") && (/*status*/ ctx[0] === "call" || /*status*/ ctx[0] === "talk") && /*user*/ ctx[1].email !== /*operator*/ ctx[3].email) {
+    			if (/*status*/ ctx[0] === "talk" && /*user_status*/ ctx[7] === "active" && /*user*/ ctx[1].email !== /*operator*/ ctx[3].email) {
     				if (if_block4) {
     					if_block4.p(ctx, dirty);
 
-    					if (dirty[0] & /*user_status, status, user, operator*/ 139) {
+    					if (dirty[0] & /*status, user_status, user, operator*/ 139) {
     						transition_in(if_block4, 1);
     					}
     				} else {
@@ -20814,7 +20829,7 @@ var app = (function () {
                     }
                     data += parsed.slice;
                     if (parsed.file) {
-                        document.getElementById('dataProgress').attributes.max = parsed.length;
+                        // document.getElementById('dataProgress').attributes.max = parsed.length;
                     }
                     if (parsed.type==="eof") {
                         const received = new Blob(receiveBuffer);
@@ -21014,7 +21029,7 @@ var app = (function () {
 
             if(this.dc.readyState==='open') {
                 this.SendData(par);
-                this.rtc.OnMessage({func: 'mute'});
+                // this.rtc.OnMessage({func: 'mute'});
                 let date_str = new Date().toLocaleString("es-CL");
                 resolve(date_str);
             }
@@ -21622,11 +21637,11 @@ var app = (function () {
             this.RemoveTracks();
 
             if (this.DC)
-                this.DC.SendDCHangup(() => {         
+                // this.DC.SendDCHangup(() => {         
                     //this.OnInit();
                     this.DC.dc.close();
                     this.SendStatus('close');
-                }); 
+                // }); 
         }
 
 
@@ -24484,10 +24499,9 @@ var app = (function () {
     			attr(svg, "status", /*status*/ ctx[0]);
     			attr(svg, "width", "50");
     			attr(svg, "height", "50");
-    			set_style(svg, "position", "relative");
-    			set_style(svg, "left", "-5px");
-    			set_style(svg, "top", "-10px");
-    			set_style(svg, "width", "40px");
+    			set_style(svg, "position", "absolute");
+    			set_style(svg, "left", "0px");
+    			set_style(svg, "top", "5px");
     			set_style(svg, "z-index", "30");
     			attr(div, "class", "callObject");
     			set_style(div, "display", "block");
@@ -25097,7 +25111,7 @@ var app = (function () {
     			set_style(video, "display", /*display*/ ctx[0]);
     			set_style(video, "position", "absolute");
     			set_style(video, "top", "0px");
-    			set_style(video, "width", "100%");
+    			set_style(video, "width", "130%");
     			set_style(video, "height", "100px");
     			set_style(video, "z-index", "20");
     		},
@@ -25563,7 +25577,7 @@ var app = (function () {
     	};
     }
 
-    // (34:32) <svelte:fragment slot="footer">
+    // (32:32) <svelte:fragment slot="footer">
     function create_footer_slot(ctx) {
     	let div;
 
@@ -25583,7 +25597,7 @@ var app = (function () {
     	};
     }
 
-    // (39:16) {#if video_button_display}
+    // (37:16) {#if video_button_display}
     function create_if_block_4(ctx) {
     	let i;
     	let mounted;
@@ -25617,7 +25631,7 @@ var app = (function () {
     	};
     }
 
-    // (56:16) {#if Dict}
+    // (54:16) {#if Dict}
     function create_if_block_3(ctx) {
     	let t0_value = /*Dict*/ ctx[8].dict['Language Select'][/*lang*/ ctx[7]] + "";
     	let t0;
@@ -25642,7 +25656,7 @@ var app = (function () {
     	};
     }
 
-    // (75:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
+    // (73:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
     function create_if_block_1$2(ctx) {
     	let if_block_anchor;
 
@@ -25683,7 +25697,7 @@ var app = (function () {
     	};
     }
 
-    // (78:16) {:else}
+    // (76:16) {:else}
     function create_else_block_1(ctx) {
     	let h2;
     	let t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "";
@@ -25716,7 +25730,7 @@ var app = (function () {
     	};
     }
 
-    // (76:16) {#if !edited_display}
+    // (74:16) {#if !edited_display}
     function create_if_block_2$1(ctx) {
     	let h2;
     	let t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "";
@@ -25749,7 +25763,7 @@ var app = (function () {
     	};
     }
 
-    // (55:8) <BurgerMenu padding={'25px'}>
+    // (53:8) <BurgerMenu padding={'25px'}>
     function create_default_slot$1(ctx) {
     	let t0;
     	let div;
@@ -25918,7 +25932,7 @@ var app = (function () {
     	};
     }
 
-    // (90:0) {:else}
+    // (88:0) {:else}
     function create_else_block$1(ctx) {
     	let callcenter_1;
     	let updating_status;
@@ -25995,7 +26009,7 @@ var app = (function () {
     	};
     }
 
-    // (88:0) {#if (!tarif || tarif.name==='free') && !abonent}
+    // (86:0) {#if (!tarif || tarif.name==='free') && !abonent}
     function create_if_block$3(ctx) {
     	let landpage;
     	let current;
@@ -26673,12 +26687,12 @@ var app = (function () {
     			$$invalidate(12, remote.text.display = 'none', remote);
 
     			// local.video.poster = UserSvg;
-    			window.operator.OnInactive();
-
+    			// window.operator.OnInactive();
     			if (status === 'talk') {
     				$$invalidate(4, status = 'inactive');
+    				window.operator.OnInactive();
     			} else if (status === 'call') {
-    				$$invalidate(4, status = 'inactive'); // window.operator.OnInactive();
+    				$$invalidate(4, status = 'inactive');
     				window.operator.OnMute();
 
     				// callcenter.GetUsers();

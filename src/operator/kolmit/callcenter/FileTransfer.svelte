@@ -11,26 +11,25 @@
 
 
 <script>
-export let status;
+
 let files; 
-export let rtc;
 export let operator;
 let input;
 
 function OnClick(ev){
 
-    // let event =  new PointerEvent('click', {
-    //     bubbles: false,
-    //     cancelable: true,
-    //     view: window,
-    //     });
+    let event =  new PointerEvent('click', {
+        bubbles: false,
+        cancelable: true,
+        view: window,
+        });
 
-    // //     input.onclick();
-    // document.getElementById('file').dispatchEvent(event);
+    //     input.onclick();
+    document.getElementById('file').dispatchEvent(event);
 
-    let iframe = document.querySelector("[src*='"+operator+"']");
-    if(iframe.contentWindow.user)
-        iframe.contentWindow.user.TransFile(input);
+    // let iframe = document.querySelector("[src*='"+operator+"']");
+    // if(iframe.contentWindow.user)
+    //     iframe.contentWindow.user.TransFile(input);
   
 }
 
@@ -40,8 +39,24 @@ async function OnChangeFile(e){
             let iframe = document.querySelector("[src*='"+operator+"']");
 
             let promise = new Promise(function(resolve, reject) {
-                if(iframe.contentWindow.user)
-                    iframe.contentWindow.user.DC.SendFile(e.target.files[0],e.target.files[0].name, resolve);//todo:
+                let fileReader = new FileReader();
+                if(iframe.contentWindow.user){
+
+                    fileReader.onload  =  (e) => {
+                        // log('FileRead.onload ', e);
+                        // iframe.contentWindow.user.DC.SendFile(,e.target.files[0].name, resolve);//todo:
+                        iframe.contentWindow.user.DC.SendFile(e.target.result,file.name);
+                    }
+                    fileReader.readAsArrayBuffer(e.target.files[0]);
+                }else{
+
+                    fileReader.onload  =  (e) => {
+                        // log('FileRead.onload ', e);
+                        // iframe.contentWindow.user.DC.SendFile(,e.target.files[0].name, resolve);//todo:
+                        window.operator.DC.SendFile(e.target.result,file.name);
+                    }
+                    fileReader.readAsArrayBuffer(e.target.files[0]);
+                }
             });
 
             let data  = await promise;

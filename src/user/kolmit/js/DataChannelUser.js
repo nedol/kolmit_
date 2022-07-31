@@ -103,7 +103,8 @@ export class DataChannelUser extends DataChannel{
                 });
                 for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
                     const slice = data.slice(o, o + size);
-                    document.getElementById('dataProgress').attributes.value =  o + size;
+                    let dp = document.getElementById('dataProgress');
+                    // dp.attributes.value =  o + size;//todo:
                     this.dc.send(slice, function (data) {
                         console.log(data);
                     });

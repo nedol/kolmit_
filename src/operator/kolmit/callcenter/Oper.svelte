@@ -97,11 +97,11 @@
   <div
     style="display: flex;flex-flow: row nowrap; align-items: flex-start;flex-direction: column;">
 
-    {#if (user_status === "active" || user_status === "call" || user_status === "talk") && (status === "call" || status === "talk") && user.email !== operator.email}
+    {#if status === "talk" && (user_status === "active")  && user.email !== operator.email}
       <Forward bind:status {rtc} operator={user.email}>
         <img
           src="../assets/call-forward.svg"
-          alt=""
+          alt="call-forward"
           width="30px"
           height="30px"
         />
@@ -111,7 +111,7 @@
       <FileTransfer {status} {rtc} operator={user.email}>
         <img
         src="../assets/file-transfer.svg"
-        alt=""
+        alt="file-transfer"
         width="30px"
         height="30px"
         />

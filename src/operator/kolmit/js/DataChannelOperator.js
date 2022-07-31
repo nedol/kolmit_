@@ -54,7 +54,7 @@ export class DataChannelOperator extends DataChannel{
                 }
                 data += parsed.slice;
                 if (parsed.file) {
-                    document.getElementById('dataProgress').attributes.max = parsed.length;
+                    // document.getElementById('dataProgress').attributes.max = parsed.length;
                 }
                 if (parsed.type==="eof") {
                     const received = new Blob(receiveBuffer);
@@ -254,7 +254,7 @@ export class DataChannelOperator extends DataChannel{
 
         if(this.dc.readyState==='open') {
             this.SendData(par);
-            this.rtc.OnMessage({func: 'mute'});
+            // this.rtc.OnMessage({func: 'mute'});
             let date_str = new Date().toLocaleString("es-CL");
             resolve(date_str);
         }

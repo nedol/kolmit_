@@ -1,7 +1,7 @@
 <div class="callObject" on:long-press = {OnLongPress} style="display: block;">
     <svg  
         class="callButton" status={status} on:click  width="50" height="50"
-        style="position:relative;left:-5px;top:-10px;width:40px;z-index: 30;">
+        style="position:absolute;left:0px;top:5px;z-index: 30;">
         <!-- <rect id="backgroundrect" width="100%" height="100%" x="0" y="0" fill="none" stroke="none"/>
         <glyph glyph-name="phone" unicode="" horiz-adv-x="1000"/>         -->
         <g class="currentLayer" style=" stroke:lightgrey; stroke-width:10px">

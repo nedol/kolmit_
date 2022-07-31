@@ -18777,7 +18777,8 @@ var app = (function () {
                     });
                     for (let i = 0, o = 0; i < numChunks; ++i, o += size) {
                         const slice = data.slice(o, o + size);
-                        document.getElementById('dataProgress').attributes.value =  o + size;
+                        let dp = document.getElementById('dataProgress');
+                        // dp.attributes.value =  o + size;//todo:
                         this.dc.send(slice, function (data) {
                             console.log(data);
                         });
@@ -19146,10 +19147,10 @@ var app = (function () {
         }
 
 
-        TransFile() {
+        TransFile(fileInput) {
             let that = this;
             async function handleFileInputChange() {
-                const file = that.fileInput.files[0];
+                const file = fileInput.files[0];
                 if (!file) {
                     utils.log('No file chosen');
                 }
@@ -19166,9 +19167,14 @@ var app = (function () {
                 };
                 fileReader.readAsArrayBuffer(file);
             }
-            that.fileInput.removeEventListener('change',that.fileInput.onchange );
-            that.fileInput.onchange  =  handleFileInputChange;
-            that.fileInput.dispatchEvent(new Event("click"));
+            fileInput.removeEventListener('change',fileInput.onchange );
+            fileInput.onchange  =  handleFileInputChange;
+            let event =  new PointerEvent('click', {
+                    bubbles: false,
+                    cancelable: true,
+                    view: window,
+                    });
+            fileInput.dispatchEvent(event);
         }
 
 
@@ -19338,6 +19344,8 @@ var app = (function () {
         constructor(abonent,type, em, uid) {
 
             super(abonent,type, em, uid);
+
+            this.redirected = false;
        
             this.component = '';
 
@@ -19471,7 +19479,7 @@ var app = (function () {
             }
 
             if (data.func === 'redirect') {
-
+                
                 that.em =  data.abonent.operator;
                 // that.pcPull['all'].params = data.abonent.pcPull;
                 that.InitRTC(data.abonent.operator,function () {
@@ -26470,6 +26478,7 @@ var app = (function () {
 
     			const event = new Event("inactive");
     			window.frameElement.dispatchEvent(event);
+    			location.reload();
     		} // window.frameElement.style.width = '60px'
     		// window.frameElement.style.height = '60px'
 

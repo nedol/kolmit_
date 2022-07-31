@@ -34,7 +34,7 @@
         display: {display};
         position:absolute;
         top:0px;
-        width:100%;
+        width:130%;
         height: 100px;
         z-index: 20;">
 </video>

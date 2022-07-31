@@ -238,11 +238,11 @@ export default class  RTCOperator extends RTCBase{
         this.RemoveTracks();
 
         if (this.DC)
-            this.DC.SendDCHangup(() => {         
+            // this.DC.SendDCHangup(() => {         
                 //this.OnInit();
                 this.DC.dc.close();
                 this.SendStatus('close');
-            }); 
+            // }); 
     }
 
 
