@@ -384,7 +384,8 @@
       const event = new Event("inactive");
       window.frameElement.dispatchEvent(event);
 
-      location.reload();
+      // if(url.searchParams.get("em")!==window.user.em)
+      //   location.reload();
 
       // window.frameElement.style.width = '60px'
       // window.frameElement.style.height = '60px'
@@ -410,6 +411,7 @@
 
       remote.video.srcObject = null;
       remote.video.display = "none";
+
     }
 
     if (data.status === "wait") {
