@@ -20156,10 +20156,12 @@ var app = (function () {
             this.rtc = rtc;
             this.pc = pc;
             this.call_num = 3;
-            this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
             this.forward;
         }
 
+        CreateDC(){
+            this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
+        }
 
     }
 
@@ -20175,8 +20177,20 @@ var app = (function () {
             //     console.log('OnOpenDataChannel');
             // }
 
-            this.dc.onclose = () => {
-                // rtc.OnMessage({func:'mute'});
+            
+            this.dc = pc.con.createDataChannel(pc.pc_key+" data channel"); 
+
+            this.dc.onopen = () => {
+                //this.dc.onopen = null;
+                if (that.dc.readyState==='open') {
+                    console.log(that.pc.pc_key+" datachannel open");
+                }
+
+                this.dc.onclose = () => {
+                    // rtc.OnMessage({func:'mute'});
+                    // pc.con = null;
+                };
+
             };
 
             pc.StartEvents();
@@ -20186,21 +20200,13 @@ var app = (function () {
                 console.log('Receive Channel Callback');
 
                 this.dc = event.channel;//change dc
-
-                this.dc.onopen = () => {
-                    //this.dc.onopen = null;
-                    if (that.dc.readyState==='open') {
-                        console.log(that.pc.pc_key+" datachannel open");
-                    }
-
-
-                    return true;
-                };
+                
             };
+            
             let data = '';
             let receiveBuffer = [];
             let receivedSize = 0;
-            this.dc.removeEventListener("message",this.dc.onmessage);
+            // this.dc.removeEventListener("message",this.dc.onmessage);
             this.dc.onmessage = function (event) {
                 try {
                     let parsed = JSON.parse(event.data);
@@ -20244,6 +20250,7 @@ var app = (function () {
                 }
 
             };
+
         }
 
         SendFile(data, name){
@@ -20583,7 +20590,7 @@ var app = (function () {
 
         onIceStateChange(pc, event) {
 
-            if (pc) {
+            if (pc && pc.con) {
 
                 if(pc.con.iceConnectionState==='new'){
                     utils.log(pc.pc_key +' ICE state change event: new', this);
@@ -20677,12 +20684,6 @@ var app = (function () {
         async InitRTC(pc_key, cb) {
 
             this.conf = (await (await fetch(this.signch.host.host_server+'kolmit/ice_conf.json')).json());
-            try{
-                let res = fetch(this.signch.host.host_server+'kolmit/users/'+this.email+'/ice_conf.json');
-                this.conf = (await (await res).json());
-            }catch(ex){
-
-            }
 
             let pc_config = {
                 iceTransportPolicy: 'all',
@@ -20696,32 +20697,29 @@ var app = (function () {
             };
 
             if(this.pcPull[pc_key]){
-                // if(this.DC) {
-                //     this.DC.dc.close();
-                //     this.DC = null
-                // }
+                if(this.DC && this.DC.dc) {
+                    this.DC.dc.close();
+                    this.DC = null;
+                }
                 if(this.pcPull[pc_key].con) {
                     this.pcPull[pc_key].con.close();
                     this.pcPull[pc_key].con = null;
                 }
             }
 
-            let params = this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
+            let params = {};//this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
 
             this.pcPull[pc_key] = null;
             this.pcPull[pc_key] = new Peer(this, pc_config, pc_key);
             this.pcPull[pc_key].signch = this.signch;
             this.pcPull[pc_key].params = params;
 
-
-            this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);
-            this.DC.dc.onopen = ()=>{
-                console.log();
-            }; 
-
-            this.startTime = Date.now();
-
+            // setTimeout(()=>{
+            this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);   
+            this.startTime = Date.now();         
             cb();
+            // },1000); 
+     
         }
 
 
@@ -20832,16 +20830,16 @@ var app = (function () {
 
             let that = this;
 
-            try {
-                // Fix up for prefixing
-                window.AudioContext = window.AudioContext||window.webkitAudioContext;
-                let audioCtx = new AudioContext();
-                this.localSoundSrc = audioCtx.createMediaElementSource(rtc.localSound );
-                this.localSoundSrc.connect(audioCtx.destination);
-            }
-            catch(e) {
-                utils.log('Web Audio API is not supported in this browser');
-            }
+            // try {
+            //     // Fix up for prefixing
+            //     window.AudioContext = window.AudioContext||window.webkitAudioContext;
+            //     let audioCtx = new AudioContext();
+            //     this.localSoundSrc = audioCtx.createMediaElementSource(rtc.localSound );
+            //     this.localSoundSrc.connect(audioCtx.destination);
+            // }
+            // catch(e) {
+            //     log('Web Audio API is not supported in this browser');
+            // }
 
             that.pcPull[key].params['loc_desc'] = '';
             that.pcPull[key].params['loc_cand'] = '';
@@ -21023,11 +21021,14 @@ var app = (function () {
 
             this.RemoveTracks();
 
-            if (this.DC)
-                // this.DC.SendDCHangup(() => {         
-                    //this.OnInit();
+            if (this.DC.dc.readyState==="open" ||
+                this.DC.dc.readyState==="connecting"){
+                this.DC.SendDCHangup(() => {         
                     this.DC.dc.close();
                     this.SendStatus('close');
+                });
+            }       
+
                 // }); 
         }
 
@@ -21058,7 +21059,9 @@ var app = (function () {
 
 
             if (data.desc) {
-                if(that.pcPull[data.abonent].con.connectionState==="failed")
+                if( that.pcPull[data.abonent].con &&
+                    (that.pcPull[data.abonent].con.connectionState==="failed"
+                    || that.pcPull[data.abonent].con.connectionState==="disconnected"))
                     that.pcPull[data.abonent].con.restartIce();
 
                 if (that.pcPull[data.abonent]) {
@@ -21070,7 +21073,7 @@ var app = (function () {
             }
             if (data.cand) {
                 if (that.pcPull[data.abonent]) {
-                    if (that.pcPull[data.abonent].con.signalingState === 'closed') {
+                    if (!that.pcPull[data.abonent].con || that.pcPull[data.abonent].con.signalingState === 'closed') {
                         return;
                     }
                     try {
@@ -25957,7 +25960,7 @@ var app = (function () {
     		};
 
     		window.operator.SetRemoteAudio = src => {
-    			$$invalidate(12, remote.audio.srcObject = src, remote);
+    			if (src) $$invalidate(12, remote.audio.srcObject = src, remote);
     		};
 
     		window.operator.GetRemoteVideo = () => {
@@ -25965,20 +25968,22 @@ var app = (function () {
     		};
 
     		window.operator.SetLocalVideo = src => {
-    			$$invalidate(11, local.video.srcObject = src, local);
+    			if (src) $$invalidate(11, local.video.srcObject = src, local);
     		};
 
     		window.operator.SetRemoteVideo = src => {
-    			$$invalidate(12, remote.video.srcObject = src, remote);
-    			$$invalidate(12, remote.video.display = 'block', remote);
-    			$$invalidate(4, status = 'talk');
-    			$$invalidate(11, local.audio.paused = true, local);
+    			if (src) {
+    				$$invalidate(12, remote.video.srcObject = src, remote);
+    				$$invalidate(12, remote.video.display = 'block', remote);
+    				$$invalidate(4, status = 'talk');
+    				$$invalidate(11, local.audio.paused = true, local);
+    			}
     		};
     	}
 
     	
 
-    	async function OnClickCallButton() {
+    	function OnClickCallButton() {
     		try {
     			// Fix up for prefixing
     			if (!window.AudioContext) {
@@ -26014,7 +26019,6 @@ var app = (function () {
     				document.getElementsByTagName('body')[0].dispatchEvent(event);
     				break;
     			case 'talk':
-    				$$invalidate(4, status = 'inactive');
     				window.operator.OnInactive();
     				$$invalidate(12, remote.audio.muted = true, remote);
     				$$invalidate(11, local.video.display = 'none', local);
@@ -26025,6 +26029,7 @@ var app = (function () {
     				$$invalidate(12, remote.text.display = 'none', remote);
     				$$invalidate(12, remote.text.name = '', remote);
     				$$invalidate(12, remote.text.email = '', remote);
+    				$$invalidate(4, status = 'inactive');
     				// local.video.poster = UserSvg;    
     				break;
     			case 'muted':
@@ -26074,12 +26079,12 @@ var app = (function () {
     			$$invalidate(12, remote.text.display = 'none', remote);
 
     			// local.video.poster = UserSvg;
-    			// window.operator.OnInactive();
+    			window.operator.OnInactive();
+
     			if (status === 'talk') {
     				$$invalidate(4, status = 'inactive');
-    				window.operator.OnInactive();
     			} else if (status === 'call') {
-    				$$invalidate(4, status = 'inactive');
+    				$$invalidate(4, status = 'inactive'); // window.operator.OnInactive();
     				window.operator.OnMute();
 
     				// callcenter.GetUsers();

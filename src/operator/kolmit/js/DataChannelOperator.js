@@ -13,9 +13,21 @@ export class DataChannelOperator extends DataChannel{
         //     console.log('OnOpenDataChannel');
         // }
 
-        this.dc.onclose = () => {
-            // rtc.OnMessage({func:'mute'});
-        };
+        
+        this.dc = pc.con.createDataChannel(pc.pc_key+" data channel"); 
+
+        this.dc.onopen = () => {
+            //this.dc.onopen = null;
+            if (that.dc.readyState==='open') {
+                console.log(that.pc.pc_key+" datachannel open");
+            }
+
+            this.dc.onclose = () => {
+                // rtc.OnMessage({func:'mute'});
+                // pc.con = null;
+            };
+
+        }
 
         pc.StartEvents();
 
@@ -24,21 +36,13 @@ export class DataChannelOperator extends DataChannel{
             console.log('Receive Channel Callback');
 
             this.dc = event.channel;//change dc
-
-            this.dc.onopen = () => {
-                //this.dc.onopen = null;
-                if (that.dc.readyState==='open') {
-                    console.log(that.pc.pc_key+" datachannel open");
-                }
-
-
-                return true;
-            }
+            
         };
+        
         let data = '';
         let receiveBuffer = [];
         let receivedSize = 0;
-        this.dc.removeEventListener("message",this.dc.onmessage);
+        // this.dc.removeEventListener("message",this.dc.onmessage);
         this.dc.onmessage = function (event) {
             try {
                 let parsed = JSON.parse(event.data);
@@ -82,6 +86,7 @@ export class DataChannelOperator extends DataChannel{
             }
 
         };
+
     }
 
     SendFile(data, name){

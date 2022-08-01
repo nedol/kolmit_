@@ -323,20 +323,24 @@ async function initRTC(){
                 return remote.audio.srcObject;
         }  
         window.operator.SetRemoteAudio = (src)=>{
-                remote.audio.srcObject = src;
+                if(src)
+                        remote.audio.srcObject = src;
         }
         window.operator.GetRemoteVideo =()=>{
                 return remote.video.srcObject;
         }  
         window.operator.SetLocalVideo = (src)=>{
-                local.video.srcObject = src; 
+                if(src)
+                        local.video.srcObject = src; 
         }
 
         window.operator.SetRemoteVideo = (src)=>{
-                remote.video.srcObject = src;
-                remote.video.display = 'block';
-                status = 'talk';
-                local.audio.paused = true;
+                if(src){
+                        remote.video.srcObject = src;
+                        remote.video.display = 'block';
+                        status = 'talk';
+                        local.audio.paused = true;
+                }
         }             
 }; 
 
@@ -346,19 +350,19 @@ function OnLongPress(){
 }
 
 
-async function OnClickCallButton(){
-        try {
-                // Fix up for prefixing
-                if (!window.AudioContext) {
-                        window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                        let audioCtx = new AudioContext();
-                        window.operator.localSoundSrc = audioCtx.createMediaElementSource(window.user.localSound);
-                        window.operator.localSoundSrc.connect(audioCtx.destination);
-                }
+function OnClickCallButton(){
+try {
+        // Fix up for prefixing
+        if (!window.AudioContext) {
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                let audioCtx = new AudioContext();
+                window.operator.localSoundSrc = audioCtx.createMediaElementSource(window.user.localSound);
+                window.operator.localSoundSrc.connect(audioCtx.destination);
         }
-        catch (ex) {
-                log('Web Audio API is not supported in this browser');
-        }
+}
+catch (ex) {
+        log('Web Audio API is not supported in this browser');
+}
 
         console.log();
 
@@ -385,8 +389,7 @@ async function OnClickCallButton(){
                 const event = new Event('talk');
                 document.getElementsByTagName('body')[0].dispatchEvent(event);
                 break;
-        case 'talk':
-                status='inactive';
+        case 'talk':          
                 window.operator.OnInactive();  
                 remote.audio.muted = true;
                 local.video.display = 'none';
@@ -397,6 +400,7 @@ async function OnClickCallButton(){
                 remote.text.display = 'none';
                 remote.text.name = '';
                 remote.text.email = '';  
+                status='inactive';
                 // local.video.poster = UserSvg;    
                 break;
         case 'muted':
@@ -450,10 +454,10 @@ function OnMessage(data, resolve) {
                 remote.text.email = '';
                 remote.text.display = 'none';
                  // local.video.poster = UserSvg;
-                // window.operator.OnInactive();
+                window.operator.OnInactive();
                 if(status==='talk'){
                         status ='inactive';
-                        window.operator.OnInactive();
+                        // window.operator.OnInactive();
                 }else if(status==='call'){
                         status='inactive';
                         window.operator.OnMute();

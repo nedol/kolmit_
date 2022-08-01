@@ -58,7 +58,7 @@ export  class RTCBase{
 
     onIceStateChange(pc, event) {
 
-        if (pc) {
+        if (pc && pc.con) {
 
             if(pc.con.iceConnectionState==='new'){
                 log(pc.pc_key +' ICE state change event: new', this);
@@ -156,8 +156,8 @@ export  class RTCBase{
 
         this.conf = (await (await fetch(this.signch.host.host_server+'kolmit/ice_conf.json')).json());
         try{
-            let res = fetch(this.signch.host.host_server+'kolmit/users/'+this.email+'/ice_conf.json');
-            this.conf = (await (await res).json());
+            // let res = fetch(this.signch.host.host_server+'kolmit/users/'+this.email+'/ice_conf.json');
+            // this.conf = (await (await res).json());
         }catch(ex){
 
         }
@@ -174,32 +174,29 @@ export  class RTCBase{
         };
 
         if(this.pcPull[pc_key]){
-            // if(this.DC) {
-            //     this.DC.dc.close();
-            //     this.DC = null
-            // }
+            if(this.DC && this.DC.dc) {
+                this.DC.dc.close();
+                this.DC = null
+            }
             if(this.pcPull[pc_key].con) {
                 this.pcPull[pc_key].con.close();
                 this.pcPull[pc_key].con = null;
             }
         }
 
-        let params = this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
+        let params = {};//this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
 
         this.pcPull[pc_key] = null;
         this.pcPull[pc_key] = new Peer(this, pc_config, pc_key);
         this.pcPull[pc_key].signch = this.signch;
         this.pcPull[pc_key].params = params;
 
-
-        this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);
-        this.DC.dc.onopen = ()=>{
-            console.log();
-        } 
-
-        this.startTime = Date.now();
-
+        // setTimeout(()=>{
+        this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);   
+        this.startTime = Date.now();         
         cb();
+        // },1000); 
+ 
     }
 
 

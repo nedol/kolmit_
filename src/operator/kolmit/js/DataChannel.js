@@ -4,9 +4,11 @@ export  class DataChannel {
         this.rtc = rtc;
         this.pc = pc;
         this.call_num = 3;
-        this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
         this.forward;
     }
 
+    CreateDC(){
+        this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
+    }
 
 }

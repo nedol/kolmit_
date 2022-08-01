@@ -6,12 +6,9 @@ export class DataChannelUser extends DataChannel{
 
         let that = this;
         that.cnt_call = 0;
-        // this.dc.onopen = () => {
-        //     console.log('OnOpenDataChannel');
-        // }
 
         this.dc.onclose = () => {
-            // rtc.OnMessage({func:'mute'});
+            // this.rtc.OnMessage({func:'mute'});
         };
 
         pc.StartEvents();
@@ -26,6 +23,10 @@ export class DataChannelUser extends DataChannel{
                 //this.dc.onopen = null;
                 if (that.dc.readyState==='open') {
                     console.log(that.pc.pc_key+" datachannel open");
+                    //after redirect:
+                    const url = new URL(window.location.href);
+                    let em = url.searchParams.get('em');
+                    this.rtc.em = em;
                 }
 
                 // if(that.cnt_call === 0) {
@@ -33,10 +34,10 @@ export class DataChannelUser extends DataChannel{
                     that.SendDCCall();
                 //}
                 //after redirect:
-                const url = new URL(window.location.href);
-                let ab = url.searchParams.get('abonent');
-                that.rtc.abonent = ab;
-                that.rtc.trans = ab;
+                // const url = new URL(window.location.href);
+                // let ab = url.searchParams.get('abonent');
+                // that.rtc.abonent = ab;
+                // that.rtc.trans = ab;
 
                 return true;
             }

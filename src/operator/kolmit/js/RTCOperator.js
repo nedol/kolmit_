@@ -46,16 +46,16 @@ export default class  RTCOperator extends RTCBase{
 
         let that = this;
 
-        try {
-            // Fix up for prefixing
-            window.AudioContext = window.AudioContext||window.webkitAudioContext;
-            let audioCtx = new AudioContext();
-            this.localSoundSrc = audioCtx.createMediaElementSource(rtc.localSound );
-            this.localSoundSrc.connect(audioCtx.destination);
-        }
-        catch(e) {
-            log('Web Audio API is not supported in this browser');
-        }
+        // try {
+        //     // Fix up for prefixing
+        //     window.AudioContext = window.AudioContext||window.webkitAudioContext;
+        //     let audioCtx = new AudioContext();
+        //     this.localSoundSrc = audioCtx.createMediaElementSource(rtc.localSound );
+        //     this.localSoundSrc.connect(audioCtx.destination);
+        // }
+        // catch(e) {
+        //     log('Web Audio API is not supported in this browser');
+        // }
 
         that.pcPull[key].params['loc_desc'] = '';
         that.pcPull[key].params['loc_cand'] = '';
@@ -237,11 +237,14 @@ export default class  RTCOperator extends RTCBase{
 
         this.RemoveTracks();
 
-        if (this.DC)
-            // this.DC.SendDCHangup(() => {         
-                //this.OnInit();
+        if (this.DC.dc.readyState==="open" ||
+            this.DC.dc.readyState==="connecting"){
+            this.DC.SendDCHangup(() => {         
                 this.DC.dc.close();
                 this.SendStatus('close');
+            });
+        }       
+
             // }); 
     }
 
@@ -278,7 +281,9 @@ export default class  RTCOperator extends RTCBase{
 
 
         if (data.desc) {
-            if(that.pcPull[data.abonent].con.connectionState==="failed")
+            if( that.pcPull[data.abonent].con &&
+                (that.pcPull[data.abonent].con.connectionState==="failed"
+                || that.pcPull[data.abonent].con.connectionState==="disconnected"))
                 that.pcPull[data.abonent].con.restartIce();
 
             if (that.pcPull[data.abonent]) {
@@ -290,7 +295,7 @@ export default class  RTCOperator extends RTCBase{
         }
         if (data.cand) {
             if (that.pcPull[data.abonent]) {
-                if (that.pcPull[data.abonent].con.signalingState === 'closed') {
+                if (!that.pcPull[data.abonent].con || that.pcPull[data.abonent].con.signalingState === 'closed') {
                     return;
                 }
                 try {

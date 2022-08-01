@@ -18680,12 +18680,9 @@ var app = (function () {
 
             let that = this;
             that.cnt_call = 0;
-            // this.dc.onopen = () => {
-            //     console.log('OnOpenDataChannel');
-            // }
 
             this.dc.onclose = () => {
-                // rtc.OnMessage({func:'mute'});
+                // this.rtc.OnMessage({func:'mute'});
             };
 
             pc.StartEvents();
@@ -18700,6 +18697,10 @@ var app = (function () {
                     //this.dc.onopen = null;
                     if (that.dc.readyState==='open') {
                         console.log(that.pc.pc_key+" datachannel open");
+                        //after redirect:
+                        const url = new URL(window.location.href);
+                        let em = url.searchParams.get('em');
+                        this.rtc.em = em;
                     }
 
                     // if(that.cnt_call === 0) {
@@ -18707,10 +18708,10 @@ var app = (function () {
                         that.SendDCCall();
                     //}
                     //after redirect:
-                    const url = new URL(window.location.href);
-                    let ab = url.searchParams.get('abonent');
-                    that.rtc.abonent = ab;
-                    that.rtc.trans = ab;
+                    // const url = new URL(window.location.href);
+                    // let ab = url.searchParams.get('abonent');
+                    // that.rtc.abonent = ab;
+                    // that.rtc.trans = ab;
 
                     return true;
                 };
@@ -19389,28 +19390,24 @@ var app = (function () {
             }
         }
 
-        async Call(){
+        Call(resolve){
             let that = this;
-            let promise = new Promise((resolve, reject) => {
 
-                this.GetUserMedia({audio: 1, video: 0}, function () {
-                    // document.getElementsByClassName('browser_container')[0].style.display = 'none';
-                    let par = {};
-                    par.proj = 'kolmit';
-                    par.func = 'call';
-                    par.status = 'call';
-                    par.type = that.type;
-                    par.abonent = that.abonent.toLowerCase();
-                    par.em = that.em.toLowerCase();
-                    par.uid = that.uid;
-                    that.signch.SendMessage(par);
-                    that.status = 'call';
+            this.GetUserMedia({audio: 1, video: 0}, function () {
+                // document.getElementsByClassName('browser_container')[0].style.display = 'none';
+                let par = {};
+                par.proj = 'kolmit';
+                par.func = 'call';
+                par.status = 'call';
+                par.type = that.type;
+                par.abonent = that.abonent.toLowerCase();
+                par.em = that.em.toLowerCase();
+                par.uid = that.uid;
+                that.signch.SendMessage(par);
+                that.status = 'call';
 
-                    resolve();
-                });
+                resolve();
             });
-
-            await promise;
         }
 
         Hangup(){
@@ -19442,8 +19439,6 @@ var app = (function () {
         OnMessage(data) {
 
             let that = this;
-
-            msg.set(data);
 
             if (data.operators) {
                 if (data.operators[that.abonent] &&
@@ -19482,9 +19477,14 @@ var app = (function () {
                 
                 that.em =  data.abonent.operator;
                 // that.pcPull['all'].params = data.abonent.pcPull;
-                that.InitRTC(data.abonent.operator,function () {
-                    that.Call();
+                that.InitRTC(data.abonent.operator,async  ()=> {
+                    let promise = new Promise((resolve, reject) => {
+                        that.Call(resolve);          
+                    });
+
+                    await promise;
                 });
+
             }
 
 
@@ -19518,12 +19518,13 @@ var app = (function () {
                             //log(' Remote ICE candidate: \n' + (data.cand ? JSON.stringify(data.cand) : '(null)'), that);
                         }
 
-
                     } catch (ex) {
                         utils.log(ex);
                     }
                 }
             }
+
+            msg.set(data);
         }
     }
 
@@ -26478,10 +26479,11 @@ var app = (function () {
 
     			const event = new Event("inactive");
     			window.frameElement.dispatchEvent(event);
-    			location.reload();
-    		} // window.frameElement.style.width = '60px'
-    		// window.frameElement.style.height = '60px'
+    		} // if(url.searchParams.get("em")!==window.user.em)
+    		//   location.reload();
 
+    		// window.frameElement.style.width = '60px'
+    		// window.frameElement.style.height = '60px'
     		if (data.func === "talk") {
     			$$invalidate(1, status = "talk");
     			clearInterval(inter);
