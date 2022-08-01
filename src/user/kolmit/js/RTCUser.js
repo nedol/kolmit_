@@ -56,28 +56,24 @@ export default class RTCUser extends RTCBase {
         }
     }
 
-    async Call(){
+    Call(resolve){
         let that = this;
-        let promise = new Promise((resolve, reject) => {
 
-            this.GetUserMedia({audio: 1, video: 0}, function () {
-                // document.getElementsByClassName('browser_container')[0].style.display = 'none';
-                let par = {};
-                par.proj = 'kolmit';
-                par.func = 'call';
-                par.status = 'call';
-                par.type = that.type;
-                par.abonent = that.abonent.toLowerCase();
-                par.em = that.em.toLowerCase();
-                par.uid = that.uid;
-                that.signch.SendMessage(par);
-                that.status = 'call';
+        this.GetUserMedia({audio: 1, video: 0}, function () {
+            // document.getElementsByClassName('browser_container')[0].style.display = 'none';
+            let par = {};
+            par.proj = 'kolmit';
+            par.func = 'call';
+            par.status = 'call';
+            par.type = that.type;
+            par.abonent = that.abonent.toLowerCase();
+            par.em = that.em.toLowerCase();
+            par.uid = that.uid;
+            that.signch.SendMessage(par);
+            that.status = 'call';
 
-                resolve();
-            });
+            resolve();
         });
-
-        let result = await promise;
     }
 
     Hangup(){
@@ -109,8 +105,6 @@ export default class RTCUser extends RTCBase {
     OnMessage(data) {
 
         let that = this;
-
-        msg.set(data);
 
         if (data.operators) {
             if (data.operators[that.abonent] &&
@@ -157,9 +151,14 @@ export default class RTCUser extends RTCBase {
             
             that.em =  data.abonent.operator;
             // that.pcPull['all'].params = data.abonent.pcPull;
-            that.InitRTC(data.abonent.operator,function () {
-                that.Call();
+            that.InitRTC(data.abonent.operator,async  ()=> {
+                let promise = new Promise((resolve, reject) => {
+                    that.Call(resolve);          
+                });
+
+                let result = await promise;
             });
+
         }
 
 
@@ -193,11 +192,12 @@ export default class RTCUser extends RTCBase {
                         //log(' Remote ICE candidate: \n' + (data.cand ? JSON.stringify(data.cand) : '(null)'), that);
                     }
 
-
                 } catch (ex) {
                     log(ex);
                 }
             }
         }
+
+        msg.set(data);
     }
 }
