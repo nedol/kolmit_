@@ -1117,8 +1117,9 @@ var app = (function () {
     			attr(input_1, "name", "file");
     			attr(input_1, "type", "file");
     			set_style(input_1, "display", "none");
-    			set_style(div, "position", "relative");
+    			set_style(div, "position", "absolute");
     			set_style(div, "right", "0px");
+    			set_style(div, "bottom", "0");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -18787,8 +18788,8 @@ var app = (function () {
     			attr(iframe, "scrolling", "no");
     			attr(iframe, "frameborder", "0");
     			set_style(iframe, "position", "absolute");
-    			set_style(iframe, "top", "0");
-    			set_style(iframe, "left", "0");
+    			set_style(iframe, "top", "0px");
+    			set_style(iframe, "left", "-20px");
     			set_style(iframe, "height", "40px");
     			set_style(iframe, "width", "100%");
     			attr(iframe, "title", "User Frame");
@@ -18807,7 +18808,7 @@ var app = (function () {
     	};
     }
 
-    // (39:4) {#if edited_display}
+    // (43:4) {#if edited_display}
     function create_if_block_3$2(ctx) {
     	let if_block_anchor;
     	let if_block = /*operator*/ ctx[3].email !== /*user*/ ctx[1].email && /*user*/ ctx[1].role === "operator" && create_if_block_4$2(ctx);
@@ -18842,7 +18843,7 @@ var app = (function () {
     	};
     }
 
-    // (40:6) {#if (operator.email!==user.email && user.role === "operator")}
+    // (44:6) {#if (operator.email!==user.email && user.role === "operator")}
     function create_if_block_4$2(ctx) {
     	let svg;
     	let glyph;
@@ -18897,7 +18898,7 @@ var app = (function () {
     	};
     }
 
-    // (65:4) {#if Dict}
+    // (69:4) {#if Dict}
     function create_if_block_2$3(ctx) {
     	let input0;
     	let t;
@@ -18975,7 +18976,7 @@ var app = (function () {
     	};
     }
 
-    // (100:4) {#if status === "talk" && (user_status === "active")  && user.email !== operator.email}
+    // (104:4) {#if status === "talk" && (user_status === "active")  && user.email !== operator.email}
     function create_if_block_1$4(ctx) {
     	let forward;
     	let updating_status;
@@ -19039,7 +19040,7 @@ var app = (function () {
     	};
     }
 
-    // (101:6) <Forward bind:status {rtc} operator={user.email}>
+    // (105:6) <Forward bind:status {rtc} operator={user.email}>
     function create_default_slot_1$1(ctx) {
     	let img;
     	let img_src_value;
@@ -19061,7 +19062,7 @@ var app = (function () {
     	};
     }
 
-    // (110:4) {#if  user_status === "talk" || (status === "talk" && user.email === operator.email)}
+    // (114:4) {#if  user_status === "talk" || (status === "talk" && user.email === operator.email)}
     function create_if_block$5(ctx) {
     	let filetransfer;
     	let current;
@@ -19111,7 +19112,7 @@ var app = (function () {
     	};
     }
 
-    // (111:6) <FileTransfer {status} {rtc} operator={user.email}>
+    // (115:6) <FileTransfer {status} {rtc} operator={user.email}>
     function create_default_slot$2(ctx) {
     	let img;
     	let img_src_value;
@@ -19186,8 +19187,8 @@ var app = (function () {
     			set_style(img, "float", "right");
     			attr(div0, "class", "user_pic_div");
     			set_style(div0, "position", "relative");
-    			set_style(div0, "width", "100px");
-    			set_style(div0, "height", "100px");
+    			set_style(div0, "width", "85px");
+    			set_style(div0, "height", "85px");
     			attr(textarea, "type", "text");
     			attr(textarea, "rows", "3");
     			attr(textarea, "class", "user_desc svelte-kknszv");
@@ -19199,6 +19200,7 @@ var app = (function () {
     			set_style(textarea, "resize", "none");
     			set_style(div1, "flex", "1");
     			set_style(div1, "margin-left", "10px");
+    			set_style(div1, "font-size", "xx-small");
     			set_style(div2, "display", "flex");
     			set_style(div2, "flex-flow", "row nowrap");
     			set_style(div2, "align-items", "flex-start");
@@ -21942,8 +21944,8 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[10] = list[i];
-    	child_ctx[22] = i;
+    	child_ctx[11] = list[i];
+    	child_ctx[23] = i;
     	return child_ctx;
     }
 
@@ -21957,30 +21959,30 @@ var app = (function () {
     	let current;
 
     	function dep_1_tarif_binding(value) {
-    		/*dep_1_tarif_binding*/ ctx[11](value);
+    		/*dep_1_tarif_binding*/ ctx[12](value);
     	}
 
     	function dep_1_edited_display_binding(value) {
-    		/*dep_1_edited_display_binding*/ ctx[12](value);
+    		/*dep_1_edited_display_binding*/ ctx[13](value);
     	}
 
     	let dep_1_props = {
-    		dep: /*dep*/ ctx[10],
-    		status,
-    		rtc: /*rtc*/ ctx[7],
-    		owner: /*dep*/ ctx[10].admin.email,
+    		dep: /*dep*/ ctx[11],
+    		status: /*status*/ ctx[3],
+    		rtc: /*rtc*/ ctx[8],
+    		owner: /*dep*/ ctx[11].admin.email,
     		operator: /*operator*/ ctx[0],
     		abonent: /*abonent*/ ctx[2],
-    		update: /*GetUsers*/ ctx[3],
-    		RemoveDep: /*RemoveDep*/ ctx[9]
+    		update: /*GetUsers*/ ctx[4],
+    		RemoveDep: /*RemoveDep*/ ctx[10]
     	};
 
     	if (/*tarif*/ ctx[1] !== void 0) {
     		dep_1_props.tarif = /*tarif*/ ctx[1];
     	}
 
-    	if (/*edited_display*/ ctx[5] !== void 0) {
-    		dep_1_props.edited_display = /*edited_display*/ ctx[5];
+    	if (/*edited_display*/ ctx[6] !== void 0) {
+    		dep_1_props.edited_display = /*edited_display*/ ctx[6];
     	}
 
     	dep_1 = new Dep_1({ props: dep_1_props });
@@ -22002,8 +22004,9 @@ var app = (function () {
     		},
     		p(ctx, dirty) {
     			const dep_1_changes = {};
-    			if (dirty & /*cc_data*/ 16) dep_1_changes.dep = /*dep*/ ctx[10];
-    			if (dirty & /*cc_data*/ 16) dep_1_changes.owner = /*dep*/ ctx[10].admin.email;
+    			if (dirty & /*cc_data*/ 32) dep_1_changes.dep = /*dep*/ ctx[11];
+    			if (dirty & /*status*/ 8) dep_1_changes.status = /*status*/ ctx[3];
+    			if (dirty & /*cc_data*/ 32) dep_1_changes.owner = /*dep*/ ctx[11].admin.email;
     			if (dirty & /*operator*/ 1) dep_1_changes.operator = /*operator*/ ctx[0];
     			if (dirty & /*abonent*/ 4) dep_1_changes.abonent = /*abonent*/ ctx[2];
 
@@ -22013,9 +22016,9 @@ var app = (function () {
     				add_flush_callback(() => updating_tarif = false);
     			}
 
-    			if (!updating_edited_display && dirty & /*edited_display*/ 32) {
+    			if (!updating_edited_display && dirty & /*edited_display*/ 64) {
     				updating_edited_display = true;
-    				dep_1_changes.edited_display = /*edited_display*/ ctx[5];
+    				dep_1_changes.edited_display = /*edited_display*/ ctx[6];
     				add_flush_callback(() => updating_edited_display = false);
     			}
 
@@ -22041,7 +22044,7 @@ var app = (function () {
     // (8:2) {#if edited_display }
     function create_if_block$3(ctx) {
     	let if_block_anchor;
-    	let if_block = /*addDep*/ ctx[6] && create_if_block_1$2(ctx);
+    	let if_block = /*addDep*/ ctx[7] && create_if_block_1$2(ctx);
 
     	return {
     		c() {
@@ -22053,7 +22056,7 @@ var app = (function () {
     			insert(target, if_block_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (/*addDep*/ ctx[6]) {
+    			if (/*addDep*/ ctx[7]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -22096,7 +22099,7 @@ var app = (function () {
     			attr(glyph, "horiz-adv-x", "50");
     			attr(glyph, "class", "svelte-wc9qks");
     			attr(path, "d", "M500.2 62.5c-241.8 0-437.7 195.89999999999998-437.7 437.3 0 241.8 195.89999999999998 437.7 437.7 437.7 241.40000000000003 0 437.3-195.89999999999998 437.3-437.7 0-241.40000000000003-195.89999999999998-437.3-437.3-437.3z m301.59999999999997 466.5c-0.6999999999999318 9-2.199999999999932 19.100000000000023-4.699999999999932 30.299999999999955h-237.70000000000005v237.80000000000007c-11.199999999999932 2.5-21.600000000000023 4.2999999999999545-31.399999999999977 5.100000000000023-9.700000000000045 0.6999999999999318-19.80000000000001 1.099999999999909-30.30000000000001 1.099999999999909-9 0-17.69999999999999-0.39999999999997726-26.69999999999999-1.099999999999909-9-0.7000000000000455-19.100000000000023-2.5-30.30000000000001-5.100000000000023v-237.70000000000005h-237.5c-2.5-11.199999999999932-4.299999999999983-21.699999999999932-5.099999999999994-31.399999999999977-0.6999999999999886-9.700000000000045-1.0999999999999943-19.80000000000001-1.0999999999999943-30.30000000000001 0-9 0.4000000000000057-17.69999999999999 1.0999999999999943-26.69999999999999 0.700000000000017-9 2.5-19.100000000000023 5.099999999999994-30.30000000000001h237.40000000000003v-237.5c11.199999999999989-2.5 21.599999999999966-4 31.399999999999977-4.699999999999989 9.699999999999989-1.0999999999999943 19.80000000000001-1.4000000000000057 30.30000000000001-1.4000000000000057 9 0 17.999999999999943 0.4000000000000057 26.69999999999999 1.4000000000000057 9 0.6999999999999886 19.100000000000023 2.1999999999999886 30.299999999999955 4.699999999999989v237.40000000000003h237.80000000000007c2.5 11.199999999999989 4 21.599999999999966 4.699999999999932 31.399999999999977 1.1000000000000227 9.699999999999989 1.400000000000091 19.80000000000001 1.400000000000091 30.30000000000001 0.09999999999990905 9.099999999999966-0.3000000000000682 18.099999999999966-1.400000000000091 26.69999999999999z");
-    			attr(path, "transform", "scale(.04)");
+    			attr(path, "transform", "scale(.03)");
     			set_style(path, "fill", "lightgrey");
     			attr(path, "class", "svelte-wc9qks");
     			attr(svg, "class", "add_dep svelte-wc9qks");
@@ -22112,7 +22115,7 @@ var app = (function () {
     			append(svg, path);
 
     			if (!mounted) {
-    				dispose = listen(svg, "click", /*AddDep*/ ctx[8]);
+    				dispose = listen(svg, "click", /*AddDep*/ ctx[9]);
     				mounted = true;
     			}
     		},
@@ -22131,7 +22134,7 @@ var app = (function () {
     	let t1;
     	let div0;
     	let current;
-    	let each_value = /*cc_data*/ ctx[4];
+    	let each_value = /*cc_data*/ ctx[5];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -22142,7 +22145,7 @@ var app = (function () {
     		each_blocks[i] = null;
     	});
 
-    	let if_block = /*edited_display*/ ctx[5] && create_if_block$3(ctx);
+    	let if_block = /*edited_display*/ ctx[6] && create_if_block$3(ctx);
 
     	return {
     		c() {
@@ -22176,8 +22179,8 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*cc_data, status, rtc, operator, abonent, GetUsers, RemoveDep, tarif, edited_display*/ 703) {
-    				each_value = /*cc_data*/ ctx[4];
+    			if (dirty & /*cc_data, status, rtc, operator, abonent, GetUsers, RemoveDep, tarif, edited_display*/ 1407) {
+    				each_value = /*cc_data*/ ctx[5];
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -22203,7 +22206,7 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (/*edited_display*/ ctx[5]) {
+    			if (/*edited_display*/ ctx[6]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -22246,11 +22249,12 @@ var app = (function () {
     	let $langs;
     	let $signal;
     	let $pswd;
-    	component_subscribe($$self, langs, $$value => $$invalidate(15, $langs = $$value));
-    	component_subscribe($$self, signal, $$value => $$invalidate(16, $signal = $$value));
-    	component_subscribe($$self, pswd, $$value => $$invalidate(17, $pswd = $$value));
+    	component_subscribe($$self, langs, $$value => $$invalidate(16, $langs = $$value));
+    	component_subscribe($$self, signal, $$value => $$invalidate(17, $signal = $$value));
+    	component_subscribe($$self, pswd, $$value => $$invalidate(18, $pswd = $$value));
     	let { operator } = $$props;
     	let { abonent } = $$props;
+    	let { status } = $$props;
     	let rtc = window.operator;
     	let cnt;
     	let dep = { title: '' };
@@ -22275,7 +22279,7 @@ var app = (function () {
     		par.uid = rtc.uid;
     		par.psw = psw;
 
-    		$$invalidate(4, cc_data = (await new Promise((resolve, reject) => {
+    		$$invalidate(5, cc_data = (await new Promise((resolve, reject) => {
     				signalch.SendMessage(par, data => {
     					resolve(data);
     				});
@@ -22300,7 +22304,7 @@ var app = (function () {
     					});
     				}))['dep'];
 
-    			$$invalidate(4, cc_data[res.id] = res, cc_data);
+    			$$invalidate(5, cc_data[res.id] = res, cc_data);
     		}
     	}
 
@@ -22319,7 +22323,7 @@ var app = (function () {
     			par.uid = rtc.uid;
     			par.psw = psw;
 
-    			$$invalidate(4, cc_data = (await new Promise((resolve, reject) => {
+    			$$invalidate(5, cc_data = (await new Promise((resolve, reject) => {
     					signalch.SendMessage(par, data => {
     						resolve(data);
     					});
@@ -22334,17 +22338,18 @@ var app = (function () {
 
     	function dep_1_edited_display_binding(value) {
     		edited_display = value;
-    		$$invalidate(5, edited_display);
+    		$$invalidate(6, edited_display);
     	}
 
     	$$self.$$set = $$props => {
     		if ('operator' in $$props) $$invalidate(0, operator = $$props.operator);
     		if ('abonent' in $$props) $$invalidate(2, abonent = $$props.abonent);
+    		if ('status' in $$props) $$invalidate(3, status = $$props.status);
     		if ('tarif' in $$props) $$invalidate(1, tarif = $$props.tarif);
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*cc_data, operator*/ 17) {
+    		if ($$self.$$.dirty & /*cc_data, operator*/ 33) {
     			if (cc_data && cc_data.length > 0) {
     				lodash.forEach(cc_data, (dep, k) => {
     					if (dep.admin && dep.admin.email === operator.email) {
@@ -22356,12 +22361,12 @@ var app = (function () {
     			}
     		}
 
-    		if ($$self.$$.dirty & /*cc_data, operator*/ 17) {
+    		if ($$self.$$.dirty & /*cc_data, operator*/ 33) {
     			if (cc_data && cc_data.length > 0) {
     				lodash.forEach(cc_data, (dep, k) => {
     					if (dep.admin && dep.admin.email === operator.email) {
     						// if(!abonent) 
-    						$$invalidate(6, addDep = true);
+    						$$invalidate(7, addDep = true);
 
     						$$invalidate(0, operator.role = "admin", operator);
     					}
@@ -22378,6 +22383,7 @@ var app = (function () {
     		operator,
     		tarif,
     		abonent,
+    		status,
     		GetUsers,
     		cc_data,
     		edited_display,
@@ -22398,13 +22404,14 @@ var app = (function () {
     		init(this, options, instance$d, create_fragment$e, safe_not_equal, {
     			operator: 0,
     			abonent: 2,
+    			status: 3,
     			tarif: 1,
-    			GetUsers: 3
+    			GetUsers: 4
     		});
     	}
 
     	get GetUsers() {
-    		return this.$$.ctx[3];
+    		return this.$$.ctx[4];
     	}
     }
 
@@ -23762,14 +23769,14 @@ var app = (function () {
     			attr(path, "d", "M390.7 353.3c-120.30000000000001 69.5 63.19999999999999 413.59999999999997 194.90000000000003 337.59999999999997l122.10000000000002 211.39999999999998c-55.60000000000002 32.10000000000002-102.5 52.30000000000007-166.9000000000001 15.5-178.79999999999995-102.19999999999993-375.59999999999997-442.9-369.99999999999994-646.0999999999999 1.8999999999999773-70.60000000000005 43.599999999999994-98.30000000000004 97.89999999999998-129.70000000000005 23.30000000000001 40.400000000000006 98.60000000000002 170.8 122 211.3z m50.400000000000034-5.699999999999989c-13 7.5-29.700000000000045 3.099999999999966-37.30000000000001-10l-115-199.3c-7.5-13.000000000000014-3.1000000000000227-29.700000000000017 10-37.30000000000001l60.5-34.900000000000006c13-7.499999999999993 29.69999999999999-3.0999999999999943 37.30000000000001 10l115.09999999999997 199.29999999999998c7.500000000000057 13 3.099999999999966 29.700000000000045-10 37.200000000000045l-60.599999999999966 35z m314.4 544.5c-13 7.5-29.700000000000045 3.1000000000000227-37.299999999999955-10l-115-199.30000000000007c-7.5-13-3.1000000000000227-29.699999999999932 10-37.299999999999955l60.5-34.89999999999998c13-7.5 29.699999999999932-3.1000000000000227 37.299999999999955 10l115.10000000000002 199.29999999999995c7.5 13 3.1000000000000227 29.700000000000045-10 37.30000000000007l-60.60000000000002 34.89999999999998z");
     			attr(path, "id", "svg_1");
     			attr(path, "class", "selected");
-    			attr(path, "transform", "scale(.04)");
+    			attr(path, "transform", "scale(.03)");
     			attr(g, "class", "currentLayer svelte-xpesuu");
     			set_style(g, "stroke", "lightgrey");
     			set_style(g, "stroke-width", "10px");
     			attr(svg, "class", "callButton svelte-xpesuu");
     			attr(svg, "status", /*status*/ ctx[0]);
-    			attr(svg, "width", "50");
-    			attr(svg, "height", "50");
+    			attr(svg, "width", "35");
+    			attr(svg, "height", "35");
     			set_style(svg, "position", "absolute");
     			set_style(svg, "left", "0px");
     			set_style(svg, "top", "5px");
@@ -24496,7 +24503,7 @@ var app = (function () {
     			set_style(video, "display", /*display*/ ctx[0]);
     			set_style(video, "position", "absolute");
     			set_style(video, "height", "100px");
-    			set_style(video, "max-width", "12%");
+    			set_style(video, "max-width", "26%");
     			set_style(video, "background-color", "white");
     			set_style(video, "z-index", "10");
     		},
@@ -24952,7 +24959,7 @@ var app = (function () {
     	};
     }
 
-    // (32:32) <svelte:fragment slot="footer">
+    // (33:32) <svelte:fragment slot="footer">
     function create_footer_slot(ctx) {
     	let div;
 
@@ -24972,7 +24979,7 @@ var app = (function () {
     	};
     }
 
-    // (37:16) {#if video_button_display}
+    // (38:16) {#if video_button_display}
     function create_if_block_4(ctx) {
     	let div;
     	let svg;
@@ -24993,7 +25000,7 @@ var app = (function () {
     			attr(glyph, "unicode", "");
     			attr(glyph, "horiz-adv-x", "50");
     			attr(path, "d", "M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z");
-    			attr(path, "transform", "scale(.03)");
+    			attr(path, "transform", "scale(.025)");
     			set_style(path, "fill", "lightgrey");
     			set_style(path, "stroke", "black");
     			set_style(path, "stroke-width", "20px");
@@ -25014,8 +25021,8 @@ var app = (function () {
     			attr(div, "class", "video");
     			set_style(div, "position", "absolute");
     			set_style(div, "top", "0");
-    			set_style(div, "width", "100px");
-    			set_style(div, "height", "100px");
+    			set_style(div, "width", "95px");
+    			set_style(div, "height", "95px");
     		},
     		m(target, anchor) {
     			insert(target, div, anchor);
@@ -25038,7 +25045,7 @@ var app = (function () {
     	};
     }
 
-    // (71:16) {#if Dict}
+    // (72:16) {#if Dict}
     function create_if_block_3(ctx) {
     	let t0_value = /*Dict*/ ctx[8].dict['Language Select'][/*lang*/ ctx[7]] + "";
     	let t0;
@@ -25063,7 +25070,7 @@ var app = (function () {
     	};
     }
 
-    // (90:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
+    // (91:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
     function create_if_block_1(ctx) {
     	let if_block_anchor;
 
@@ -25104,7 +25111,7 @@ var app = (function () {
     	};
     }
 
-    // (93:16) {:else}
+    // (94:16) {:else}
     function create_else_block_1(ctx) {
     	let h4;
     	let t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "";
@@ -25137,7 +25144,7 @@ var app = (function () {
     	};
     }
 
-    // (91:16) {#if !edited_display}
+    // (92:16) {#if !edited_display}
     function create_if_block_2(ctx) {
     	let h4;
     	let t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "";
@@ -25170,7 +25177,7 @@ var app = (function () {
     	};
     }
 
-    // (70:8) <BurgerMenu padding={'25px'}>
+    // (71:8) <BurgerMenu padding={'25px'}>
     function create_default_slot(ctx) {
     	let t0;
     	let div;
@@ -25339,7 +25346,7 @@ var app = (function () {
     	};
     }
 
-    // (105:0) {:else}
+    // (106:0) {:else}
     function create_else_block(ctx) {
     	let callcenter_1;
     	let updating_status;
@@ -25416,7 +25423,7 @@ var app = (function () {
     	};
     }
 
-    // (103:0) {#if (!tarif || tarif.name==='free') && !abonent}
+    // (104:0) {#if (!tarif || tarif.name==='free') && !abonent}
     function create_if_block(ctx) {
     	let landpage;
     	let current;
@@ -25624,11 +25631,12 @@ var app = (function () {
     			set_style(p, "white-space", "nowrap");
     			set_style(p, "color", "white");
     			set_style(div0, "display", /*remote*/ ctx[12].text.display);
-    			set_style(div0, "position", "absolute");
+    			set_style(div0, "position", "relative");
+    			set_style(div0, "height", "auto");
     			set_style(div0, "z-index", "10");
     			set_style(div0, "background-color", "rgba(125, 125, 125, 0.8)");
     			set_style(div0, "top", "83px");
-    			set_style(div0, "left", "9px");
+    			set_style(div0, "left", "0px");
     			set_style(div1, "flex", "1");
     			set_style(div2, "position", "absolute");
     			set_style(div2, "flex", "1 1 0%");

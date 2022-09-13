@@ -1,5 +1,5 @@
 <div bind:this={oper_admin_div} style="display:flex; flex-wrap: nowrap;justify-content: space-between;">
-  <div class="user_pic_div" style="position:relative; width:100px;height:100px">
+  <div class="user_pic_div" style="position:relative; width:85px;height:85px">
     <img
       class="user_pic is-rounded"
       src={user.picture.medium}
@@ -29,7 +29,11 @@
           src="/kolmit/user/iframe.html?em={user.email}&abonent={abonent}"
           scrolling="no"
           frameBorder="0"
-          style="position: absolute;top:0;left:0; height:40px;width:100%"
+          style="position: absolute;
+            top: 0px;
+            left: -20px;
+            height: 40px;
+            width: 100%;"
       
           title="User Frame"
         />
@@ -61,7 +65,7 @@
     {/if}
   </div>
 
-  <div style="flex:1; margin-left:10px">
+  <div style="flex:1; margin-left:10px; font-size:xx-small">
     {#if Dict}
       <input
         type="text"

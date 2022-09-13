@@ -1,4 +1,4 @@
-<div style = "position: relative;right: 0px;" on:click={OnClick}>
+<div style = "position: absolute;right: 0px;bottom:0" on:click={OnClick}>
     <slot></slot>
     <input  class="file-upload" bind:this={input} on:change={OnChangeFile}
         accept="*,*"
