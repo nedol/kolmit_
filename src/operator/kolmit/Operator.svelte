@@ -21,8 +21,9 @@
                                 z-index: 10;
                                 background-color: rgba(125, 125, 125, 0.8);
                                 top: 83px;
-                                left: 0px;">
-                        <p style="font-size: .5em; white-space: nowrap; color:white">{remote.text.msg} {remote.text.name}</p>
+                                left: 0px;
+                                max-width: fit-content">
+                        <p style="font-size: .5em; white-space: nowrap; color:white; text-align:center">{remote.text.msg}<br>{remote.text.name}</p>
                         <!-- <p style="font-size: .7em; white-space: nowrap;">{remote.text.name}</p> -->
                 </div> 
         </div>
@@ -36,25 +37,25 @@
                         </VideoLocal>
 
                 {#if video_button_display}
-                        <!-- <i class="video icofont-ui-video-chat"  on:click = {OnClickVideoButton}
-                        style="position: absolute; right: 80px; top: 0px; color: lightgrey; font-size: 30px; z-index: 20;"></i>  -->
-                        <div  class="video"  style="position: absolute;top: 0;width: 95px; height:95px;">
-                                <svg 
-                                  height="30" width="30" 
-                                        style="position: absolute;
-                                        bottom: 70px;
-                                        right: 0px;
-                                        z-index: 30;"
-                                        on:click = {OnClickVideoButton}>
-                                        <glyph glyph-name="ui-video-chat" unicode="&#xec90;" horiz-adv-x="50" />
-                                        <g class="currentLayer" style=" position: absolute; right: 0; top: 0; stroke:grey; stroke-width:2px;fill:lightgrey;font-size: 30px;">
-                                        <path d="M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z"
-                                                transform="scale(.025)"
-                                                style="fill:lightgrey; stroke:black; stroke-width:20px"
-                                        />
-                                        </g>
-                                </svg>
-                                </div>
+                <!-- <i class="video icofont-ui-video-chat"  on:click = {OnClickVideoButton}
+                style="position: absolute; right: 80px; top: 0px; color: lightgrey; font-size: 30px; z-index: 20;"></i>  -->
+                <div  class="video"  style="position: absolute;top: 0;width: 95px; height:95px;">
+                        <svg 
+                                height="30" width="30" 
+                                style="position: absolute;
+                                bottom: 70px;
+                                right: 0px;
+                                z-index: 30;"
+                                on:click = {OnClickVideoButton}>
+                                <glyph glyph-name="ui-video-chat" unicode="&#xec90;" horiz-adv-x="50" />
+                                <g class="currentLayer" style=" position: absolute; right: 0; top: 0; stroke:grey; stroke-width:2px;fill:lightgrey;font-size: 30px;">
+                                <path d="M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z"
+                                        transform="scale(.025)"
+                                        style="fill:lightgrey; stroke:black; stroke-width:20px"
+                                />
+                                </g>
+                        </svg>
+                        </div>
                 {/if}
 
         </div>

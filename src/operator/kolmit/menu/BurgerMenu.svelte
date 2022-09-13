@@ -3,10 +3,10 @@
     import SideMenu from './SideMenu.svelte'
     export let open = false;
     export let duration = 0.4;
-    export let width = '300px';
+    export let width = '245px';
     export let padding = '20px';
     export let paddingTop = '50px';
-    export let backgroundColor = 'rgb(1, 0, 74)';
+    export let backgroundColor = 'rgb(255, 255, 255)';
     export let burgerColor = 'rgb(18.4, 18.4, 18.4)';
     export let menuColor = 'rgb(180, 180, 180)';
     let burgerProps = {

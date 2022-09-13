@@ -23887,35 +23887,35 @@ var app = (function () {
     			line2 = svg_element("line");
     			attr(line0, "id", "top");
     			attr(line0, "x1", "0");
-    			attr(line0, "y1", "9");
-    			attr(line0, "x2", "32");
-    			attr(line0, "y2", "9");
+    			attr(line0, "y1", "8");
+    			attr(line0, "x2", "26");
+    			attr(line0, "y2", "8");
     			set_style(line0, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line0, "class", "svelte-1lxplrm");
+    			attr(line0, "class", "svelte-ks73yc");
     			attr(line1, "id", "mid");
     			attr(line1, "x1", "0");
-    			attr(line1, "y1", "18.5");
-    			attr(line1, "x2", "32");
-    			attr(line1, "y2", "18.5");
+    			attr(line1, "y1", "16");
+    			attr(line1, "x2", "26");
+    			attr(line1, "y2", "16");
     			set_style(line1, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line1, "class", "svelte-1lxplrm");
+    			attr(line1, "class", "svelte-ks73yc");
     			attr(line2, "id", "bot");
     			attr(line2, "x1", "0");
-    			attr(line2, "y1", "28");
-    			attr(line2, "x2", "32");
-    			attr(line2, "y2", "28");
+    			attr(line2, "y1", "24");
+    			attr(line2, "x2", "26");
+    			attr(line2, "y2", "24");
     			set_style(line2, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line2, "class", "svelte-1lxplrm");
-    			attr(svg, "width", "32");
-    			attr(svg, "height", "32");
-    			attr(svg, "class", "svelte-1lxplrm");
+    			attr(line2, "class", "svelte-ks73yc");
+    			attr(svg, "width", "26");
+    			attr(svg, "height", "26");
+    			attr(svg, "class", "svelte-ks73yc");
     			set_style(button, "transition", "color " + /*duration*/ ctx[1] + "s ease-in-out");
 
     			set_style(button, "color", /*open*/ ctx[0]
     			? /*menuColor*/ ctx[3]
     			: /*burgerColor*/ ctx[2]);
 
-    			attr(button, "class", "svelte-1lxplrm");
+    			attr(button, "class", "svelte-ks73yc");
     			toggle_class(button, "open", /*open*/ ctx[0]);
     		},
     		m(target, anchor) {
@@ -24292,10 +24292,10 @@ var app = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	let { open = false } = $$props;
     	let { duration = 0.4 } = $$props;
-    	let { width = '300px' } = $$props;
+    	let { width = '245px' } = $$props;
     	let { padding = '20px' } = $$props;
     	let { paddingTop = '50px' } = $$props;
-    	let { backgroundColor = 'rgb(1, 0, 74)' } = $$props;
+    	let { backgroundColor = 'rgb(255, 255, 255)' } = $$props;
     	let { burgerColor = 'rgb(18.4, 18.4, 18.4)' } = $$props;
     	let { menuColor = 'rgb(180, 180, 180)' } = $$props;
     	let burgerProps = { duration, burgerColor, menuColor };
@@ -24503,7 +24503,7 @@ var app = (function () {
     			set_style(video, "display", /*display*/ ctx[0]);
     			set_style(video, "position", "absolute");
     			set_style(video, "height", "100px");
-    			set_style(video, "max-width", "26%");
+    			set_style(video, "width", "85px");
     			set_style(video, "background-color", "white");
     			set_style(video, "z-index", "10");
     		},
@@ -24959,7 +24959,7 @@ var app = (function () {
     	};
     }
 
-    // (33:32) <svelte:fragment slot="footer">
+    // (34:32) <svelte:fragment slot="footer">
     function create_footer_slot(ctx) {
     	let div;
 
@@ -24979,7 +24979,7 @@ var app = (function () {
     	};
     }
 
-    // (38:16) {#if video_button_display}
+    // (39:16) {#if video_button_display}
     function create_if_block_4(ctx) {
     	let div;
     	let svg;
@@ -25045,7 +25045,7 @@ var app = (function () {
     	};
     }
 
-    // (72:16) {#if Dict}
+    // (73:16) {#if Dict}
     function create_if_block_3(ctx) {
     	let t0_value = /*Dict*/ ctx[8].dict['Language Select'][/*lang*/ ctx[7]] + "";
     	let t0;
@@ -25070,7 +25070,7 @@ var app = (function () {
     	};
     }
 
-    // (91:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
+    // (92:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
     function create_if_block_1(ctx) {
     	let if_block_anchor;
 
@@ -25111,7 +25111,7 @@ var app = (function () {
     	};
     }
 
-    // (94:16) {:else}
+    // (95:16) {:else}
     function create_else_block_1(ctx) {
     	let h4;
     	let t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "";
@@ -25144,7 +25144,7 @@ var app = (function () {
     	};
     }
 
-    // (92:16) {#if !edited_display}
+    // (93:16) {#if !edited_display}
     function create_if_block_2(ctx) {
     	let h4;
     	let t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "";
@@ -25177,7 +25177,7 @@ var app = (function () {
     	};
     }
 
-    // (71:8) <BurgerMenu padding={'25px'}>
+    // (72:8) <BurgerMenu padding={'25px'}>
     function create_default_slot(ctx) {
     	let t0;
     	let div;
@@ -25346,7 +25346,7 @@ var app = (function () {
     	};
     }
 
-    // (106:0) {:else}
+    // (107:0) {:else}
     function create_else_block(ctx) {
     	let callcenter_1;
     	let updating_status;
@@ -25423,7 +25423,7 @@ var app = (function () {
     	};
     }
 
-    // (104:0) {#if (!tarif || tarif.name==='free') && !abonent}
+    // (105:0) {#if (!tarif || tarif.name==='free') && !abonent}
     function create_if_block(ctx) {
     	let landpage;
     	let current;
@@ -25469,29 +25469,29 @@ var app = (function () {
     	let p;
     	let t2_value = /*remote*/ ctx[12].text.msg + "";
     	let t2;
+    	let br;
+    	let t3_value = /*remote*/ ctx[12].text.name + "";
     	let t3;
-    	let t4_value = /*remote*/ ctx[12].text.name + "";
     	let t4;
-    	let t5;
     	let div2;
     	let videolocal;
+    	let t5;
     	let t6;
-    	let t7;
     	let div3;
     	let audiolocal;
     	let updating_paused;
-    	let t8;
+    	let t7;
     	let audioremote;
     	let updating_srcObject;
-    	let t9;
+    	let t8;
     	let recordedvideo;
-    	let t10;
+    	let t9;
     	let download;
-    	let t11;
+    	let t10;
     	let burgermenu;
-    	let t12;
+    	let t11;
     	let progress_1;
-    	let t13;
+    	let t12;
     	let current_block_type_index;
     	let if_block1;
     	let if_block1_anchor;
@@ -25604,32 +25604,33 @@ var app = (function () {
     			div0 = element("div");
     			p = element("p");
     			t2 = text(t2_value);
-    			t3 = space();
-    			t4 = text(t4_value);
-    			t5 = space();
+    			br = element("br");
+    			t3 = text(t3_value);
+    			t4 = space();
     			div2 = element("div");
     			create_component(videolocal.$$.fragment);
-    			t6 = space();
+    			t5 = space();
     			if (if_block0) if_block0.c();
-    			t7 = space();
+    			t6 = space();
     			div3 = element("div");
     			create_component(audiolocal.$$.fragment);
-    			t8 = space();
+    			t7 = space();
     			create_component(audioremote.$$.fragment);
-    			t9 = space();
+    			t8 = space();
     			create_component(recordedvideo.$$.fragment);
-    			t10 = space();
+    			t9 = space();
     			create_component(download.$$.fragment);
-    			t11 = space();
+    			t10 = space();
     			create_component(burgermenu.$$.fragment);
-    			t12 = space();
+    			t11 = space();
     			progress_1 = element("progress");
-    			t13 = space();
+    			t12 = space();
     			if_block1.c();
     			if_block1_anchor = empty();
     			set_style(p, "font-size", ".5em");
     			set_style(p, "white-space", "nowrap");
     			set_style(p, "color", "white");
+    			set_style(p, "text-align", "center");
     			set_style(div0, "display", /*remote*/ ctx[12].text.display);
     			set_style(div0, "position", "relative");
     			set_style(div0, "height", "auto");
@@ -25637,6 +25638,7 @@ var app = (function () {
     			set_style(div0, "background-color", "rgba(125, 125, 125, 0.8)");
     			set_style(div0, "top", "83px");
     			set_style(div0, "left", "0px");
+    			set_style(div0, "max-width", "fit-content");
     			set_style(div1, "flex", "1");
     			set_style(div2, "position", "absolute");
     			set_style(div2, "flex", "1 1 0%");
@@ -25664,27 +25666,27 @@ var app = (function () {
     			append(div1, div0);
     			append(div0, p);
     			append(p, t2);
+    			append(p, br);
     			append(p, t3);
-    			append(p, t4);
-    			append(div4, t5);
+    			append(div4, t4);
     			append(div4, div2);
     			mount_component(videolocal, div2, null);
-    			append(div2, t6);
+    			append(div2, t5);
     			if (if_block0) if_block0.m(div2, null);
-    			append(div4, t7);
+    			append(div4, t6);
     			append(div4, div3);
     			mount_component(audiolocal, div3, null);
-    			append(div3, t8);
+    			append(div3, t7);
     			mount_component(audioremote, div3, null);
-    			append(div3, t9);
+    			append(div3, t8);
     			mount_component(recordedvideo, div3, null);
-    			append(div3, t10);
+    			append(div3, t9);
     			mount_component(download, div3, null);
-    			append(div4, t11);
+    			append(div4, t10);
     			mount_component(burgermenu, div4, null);
-    			insert(target, t12, anchor);
+    			insert(target, t11, anchor);
     			insert(target, progress_1, anchor);
-    			insert(target, t13, anchor);
+    			insert(target, t12, anchor);
     			if_blocks[current_block_type_index].m(target, anchor);
     			insert(target, if_block1_anchor, anchor);
     			current = true;
@@ -25709,7 +25711,7 @@ var app = (function () {
 
     			callbutton.$set(callbutton_changes);
     			if ((!current || dirty[0] & /*remote*/ 4096) && t2_value !== (t2_value = /*remote*/ ctx[12].text.msg + "")) set_data(t2, t2_value);
-    			if ((!current || dirty[0] & /*remote*/ 4096) && t4_value !== (t4_value = /*remote*/ ctx[12].text.name + "")) set_data(t4, t4_value);
+    			if ((!current || dirty[0] & /*remote*/ 4096) && t3_value !== (t3_value = /*remote*/ ctx[12].text.name + "")) set_data(t3, t3_value);
 
     			if (!current || dirty[0] & /*remote*/ 4096) {
     				set_style(div0, "display", /*remote*/ ctx[12].text.display);
@@ -25830,9 +25832,9 @@ var app = (function () {
     			destroy_component(recordedvideo);
     			destroy_component(download);
     			destroy_component(burgermenu);
-    			if (detaching) detach(t12);
+    			if (detaching) detach(t11);
     			if (detaching) detach(progress_1);
-    			if (detaching) detach(t13);
+    			if (detaching) detach(t12);
     			if_blocks[current_block_type_index].d(detaching);
     			if (detaching) detach(if_block1_anchor);
     		}

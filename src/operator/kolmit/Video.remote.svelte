@@ -35,7 +35,7 @@
             display: {display};
             position: absolute;
             height: 100px;
-            max-width: 26%;
+            width: 85px;
             background-color: white;
             z-index: 10;
             ">
