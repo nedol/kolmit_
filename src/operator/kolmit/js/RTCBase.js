@@ -2,7 +2,7 @@
 import {Peer} from './Peer'
 import {DataChannelOperator} from "./DataChannelOperator";
 import {log} from './utils';
-import {SignalingChannel} from './signalingChannel.js';
+
 // import {host_port, host_server, host_ws } from './host'
 
 // const host_port = 'https://delivery-angels.com/server/';
@@ -154,8 +154,9 @@ export  class RTCBase{
 
     async InitRTC(pc_key, cb) {
 
-        this.conf = (await (await fetch(this.signch.host.host_server+'kolmit/ice_conf.json')).json());
+
         try{
+            this.conf = (await (await fetch('../assets/ice_conf.json')).json());
             // let res = fetch(this.signch.host.host_server+'kolmit/users/'+this.email+'/ice_conf.json');
             // this.conf = (await (await res).json());
         }catch(ex){

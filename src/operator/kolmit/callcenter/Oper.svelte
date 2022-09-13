@@ -7,7 +7,7 @@
       on:click={OnClickUpload}
       style="border-radius: 5px; float:right"
     />
-    {#if !edited_display}
+    {#if edited_display}
       <input
         bind:this={upload}
         class="file-upload"
@@ -29,9 +29,9 @@
           src="/kolmit/user/iframe.html?em={user.email}&abonent={abonent}"
           scrolling="no"
           frameBorder="0"
-          style="position: absolute;top:0;left:0"
-          on:load={OnLoad}
-          title=""
+          style="position: absolute;top:0;left:0; height:40px;width:100%"
+      
+          title="User Frame"
         />
       {/if}
     <!-- {/if} -->

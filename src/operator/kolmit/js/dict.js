@@ -2,12 +2,12 @@ import { writable } from 'svelte/store';
 
 export let dicts = writable();
 
+
 (async ()=>{
-    const host = (await (await fetch('/kolmit/host.json')).json());     
-    let dict = (await (await fetch(host.host_server+'dict/dict.json')).json());
+    const host = (await (await fetch('../host.json')).json());     
+    let dict = (await (await fetch('../assets/dict.json')).json());
     dicts.set( new Dict(dict));
 })();
-
 
 class Dict {
 

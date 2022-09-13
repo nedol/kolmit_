@@ -35,8 +35,25 @@
                         </VideoLocal>
 
                 {#if video_button_display}
-                        <i class="video icofont-ui-video-chat"  on:click = {OnClickVideoButton}
-                        style="position: absolute; right: 80px; top: 0px; color: lightgrey; font-size: 30px; z-index: 20;"></i> 
+                        <!-- <i class="video icofont-ui-video-chat"  on:click = {OnClickVideoButton}
+                        style="position: absolute; right: 80px; top: 0px; color: lightgrey; font-size: 30px; z-index: 20;"></i>  -->
+                        <div  class="video"  style="position: absolute;top: 0;width: 100px; height:100px;">
+                                <svg 
+                                  height="30" width="30" 
+                                        style="position: absolute;
+                                        bottom: 70px;
+                                        right: 0px;
+                                        z-index: 30;"
+                                        on:click = {OnClickVideoButton}>
+                                        <glyph glyph-name="ui-video-chat" unicode="&#xec90;" horiz-adv-x="50" />
+                                        <g class="currentLayer" style=" position: absolute; right: 0; top: 0; stroke:grey; stroke-width:2px;fill:lightgrey;font-size: 30px;">
+                                        <path d="M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z"
+                                                transform="scale(.03)"
+                                                style="fill:lightgrey; stroke:black; stroke-width:20px"
+                                        />
+                                        </g>
+                                </svg>
+                                </div>
                 {/if}
 
         </div>
@@ -72,9 +89,9 @@
                 </div>
                 {#if Dict && (window.operator && operator.role==="admin") && isPaid}      
                 {#if !edited_display}                          
-                        <h2 on:click="{()=>editable.set(true)}">{Dict.dict['Edit Call Center'][lang]}</h2>                 
+                        <h4 on:click="{()=>editable.set(true)}">{Dict.dict['Edit Call Center'][lang]}</h4>                 
                 {:else}
-                        <h2 on:click="{()=>editable.set(false)}">{Dict.dict['Cancel Edit Call Center'][lang]}</h2>
+                        <h4 on:click="{()=>editable.set(false)}">{Dict.dict['Cancel Edit Call Center'][lang]}</h4>
                 {/if}
                 {/if}
         </BurgerMenu>
@@ -136,6 +153,8 @@ if(tarif && tarif.paid){
 //         window.operator.= data;
 // });
 
+window.operator = {};
+
 let selected;
 let call_cnt, status, inter;
 let video_button_display = false;
@@ -181,7 +200,7 @@ const us_signal = signal.subscribe((signalch) => {
 });
 
 
-// import {msg} from './js/signalingChannel.js'
+import {msg} from './js/signalingChannel.js'
 // const us_msg = msg.subscribe((data) => {
 //         console.log();
 //         if(window.operator.&& window.operator.OnMessage)
@@ -335,12 +354,11 @@ async function initRTC(){
         }
 
         window.operator.SetRemoteVideo = (src)=>{
-                if(src){
+                if(status === 'talk'){
                         remote.video.srcObject = src;
-                        remote.video.display = 'block';
-                        status = 'talk';
+                        remote.video.display = 'block';                  
                         local.audio.paused = true;
-                }
+                }        
         }             
 }; 
 
@@ -376,7 +394,7 @@ catch (ex) {
         case 'active':  
                 status = 'inactive';
                 window.operator.OnInactive();              
-        
+                video_button_display = false;
                 break;
         case 'call':
                 status = 'talk'
@@ -393,7 +411,7 @@ catch (ex) {
                 window.operator.OnInactive();  
                 remote.audio.muted = true;
                 local.video.display = 'none';
-                video_button_display = true;
+                video_button_display = false;
                 remote.video.display = 'none';
                 remote.video.srcObject = '';
                 remote.video.poster = '';  
@@ -405,7 +423,7 @@ catch (ex) {
                 break;
         case 'muted':
                 status = 'inactive'
-                // local.video.display = 'none';
+                video_button_display = false;
                 local.video.srcObject = '';
                 remote.audio.muted = true;
                 remote.video.display = 'none';
@@ -443,7 +461,7 @@ function OnMessage(data, resolve) {
         if (data.func === 'mute') {
                 local.audio.paused = true;
                 remote.audio.muted = true;
-                video_button_display = true;
+                video_button_display = false;
                 local.video.display = 'none';
                 local.video.srcObject = '';
                 // local.video.display = 'block';
@@ -458,8 +476,10 @@ function OnMessage(data, resolve) {
                 if(status==='talk'){
                         status ='inactive';
                         // window.operator.OnInactive();
+                        video_button_display = false;
                 }else if(status==='call'){
                         status='inactive';
+                        video_button_display = false;
                         window.operator.OnMute();
                         // callcenter.GetUsers();
                         OnClickCallButton();

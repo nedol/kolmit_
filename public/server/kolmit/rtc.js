@@ -116,7 +116,7 @@ module.exports = class RTC {
                         }
                         mysql.query(this.sql, vals,  (err, result)=> {
                             if (err) {
-
+                                console.log(err)
                             }else{
                      
                                 if(result[0]) {  
@@ -154,22 +154,23 @@ module.exports = class RTC {
                 this.SetParams( q, ws);
 
                 if( q.abonent){
-                    vals = [q.abonent, q.em, q.abonent, q.psw];
-                    
-                    this.sql = "SELECT (SELECT tarif FROM operators WHERE operator=?) as tarif, users "+
-                    "FROM operators, users "+ 
-                    "WHERE operators.operator=? AND operators.abonent=? AND operators.psw=?";
-                }else{
-                    vals = [q.em, q.psw];
+                    vals = [ q.em, q.abonent, q.psw];
                     
                     this.sql = "SELECT tarif, users "+
                     "FROM operators, users "+ 
-                    "WHERE operators.operator = users.operator AND operators.operator=? AND operators.psw=? AND operators.abonent=''";
+                    "WHERE operators.abonent = users.operator AND operators.operator=? AND operators.abonent=?  AND operators.psw=?"
+                }else{
+                    vals = [q.em, q.psw];
+                    
+                    this.sql ="SELECT tarif, users "+
+                    "FROM operators, users "+ 
+                    "WHERE operators.operator=users.operators.operator " 
+                    "AND operators.operator=? AND operators.psw=? AND operators.abonent=operators.operator";
                 }
 
                 mysql.query(this.sql, vals, async function (err, result) {
                     if (err) {
-
+                        console.log()
                     }else{
                         if(result[0]){
                             let res = false;
@@ -229,11 +230,15 @@ module.exports = class RTC {
                     break;
                 }
                 if(q.status==='close') {
-                    let item = _.find(global.rtcPull[q.type][q.abonent][q.em],{uid:q.uid});
-                    if(item)
-                        item.status = q.status;
-                    if(q.type==='operator')
-                        this.BroadcastOperatorStatus(q, 'close');
+                    try{
+                        let item = _.find(global.rtcPull[q.type][q.abonent][q.em],{uid:q.uid});
+                        if(item)
+                            item.status = q.status;
+                        if(q.type==='operator')
+                            this.BroadcastOperatorStatus(q, 'close');
+                    }catch(ex){
+
+                    }
                     //this.RemoveAbonent(q);
                     break;
                 }
@@ -590,7 +595,7 @@ module.exports = class RTC {
             }
 
             for (let em in global.rtcPull[type][q.abonent]) {
-                if(em!==q.em)//not to send to yourself
+                if(em===q.em && q.status==='call')//not to send to yourself
                     continue;
                 for (let uid in global.rtcPull[type][q.abonent][em]) {
                     let item = global.rtcPull[type][q.abonent][em][uid];
@@ -625,8 +630,9 @@ module.exports = class RTC {
     }
 
     SendOperatorStatus(q){
-        if (global.rtcPull['operator'] && global.rtcPull['operator'][q.abonent]
-            && global.rtcPull['operator'][q.abonent][q.em]){
+        if (global.rtcPull['operator'] && 
+            global.rtcPull['operator'][q.abonent] && 
+            global.rtcPull['operator'][q.abonent][q.em]){
 
             for(let uid in global.rtcPull['operator'][q.abonent][q.em]){
                 if(global.rtcPull['operator'][q.abonent][q.em][uid].status==='offer') {

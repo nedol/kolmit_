@@ -18924,108 +18924,7 @@ var app = (function () {
 
     }
 
-    class SignalingChannel{
-
-        constructor(url) {
-
-            this.url = url;
-            this.cb;
-            this.timeout = 10000;
-
-            if(!this.ws)
-                this.ws = new WebSocket(this.url);
-
-
-                this.ws.onerror = function (error) {
-                    utils.log('Connect Error: ' + error.toString());
-                };
-
-                this.ws.onopen = ()=>{
-                    this.keepAlive();
-                };
-        
-                this.ws.onclose = function () {
-                    utils.log('echo-protocol Connection Closed');
-                    this.ws = new WebSocket(this.url);
-                };
-        
-                this.ws.onmessage =   (message) =>{
-                    if (message.type === 'message') {
-                        // log("Received: '" + message.originalEvent.data + "'");
-                        if(this.cb)
-                            this.cb();
-                        const data = JSON.parse(decodeURIComponent(message.data));
-                        window.user.OnMessage(data);
-                        // window.user.SendToComponent(data);
-                    }
-                };
-        }
-
-        keepAlive(){
-            setInterval(()=>{
-                if(this.ws.readyState === 1)
-                    this.ws.send(encodeURIComponent('kolmit'));
-            },this.timeout);
-        }
-
-        waitForSocketConnection(socket, callback){
-
-            let that = this;
-            setTimeout(
-                function () {
-                    if (socket.readyState === 1) {
-                        console.log("Connection is made");
-                        if (callback != null){
-                            callback();
-                        }
-                    } else {
-                        console.log("wait for connection...");
-                        that.waitForSocketConnection(socket, callback);
-                    }
-        
-                }, 5); // wait 5 milisecond for the connection...
-        }
-
-        SendMessage(rtc_par,cb){
-            let that= this;
-            that.cb = cb;
-            if(that.ws.readyState!=1) {
-                that.ws = new WebSocket(this.url);
-                that.ws.onopen = function (connection) {
-                    that.waitForSocketConnection(that.ws, function(){
-                        that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));
-
-                    });              
-                };
-                that.ws.onmessage =  function (message) {
-
-                    if (message.type === 'message') {
-                        utils.log("Received: '" + message.data + "'");
-                        const data = JSON.parse(decodeURIComponent(message.data));
-                        window.user.OnMessage(data);
-                        // window.user.SendToComponent(data);
-                    }
-                    if(that.cb)
-                        that.cb(message);
-                };
-                return;
-            }
-            try {
-                if(that.ws.readyState===1)
-                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
-                else {
-                    that.openSocket(); 
-                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
-                }
-
-            }catch(ex){
-                return false;
-            }
-            return true;
-        }
-
-
-    }
+    /* user/kolmit/RTCBase                                */
 
     // import {host_port, host_ws, host_server } from './host'
 
@@ -19187,12 +19086,12 @@ var app = (function () {
 
             let that = this;
 
-            this.conf = (await (await fetch(this.host.host_server+'kolmit/ice_conf.json')).json());
-           try{
-                this.conf = (await (await fetch(this.host.host_server+'kolmit/users/'+this.em+'/ice_conf.json')).json());
-            }catch(ex){
+            this.conf = (await (await fetch('../assets/ice_conf.json')).json());
+        //    try{
+        //         this.conf = (await (await fetch(this.host.host_server+'users/'+this.em+'ice_conf.json')).json());
+        //     }catch(ex){
 
-            }
+        //     }
 
             let pc_config = {
                 iceTransportPolicy: 'all',
@@ -19338,6 +19237,111 @@ var app = (function () {
 
     }
 
+    class SignalingChannel{
+
+        constructor(url) {
+
+            this.url = url;
+            this.cb;
+            this.timeout = 10000;
+
+            if(!this.ws)
+                this.ws = new WebSocket(this.url);
+
+
+                this.ws.onerror = function (error) {
+                    utils.log('Connect Error: ' + error.toString());
+                };
+
+                this.ws.onopen = ()=>{
+                    this.keepAlive();
+                };
+        
+                this.ws.onclose = function () {
+                    utils.log('echo-protocol Connection Closed');
+                    this.ws = new WebSocket(this.url);
+                };
+        
+                this.ws.onmessage =   (message) =>{
+                    if (message.type === 'message') {
+                        // log("Received: '" + message.originalEvent.data + "'");
+                        if(this.cb)
+                            this.cb();
+                        const data = JSON.parse(decodeURIComponent(message.data));
+                        window.user.OnMessage(data);
+                        // window.user.SendToComponent(data);
+                    }
+                };
+        }
+
+        keepAlive(){
+            setInterval(()=>{
+                if(this.ws.readyState === 1)
+                    this.ws.send(encodeURIComponent('kolmit'));
+            },this.timeout);
+        }
+
+        waitForSocketConnection(socket, callback){
+
+            let that = this;
+            setTimeout(
+                function () {
+                    if (socket.readyState === 1) {
+                        console.log("Connection is made");
+                        if (callback != null){
+                            callback();
+                        }
+                    } else {
+                        console.log("wait for connection...");
+                        that.waitForSocketConnection(socket, callback);
+                    }
+        
+                }, 5); // wait 5 milisecond for the connection...
+        }
+
+        SendMessage(rtc_par,cb){
+            let that= this;
+            that.cb = cb;
+            if(that.ws.readyState!=1) {
+                that.ws = new WebSocket(this.url);
+                that.ws.onopen = function (connection) {
+                    that.waitForSocketConnection(that.ws, function(){
+                        that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));
+
+                    });              
+                };
+                that.ws.onmessage =  function (message) {
+
+                    if (message.type === 'message') {
+                        utils.log("Received: '" + message.data + "'");
+                        const data = JSON.parse(decodeURIComponent(message.data));
+                        window.user.OnMessage(data);
+                        // window.user.SendToComponent(data);
+                    }
+                    if(that.cb)
+                        that.cb(message);
+                };
+                return;
+            }
+            try {
+                if(that.ws.readyState===1)
+                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
+                else {
+                    that.openSocket(); 
+                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
+                }
+
+            }catch(ex){
+                return false;
+            }
+            return true;
+        }
+
+
+    }
+
+    /* user.kolmit.RTCUser.svelte*/
+
     const msg = writable('');
 
     class RTCUser extends RTCBase {
@@ -19358,7 +19362,7 @@ var app = (function () {
             this.dataProgress = document.getElementById('dataProgress')?document.getElementById('dataProgress'):'';
                     
             (async ()=>{
-                this.host = (await (await fetch('/kolmit/host.json')).json());
+                this.host = (await (await fetch('../assets/host.json')).json());
                     
                 if(!this.signch) {
                     this.signch = new SignalingChannel(this.host.host_ws);
@@ -19390,7 +19394,7 @@ var app = (function () {
             }
         }
 
-        Call(resolve){
+        Call(){
             let that = this;
 
             this.GetUserMedia({audio: 1, video: 0}, function () {
@@ -19406,7 +19410,6 @@ var app = (function () {
                 that.signch.SendMessage(par);
                 that.status = 'call';
 
-                resolve();
             });
         }
 
@@ -20076,19 +20079,6 @@ var app = (function () {
     });
     });
 
-    let tarif = writable();
-
-
-    (async ()=>{
-
-        (async ()=>{
-            try{
-                tarif.set((await (await fetch('/server/kolmit/tarifs/tarifs.json?')).json()));
-            }catch(ex){
-            }
-        })();
-    })();
-
     let langs = writable();
     let lang = 'en';
 
@@ -20103,9 +20093,8 @@ var app = (function () {
 
     let dicts = writable();
 
-    (async ()=>{
-        const host = (await (await fetch('/kolmit/host.json')).json());     
-        let dict = (await (await fetch(host.host_server+'dict/dict.json')).json());
+    (async ()=>{   
+        let dict = (await (await fetch('../assets/dict.json')).json());
         dicts.set( new Dict(dict));
     })();
 
@@ -20417,7 +20406,7 @@ var app = (function () {
     			set_style(div6, "padding", "10px");
     			attr(form_1, "class", "form-signin");
     			set_style(form_1, "display", "block");
-    			set_style(form_1, "position", "absolute");
+    			set_style(form_1, "position", "fixed");
     			set_style(form_1, "top", "0");
     		},
     		m(target, anchor) {
@@ -20503,11 +20492,16 @@ var app = (function () {
     function instance$k($$self, $$props, $$invalidate) {
     	let { profile } = $$props;
     	let { selected } = $$props;
-    	let src = "../assets/user.svg";
+    	let src = "../kolmit/assets/user.svg";
     	let name;
     	let email;
     	let form;
     	let files;
+
+    	onMount(() => {
+    		console.log();
+    	});
+
     	let lang = 'en';
 
     	langs.subscribe(data => {
@@ -20534,12 +20528,17 @@ var app = (function () {
     		// window.parent.document.body.append(document.getElementsByClassName('form-signin')[0]);
     		window.parent.document.body.append(form);
 
-    		let item = JSON.parse(localStorage.getItem('kolmi_abonent'));
-    		$$invalidate(2, name = item.name);
-    		$$invalidate(3, email = item.email);
-    		$$invalidate(1, src = item.src);
+    		if (localStorage.getItem('kolmi_abonent')) {
+    			let item = JSON.parse(localStorage.getItem('kolmi_abonent'));
+    			$$invalidate(2, name = item.name);
+    			$$invalidate(3, email = item.email);
+    			$$invalidate(1, src = item.src);
+    		}
     	}
 
+    	//TODO: import { createEventDispatcher } from 'svelte'
+    	//      const dispatch =  createEventDispatcher()
+    	//  ... dispatch('custom_event')
     	function OnClickUpload() {
     		let event = new MouseEvent('click',
     		{
@@ -20955,6 +20954,9 @@ var app = (function () {
     			attr(div, "class", "callObject");
     			set_style(div, "display", "block");
     			set_style(div, "position", "absolute");
+    			set_style(div, "max-width", "100%");
+    			set_style(div, "width", "100%");
+    			set_style(div, "height", "100%");
     			set_style(div, "top", "0");
     			set_style(div, "left", "10px");
     			set_style(div, "z-index", "10");
@@ -24639,7 +24641,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (27:12) {#if opt.id==1 && status==='talk'}
+    // (28:12) {#if opt.id==1 && status==='talk'}
     function create_if_block_1$1(ctx) {
     	let option;
     	let t_value = /*opt*/ ctx[8].text + "";
@@ -24663,7 +24665,7 @@ var app = (function () {
     	};
     }
 
-    // (30:12) {#if opt.id==2}
+    // (31:12) {#if opt.id==2}
     function create_if_block$1(ctx) {
     	let option;
     	let t_value = /*opt*/ ctx[8].text + "";
@@ -24687,7 +24689,7 @@ var app = (function () {
     	};
     }
 
-    // (26:8) {#each options as opt (opt.id)}
+    // (27:8) {#each options as opt (opt.id)}
     function create_each_block(key_1, ctx) {
     	let first;
     	let t;
@@ -24741,7 +24743,7 @@ var app = (function () {
     	};
     }
 
-    // (25:4) <Select placeholder="Options:" on:blur = {OnBlurSelect}  bind:selected={selected}>
+    // (26:4) <Select placeholder="Options:" on:blur = {OnBlurSelect}  bind:selected={selected}>
     function create_default_slot$1(ctx) {
     	let each_blocks = [];
     	let each_1_lookup = new Map();
@@ -24814,8 +24816,8 @@ var app = (function () {
     		c() {
     			div = element("div");
     			create_component(select.$$.fragment);
+    			set_style(div, "position", "fixed");
     			set_style(div, "z-index", "30");
-    			set_style(div, "position", "absolute");
     			set_style(div, "top", "5px");
     			set_style(div, "height", "70px");
     		},
@@ -25005,12 +25007,7 @@ var app = (function () {
     			attr(video, "id", "remoteVideo");
     			video.autoplay = true;
     			video.playsInline = true;
-    			set_style(video, "position", "relative");
-    			set_style(video, "width", "100%");
-    			set_style(video, "height", "100%");
-    			set_style(video, "left", "0");
-    			set_style(video, "top", "0");
-    			set_style(video, "opacity", "1");
+    			attr(video, "style", "\r\n        position: absolute;\r\n        /* width: 100%; */\r\n        height: 107%;\r\n        /* left: 0px; */\r\n        top: 0px;\r\n        opacity: 1;\r\n        ");
     			set_style(div, "display", /*display*/ ctx[0]);
     			set_style(div, "position", "relative");
     			set_style(div, "width", "100%");
@@ -25647,17 +25644,17 @@ var app = (function () {
     	let current;
 
     	function profile_1_profile_binding(value) {
-    		/*profile_1_profile_binding*/ ctx[15](value);
+    		/*profile_1_profile_binding*/ ctx[14](value);
     	}
 
     	function profile_1_selected_binding(value) {
-    		/*profile_1_selected_binding*/ ctx[16](value);
+    		/*profile_1_selected_binding*/ ctx[15](value);
     	}
 
     	let profile_1_props = {};
 
-    	if (/*profile*/ ctx[6] !== void 0) {
-    		profile_1_props.profile = /*profile*/ ctx[6];
+    	if (/*profile*/ ctx[5] !== void 0) {
+    		profile_1_props.profile = /*profile*/ ctx[5];
     	}
 
     	if (/*selected*/ ctx[0] !== void 0) {
@@ -25679,9 +25676,9 @@ var app = (function () {
     		p(ctx, dirty) {
     			const profile_1_changes = {};
 
-    			if (!updating_profile && dirty[0] & /*profile*/ 64) {
+    			if (!updating_profile && dirty[0] & /*profile*/ 32) {
     				updating_profile = true;
-    				profile_1_changes.profile = /*profile*/ ctx[6];
+    				profile_1_changes.profile = /*profile*/ ctx[5];
     				add_flush_callback(() => updating_profile = false);
     			}
 
@@ -25708,47 +25705,71 @@ var app = (function () {
     	};
     }
 
-    // (21:0) {#if video_button_pos}
+    // (21:0) {#if video_button_display}
     function create_if_block_1(ctx) {
-    	let i;
+    	let div;
+    	let svg;
+    	let glyph;
+    	let g;
+    	let path;
     	let mounted;
     	let dispose;
 
     	return {
     		c() {
-    			i = element("i");
-    			attr(i, "class", "video icofont-ui-video-chat");
-    			set_style(i, "display", /*video_button_display*/ ctx[2]);
-    			set_style(i, "position", "absolute");
-    			set_style(i, "right", "0px");
-    			set_style(i, "top", "0");
-    			set_style(i, "color", "lightgrey");
-    			set_style(i, "margin", "0px");
-    			set_style(i, "font-size", "30px");
-    			set_style(i, "z-index", "20");
+    			div = element("div");
+    			svg = svg_element("svg");
+    			glyph = svg_element("glyph");
+    			g = svg_element("g");
+    			path = svg_element("path");
+    			attr(glyph, "glyph-name", "ui-video-chat");
+    			attr(glyph, "unicode", "");
+    			attr(glyph, "horiz-adv-x", "50");
+    			attr(path, "d", "M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z");
+    			attr(path, "transform", "scale(.03)");
+    			set_style(path, "fill", "lightgrey");
+    			set_style(path, "stroke", "black");
+    			set_style(path, "stroke-width", "20px");
+    			attr(g, "class", "currentLayer");
+    			set_style(g, "position", "absolute");
+    			set_style(g, "right", "0");
+    			set_style(g, "top", "0");
+    			set_style(g, "stroke", "grey");
+    			set_style(g, "stroke-width", "2px");
+    			set_style(g, "fill", "lightgrey");
+    			set_style(g, "font-size", "30px");
+    			attr(svg, "height", "30");
+    			attr(svg, "width", "30");
+    			set_style(svg, "position", "absolute");
+    			set_style(svg, "right", "8px");
+    			set_style(svg, "z-index", "30");
+    			attr(div, "class", "video");
+    			set_style(div, "position", "absolute");
+    			set_style(div, "top", "0");
+    			set_style(div, "width", "100%");
     		},
     		m(target, anchor) {
-    			insert(target, i, anchor);
+    			insert(target, div, anchor);
+    			append(div, svg);
+    			append(svg, glyph);
+    			append(svg, g);
+    			append(g, path);
 
     			if (!mounted) {
-    				dispose = listen(i, "click", /*OnClickVideoButton*/ ctx[14]);
+    				dispose = listen(svg, "click", /*OnClickVideoButton*/ ctx[13]);
     				mounted = true;
     			}
     		},
-    		p(ctx, dirty) {
-    			if (dirty[0] & /*video_button_display*/ 4) {
-    				set_style(i, "display", /*video_button_display*/ ctx[2]);
-    			}
-    		},
+    		p: noop,
     		d(detaching) {
-    			if (detaching) detach(i);
+    			if (detaching) detach(div);
     			mounted = false;
     			dispose();
     		}
     	};
     }
 
-    // (29:0) <VideoRemote slot="remote" {...remote.video}>
+    // (50:0) <VideoRemote slot="remote" {...remote.video}>
     function create_default_slot(ctx) {
     	let i;
 
@@ -25770,7 +25791,7 @@ var app = (function () {
     	};
     }
 
-    // (45:0) {#if select.display}
+    // (66:0) {#if select.display}
     function create_if_block(ctx) {
     	let dropdownlist;
     	let updating_display;
@@ -25780,33 +25801,33 @@ var app = (function () {
     	let current;
 
     	function dropdownlist_display_binding(value) {
-    		/*dropdownlist_display_binding*/ ctx[20](value);
+    		/*dropdownlist_display_binding*/ ctx[19](value);
     	}
 
     	function dropdownlist_selected_binding(value) {
-    		/*dropdownlist_selected_binding*/ ctx[21](value);
+    		/*dropdownlist_selected_binding*/ ctx[20](value);
     	}
 
     	function dropdownlist_list_binding(value) {
-    		/*dropdownlist_list_binding*/ ctx[22](value);
+    		/*dropdownlist_list_binding*/ ctx[21](value);
     	}
 
     	function dropdownlist_status_binding(value) {
-    		/*dropdownlist_status_binding*/ ctx[23](value);
+    		/*dropdownlist_status_binding*/ ctx[22](value);
     	}
 
     	let dropdownlist_props = {};
 
-    	if (/*select*/ ctx[9].display !== void 0) {
-    		dropdownlist_props.display = /*select*/ ctx[9].display;
+    	if (/*select*/ ctx[8].display !== void 0) {
+    		dropdownlist_props.display = /*select*/ ctx[8].display;
     	}
 
     	if (/*selected*/ ctx[0] !== void 0) {
     		dropdownlist_props.selected = /*selected*/ ctx[0];
     	}
 
-    	if (/*list*/ ctx[5] !== void 0) {
-    		dropdownlist_props.list = /*list*/ ctx[5];
+    	if (/*list*/ ctx[4] !== void 0) {
+    		dropdownlist_props.list = /*list*/ ctx[4];
     	}
 
     	if (/*status*/ ctx[1] !== void 0) {
@@ -25830,9 +25851,9 @@ var app = (function () {
     		p(ctx, dirty) {
     			const dropdownlist_changes = {};
 
-    			if (!updating_display && dirty[0] & /*select*/ 512) {
+    			if (!updating_display && dirty[0] & /*select*/ 256) {
     				updating_display = true;
-    				dropdownlist_changes.display = /*select*/ ctx[9].display;
+    				dropdownlist_changes.display = /*select*/ ctx[8].display;
     				add_flush_callback(() => updating_display = false);
     			}
 
@@ -25842,9 +25863,9 @@ var app = (function () {
     				add_flush_callback(() => updating_selected = false);
     			}
 
-    			if (!updating_list && dirty[0] & /*list*/ 32) {
+    			if (!updating_list && dirty[0] & /*list*/ 16) {
     				updating_list = true;
-    				dropdownlist_changes.list = /*list*/ ctx[5];
+    				dropdownlist_changes.list = /*list*/ ctx[4];
     				add_flush_callback(() => updating_list = false);
     			}
 
@@ -25900,13 +25921,13 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*profile*/ ctx[6] && create_if_block_2(ctx);
+    	let if_block0 = /*profile*/ ctx[5] && create_if_block_2(ctx);
 
     	function callbuttonuser_status_binding(value) {
-    		/*callbuttonuser_status_binding*/ ctx[17](value);
+    		/*callbuttonuser_status_binding*/ ctx[16](value);
     	}
 
-    	let callbuttonuser_props = { OnLongPress: /*OnLongPress*/ ctx[11] };
+    	let callbuttonuser_props = { OnLongPress: /*OnLongPress*/ ctx[10] };
 
     	if (/*status*/ ctx[1] !== void 0) {
     		callbuttonuser_props.status = /*status*/ ctx[1];
@@ -25914,12 +25935,12 @@ var app = (function () {
 
     	callbuttonuser = new CallButtonUser({ props: callbuttonuser_props });
     	binding_callbacks.push(() => bind(callbuttonuser, 'status', callbuttonuser_status_binding));
-    	callbuttonuser.$on("click", /*OnClickCallButton*/ ctx[13]);
-    	callbuttonuser.$on("mute", /*OnMute*/ ctx[12]);
-    	const audiolocal_spread_levels = [/*local*/ ctx[7].audio];
+    	callbuttonuser.$on("click", /*OnClickCallButton*/ ctx[12]);
+    	callbuttonuser.$on("mute", /*OnMute*/ ctx[11]);
+    	const audiolocal_spread_levels = [/*local*/ ctx[6].audio];
 
     	function audiolocal_paused_binding(value) {
-    		/*audiolocal_paused_binding*/ ctx[18](value);
+    		/*audiolocal_paused_binding*/ ctx[17](value);
     	}
 
     	let audiolocal_props = {};
@@ -25928,16 +25949,16 @@ var app = (function () {
     		audiolocal_props = assign(audiolocal_props, audiolocal_spread_levels[i]);
     	}
 
-    	if (/*local*/ ctx[7].audio.paused !== void 0) {
-    		audiolocal_props.paused = /*local*/ ctx[7].audio.paused;
+    	if (/*local*/ ctx[6].audio.paused !== void 0) {
+    		audiolocal_props.paused = /*local*/ ctx[6].audio.paused;
     	}
 
     	audiolocal = new Audio_local({ props: audiolocal_props });
     	binding_callbacks.push(() => bind(audiolocal, 'paused', audiolocal_paused_binding));
-    	const audioremote_spread_levels = [/*remote*/ ctx[8].audio];
+    	const audioremote_spread_levels = [/*remote*/ ctx[7].audio];
 
     	function audioremote_srcObject_binding(value) {
-    		/*audioremote_srcObject_binding*/ ctx[19](value);
+    		/*audioremote_srcObject_binding*/ ctx[18](value);
     	}
 
     	let audioremote_props = {};
@@ -25946,13 +25967,13 @@ var app = (function () {
     		audioremote_props = assign(audioremote_props, audioremote_spread_levels[i]);
     	}
 
-    	if (/*remote*/ ctx[8].audio.srcObject !== void 0) {
-    		audioremote_props.srcObject = /*remote*/ ctx[8].audio.srcObject;
+    	if (/*remote*/ ctx[7].audio.srcObject !== void 0) {
+    		audioremote_props.srcObject = /*remote*/ ctx[7].audio.srcObject;
     	}
 
     	audioremote = new Audio_remote({ props: audioremote_props });
     	binding_callbacks.push(() => bind(audioremote, 'srcObject', audioremote_srcObject_binding));
-    	const videolocal_spread_levels = [{ slot: "local" }, /*local*/ ctx[7].video];
+    	const videolocal_spread_levels = [{ slot: "local" }, /*local*/ ctx[6].video];
     	let videolocal_props = {};
 
     	for (let i = 0; i < videolocal_spread_levels.length; i += 1) {
@@ -25960,8 +25981,8 @@ var app = (function () {
     	}
 
     	videolocal = new Video_local({ props: videolocal_props });
-    	let if_block1 = /*video_button_pos*/ ctx[3] && create_if_block_1(ctx);
-    	const videoremote_spread_levels = [{ slot: "remote" }, /*remote*/ ctx[8].video];
+    	let if_block1 = /*video_button_display*/ ctx[2] && create_if_block_1(ctx);
+    	const videoremote_spread_levels = [{ slot: "remote" }, /*remote*/ ctx[7].video];
 
     	let videoremote_props = {
     		$$slots: { default: [create_default_slot] },
@@ -25975,7 +25996,7 @@ var app = (function () {
     	videoremote = new Video_remote({ props: videoremote_props });
     	recordedvideo = new RecordedVideo({});
     	download = new Download({});
-    	let if_block2 = /*select*/ ctx[9].display && create_if_block(ctx);
+    	let if_block2 = /*select*/ ctx[8].display && create_if_block(ctx);
 
     	return {
     		c() {
@@ -26022,10 +26043,10 @@ var app = (function () {
     			set_style(input, "display", "none");
     			attr(progress_1, "id", "dataProgress");
     			attr(progress_1, "class", "");
-    			progress_1.value = /*progress*/ ctx[10].value;
+    			progress_1.value = /*progress*/ ctx[9].value;
     			attr(progress_1, "max", "100");
     			attr(progress_1, "duration", "200");
-    			set_style(progress_1, "display", /*progress*/ ctx[10].display);
+    			set_style(progress_1, "display", /*progress*/ ctx[9].display);
     			set_style(progress_1, "position", "absolute");
     			set_style(progress_1, "top", "50%");
     			set_style(progress_1, "width", "100px");
@@ -26061,18 +26082,18 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen(input, "change", OnChangeFile),
-    					listen(input, "change", /*input_change_handler*/ ctx[24])
+    					listen(input, "change", /*input_change_handler*/ ctx[23])
     				];
 
     				mounted = true;
     			}
     		},
     		p(ctx, dirty) {
-    			if (/*profile*/ ctx[6]) {
+    			if (/*profile*/ ctx[5]) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
 
-    					if (dirty[0] & /*profile*/ 64) {
+    					if (dirty[0] & /*profile*/ 32) {
     						transition_in(if_block0, 1);
     					}
     				} else {
@@ -26101,37 +26122,37 @@ var app = (function () {
 
     			callbuttonuser.$set(callbuttonuser_changes);
 
-    			const audiolocal_changes = (dirty[0] & /*local*/ 128)
-    			? get_spread_update(audiolocal_spread_levels, [get_spread_object(/*local*/ ctx[7].audio)])
+    			const audiolocal_changes = (dirty[0] & /*local*/ 64)
+    			? get_spread_update(audiolocal_spread_levels, [get_spread_object(/*local*/ ctx[6].audio)])
     			: {};
 
-    			if (!updating_paused && dirty[0] & /*local*/ 128) {
+    			if (!updating_paused && dirty[0] & /*local*/ 64) {
     				updating_paused = true;
-    				audiolocal_changes.paused = /*local*/ ctx[7].audio.paused;
+    				audiolocal_changes.paused = /*local*/ ctx[6].audio.paused;
     				add_flush_callback(() => updating_paused = false);
     			}
 
     			audiolocal.$set(audiolocal_changes);
 
-    			const audioremote_changes = (dirty[0] & /*remote*/ 256)
-    			? get_spread_update(audioremote_spread_levels, [get_spread_object(/*remote*/ ctx[8].audio)])
+    			const audioremote_changes = (dirty[0] & /*remote*/ 128)
+    			? get_spread_update(audioremote_spread_levels, [get_spread_object(/*remote*/ ctx[7].audio)])
     			: {};
 
-    			if (!updating_srcObject && dirty[0] & /*remote*/ 256) {
+    			if (!updating_srcObject && dirty[0] & /*remote*/ 128) {
     				updating_srcObject = true;
-    				audioremote_changes.srcObject = /*remote*/ ctx[8].audio.srcObject;
+    				audioremote_changes.srcObject = /*remote*/ ctx[7].audio.srcObject;
     				add_flush_callback(() => updating_srcObject = false);
     			}
 
     			audioremote.$set(audioremote_changes);
 
-    			const videolocal_changes = (dirty[0] & /*local*/ 128)
-    			? get_spread_update(videolocal_spread_levels, [videolocal_spread_levels[0], get_spread_object(/*local*/ ctx[7].video)])
+    			const videolocal_changes = (dirty[0] & /*local*/ 64)
+    			? get_spread_update(videolocal_spread_levels, [videolocal_spread_levels[0], get_spread_object(/*local*/ ctx[6].video)])
     			: {};
 
     			videolocal.$set(videolocal_changes);
 
-    			if (/*video_button_pos*/ ctx[3]) {
+    			if (/*video_button_display*/ ctx[2]) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
@@ -26144,21 +26165,21 @@ var app = (function () {
     				if_block1 = null;
     			}
 
-    			const videoremote_changes = (dirty[0] & /*remote*/ 256)
-    			? get_spread_update(videoremote_spread_levels, [videoremote_spread_levels[0], get_spread_object(/*remote*/ ctx[8].video)])
+    			const videoremote_changes = (dirty[0] & /*remote*/ 128)
+    			? get_spread_update(videoremote_spread_levels, [videoremote_spread_levels[0], get_spread_object(/*remote*/ ctx[7].video)])
     			: {};
 
-    			if (dirty[1] & /*$$scope*/ 64) {
+    			if (dirty[1] & /*$$scope*/ 32) {
     				videoremote_changes.$$scope = { dirty, ctx };
     			}
 
     			videoremote.$set(videoremote_changes);
 
-    			if (/*select*/ ctx[9].display) {
+    			if (/*select*/ ctx[8].display) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
 
-    					if (dirty[0] & /*select*/ 512) {
+    					if (dirty[0] & /*select*/ 256) {
     						transition_in(if_block2, 1);
     					}
     				} else {
@@ -26261,8 +26282,7 @@ var app = (function () {
 
     	let selected;
     	let call_cnt, status, inter;
-    	let video_button_display = "none";
-    	let video_button_pos = false;
+    	let video_button_display = false;
     	let files;
     	let list;
     	let profile = false;
@@ -26282,16 +26302,17 @@ var app = (function () {
     	window.uid = md5(JSON.stringify(Date.now()) + em);
 
     	onMount(async () => {
-    		if (window.frameElement.previousElementSibling) // if(window.frameElement.previousElementSibling.tagName==='svg'
+    		// if (window.frameElement.previousElementSibling)
+    		// if(window.frameElement.previousElementSibling.tagName==='svg'
     		// || window.frameElement.previousElementSibling.tagName==='img')
-    		$$invalidate(3, video_button_pos = true);
-
+    		// video_button_pos = true;
     		let ab = url.searchParams.get("abonent");
+
     		window.user = new RTCUser(ab, "user", em, window.uid);
 
     		window.user.PlayCallCnt = () => {
     			call_cnt = 10;
-    			$$invalidate(7, local.audio.paused = false, local);
+    			$$invalidate(6, local.audio.paused = false, local);
 
     			inter = setInterval(
     				function () {
@@ -26299,7 +26320,7 @@ var app = (function () {
 
     					if (call_cnt === 0) {
     						clearInterval(inter);
-    						$$invalidate(7, local.audio.paused = true, local);
+    						$$invalidate(6, local.audio.paused = true, local);
     					}
     				},
     				2000
@@ -26311,27 +26332,27 @@ var app = (function () {
     		};
 
     		window.user.SetRemoteAudio = src => {
-    			$$invalidate(8, remote.audio.srcObject = src, remote);
+    			$$invalidate(7, remote.audio.srcObject = src, remote);
     		};
 
     		window.user.SendToComponent = OnMessage;
 
     		window.user.SetLocalVideo = src => {
-    			$$invalidate(7, local.video.srcObject = src, local);
+    			$$invalidate(6, local.video.srcObject = src, local);
     		};
 
     		window.user.SetRemoteVideo = src => {
-    			$$invalidate(8, remote.video.srcObject = src, remote);
-    			$$invalidate(8, remote.video.display = "block", remote);
+    			$$invalidate(7, remote.video.srcObject = src, remote);
+    			$$invalidate(7, remote.video.display = "block", remote);
     			$$invalidate(1, status = "talk");
-    			$$invalidate(7, local.audio.paused = true, local);
+    			$$invalidate(6, local.audio.paused = true, local);
     		};
     	}); //window.user.SendCheck();
 
     	onDestroy(unsubscribe);
 
     	function OnLongPress() {
-    		$$invalidate(9, select.display = true, select);
+    		$$invalidate(8, select.display = true, select);
     	}
 
     	function OnMute() {
@@ -26358,7 +26379,7 @@ var app = (function () {
     			case "inactive":
     				$$invalidate(1, status = "wait");
     				window.user.Call();
-    				$$invalidate(8, remote.video.srcObject = null, remote);
+    				$$invalidate(7, remote.video.srcObject = null, remote);
     				break;
     			case "wait":
     				$$invalidate(1, status = "inactive");
@@ -26366,26 +26387,25 @@ var app = (function () {
     				break;
     			case "active":
     				if (!localStorage.getItem("kolmit")) {
-    					$$invalidate(6, profile = true);
+    					$$invalidate(5, profile = true);
     				}
     				window.user.Call();
     				$$invalidate(1, status = "call");
-    				$$invalidate(8, remote.video.srcObject = null, remote);
-    				$$invalidate(3, video_button_pos = true);
+    				$$invalidate(7, remote.video.srcObject = null, remote);
     				break;
     			case "call":
     				$$invalidate(1, status = "inactive");
-    				$$invalidate(7, local.audio.paused = true, local);
-    				$$invalidate(7, local.video.display = "none", local);
+    				$$invalidate(6, local.audio.paused = true, local);
+    				$$invalidate(6, local.video.display = "none", local);
     				$$invalidate(2, video_button_display = "none");
     				clearInterval(inter);
     				window.user.Hangup();
     				break;
     			case "talk":
     				$$invalidate(1, status = "inactive");
-    				$$invalidate(8, remote.audio.muted = true, remote);
-    				$$invalidate(7, local.video.display = "none", local);
-    				$$invalidate(8, remote.video.display = "none", remote);
+    				$$invalidate(7, remote.audio.muted = true, remote);
+    				$$invalidate(6, local.video.display = "none", local);
+    				$$invalidate(7, remote.video.display = "none", remote);
     				$$invalidate(2, video_button_display = "none");
     				window.user.Hangup();
     				break;
@@ -26405,9 +26425,9 @@ var app = (function () {
 
     	function OnClickVideoButton() {
     		$$invalidate(1, status = "talk");
-    		$$invalidate(7, local.audio.paused = true, local);
-    		$$invalidate(7, local.video.display = "block", local);
-    		$$invalidate(3, video_button_pos = false);
+    		$$invalidate(6, local.audio.paused = true, local);
+    		$$invalidate(6, local.video.display = "block", local);
+    		$$invalidate(2, video_button_display = false);
 
     		if (window.user.DC.dc.readyState === "open") {
     			window.user.GetUserMedia({ audio: 0, video: 1 }, function () {
@@ -26435,10 +26455,10 @@ var app = (function () {
     				}
     			} else if (res["close"] && //  && res["close"].length === Object.keys(data.operators[window.user.abonent]).length 
     			status !== "wait") {
-    				$$invalidate(7, local.video.display = "none", local);
-    				$$invalidate(8, remote.video.display = "none", remote);
-    				$$invalidate(7, local.audio.paused = true, local);
-    				$$invalidate(8, remote.audio.muted = true, remote);
+    				$$invalidate(6, local.video.display = "none", local);
+    				$$invalidate(7, remote.video.display = "none", remote);
+    				$$invalidate(6, local.audio.paused = true, local);
+    				$$invalidate(7, remote.audio.muted = true, remote);
 
     				//window.user.abonent = url.searchParams.get('abonent');
     				$$invalidate(1, status = "inactive");
@@ -26468,11 +26488,11 @@ var app = (function () {
     		}
 
     		if (data.func === "mute") {
-    			$$invalidate(7, local.audio.paused = true, local);
-    			$$invalidate(8, remote.audio.muted = true, remote);
-    			$$invalidate(2, video_button_display = "none");
-    			$$invalidate(7, local.video.display = "none", local);
-    			$$invalidate(8, remote.video.display = "none", remote);
+    			$$invalidate(6, local.audio.paused = true, local);
+    			$$invalidate(7, remote.audio.muted = true, remote);
+    			$$invalidate(2, video_button_display = false);
+    			$$invalidate(6, local.video.display = "none", local);
+    			$$invalidate(7, remote.video.display = "none", remote);
 
     			// window.user.abonent = url.searchParams.get('abonent');
     			$$invalidate(1, status = "inactive");
@@ -26487,20 +26507,19 @@ var app = (function () {
     		if (data.func === "talk") {
     			$$invalidate(1, status = "talk");
     			clearInterval(inter);
-    			$$invalidate(3, video_button_pos = true);
-    			$$invalidate(7, local.audio.paused = true, local);
-    			$$invalidate(8, remote.audio.muted = false, remote);
+    			$$invalidate(2, video_button_display = true);
+    			$$invalidate(6, local.audio.paused = true, local);
+    			$$invalidate(7, remote.audio.muted = false, remote);
     			$$invalidate(2, video_button_display = "block");
-    			$$invalidate(7, local.video.display = "block", local);
     		} // window.frameElement.style.maxWidth = "200px";
     		// window.frameElement.style.maxHeight = "100px";
 
     		if (data.func === "redirect") {
     			$$invalidate(1, status = "call");
-    			$$invalidate(7, local.audio.paused = true, local);
-    			$$invalidate(8, remote.audio.muted = true, remote);
-    			$$invalidate(8, remote.video.srcObject = null, remote);
-    			$$invalidate(8, remote.video.display = "none", remote);
+    			$$invalidate(6, local.audio.paused = true, local);
+    			$$invalidate(7, remote.audio.muted = true, remote);
+    			$$invalidate(7, remote.video.srcObject = null, remote);
+    			$$invalidate(7, remote.video.display = "none", remote);
     		}
 
     		if (data.status === "wait") {
@@ -26510,12 +26529,12 @@ var app = (function () {
 
     	function profile_1_profile_binding(value) {
     		profile = value;
-    		(($$invalidate(6, profile), $$invalidate(0, selected)), $$invalidate(35, event));
+    		(($$invalidate(5, profile), $$invalidate(0, selected)), $$invalidate(34, event));
     	}
 
     	function profile_1_selected_binding(value) {
     		selected = value;
-    		($$invalidate(0, selected), $$invalidate(35, event));
+    		($$invalidate(0, selected), $$invalidate(34, event));
     	}
 
     	function callbuttonuser_status_binding(value) {
@@ -26526,32 +26545,32 @@ var app = (function () {
     	function audiolocal_paused_binding(value) {
     		if ($$self.$$.not_equal(local.audio.paused, value)) {
     			local.audio.paused = value;
-    			$$invalidate(7, local);
+    			$$invalidate(6, local);
     		}
     	}
 
     	function audioremote_srcObject_binding(value) {
     		if ($$self.$$.not_equal(remote.audio.srcObject, value)) {
     			remote.audio.srcObject = value;
-    			$$invalidate(8, remote);
+    			$$invalidate(7, remote);
     		}
     	}
 
     	function dropdownlist_display_binding(value) {
     		if ($$self.$$.not_equal(select.display, value)) {
     			select.display = value;
-    			(($$invalidate(9, select), $$invalidate(0, selected)), $$invalidate(35, event));
+    			(($$invalidate(8, select), $$invalidate(0, selected)), $$invalidate(34, event));
     		}
     	}
 
     	function dropdownlist_selected_binding(value) {
     		selected = value;
-    		($$invalidate(0, selected), $$invalidate(35, event));
+    		($$invalidate(0, selected), $$invalidate(34, event));
     	}
 
     	function dropdownlist_list_binding(value) {
     		list = value;
-    		$$invalidate(5, list);
+    		$$invalidate(4, list);
     	}
 
     	function dropdownlist_status_binding(value) {
@@ -26561,7 +26580,7 @@ var app = (function () {
 
     	function input_change_handler() {
     		files = this.files;
-    		$$invalidate(4, files);
+    		$$invalidate(3, files);
     	}
 
     	$$self.$$.update = () => {
@@ -26572,7 +26591,7 @@ var app = (function () {
     		if ($$self.$$.dirty[0] & /*selected*/ 1) {
     			if (selected) switch (selected) {
     				case 2:
-    					$$invalidate(6, profile = true);
+    					$$invalidate(5, profile = true);
     					break;
     				case 1:
     					let event = new MouseEvent("click",
@@ -26584,7 +26603,7 @@ var app = (function () {
     					document.getElementById("files").dispatchEvent(event);
     					break;
     				case 10:
-    					$$invalidate(9, select.display = false, select);
+    					$$invalidate(8, select.display = false, select);
     					$$invalidate(0, selected = 0);
     					break;
     			}
@@ -26595,7 +26614,6 @@ var app = (function () {
     		selected,
     		status,
     		video_button_display,
-    		video_button_pos,
     		files,
     		list,
     		profile,
@@ -26683,5 +26701,5 @@ var app = (function () {
 
     return app;
 
-})();
+}());
 //# sourceMappingURL=user.js.map

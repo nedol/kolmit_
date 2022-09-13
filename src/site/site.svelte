@@ -3,9 +3,8 @@
 </Modal>
 
 
-{#if checked}
+{#if checked && tarif}
 <div>
-	<!-- <iframe src="/kolmit/operator/iframe.html?operator={operator}{abonent}{paid}" scrolling="no" style="position:absolute;height:100%;width:100%;top:0;left:0;" title=""></iframe> -->
 	<Operator {operator} {tarif}></Operator>
 </div>
 {/if}
@@ -51,7 +50,7 @@
 	let tarif;
 	let lang = 'en';
 
-	let operator = {},  abonent = "", hash="";
+	let operator = {},  abonent = "", hash = null;
 
 	let kolmit = JSON.parse(localStorage.getItem('kolmit'));
 
@@ -77,7 +76,7 @@
 	if( url.searchParams.get('abonent'))
 		abonent = url.searchParams.get('abonent');
 	if( url.searchParams.get('hash'))
-		hash = url.searchParams.get('hash')?url.searchParams.get('hash'):'';
+		hash = url.searchParams.get('hash');
 
 	if(!abonent)
 		abonent = operator.email;	
@@ -147,17 +146,12 @@
 					kolmit.abonent = abonent;
 					localStorage.setItem('kolmit',JSON.stringify(kolmit));
 
-					if(hash){
+					if(par.hash === null){		
+						tarif = data.tarif;
+						checked = true;
+					}else{
 						const url = window.location.href.split('&hash=')[0];
 						window.location.assign(url);					
-					}else{
-						if(!abonent){
-							tarif = data.tarif;
-							checked = true;
-						}else if(abonent){
-							tarif = data.tarif;
-							checked = true;
-						}
 					}
 
 				}else{
@@ -166,11 +160,12 @@
 						psw = md5(psw_);
 						pswd.set(psw);
 						sendCheck();
-					}else{
-						localStorage.removeItem('kolmit');
-						const url = window.location.href;
-						window.location.assign(url);	
 					}
+					// else{
+					// 	localStorage.removeItem('kolmit');
+					// 	const url = window.location.href;
+					// 	window.location.assign(url);	
+					// }
 		
 				}
 			});		

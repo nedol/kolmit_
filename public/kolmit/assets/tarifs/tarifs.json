@@ -1,0 +1,36 @@
+{    "free":{
+
+        "Desc": {"en":"Free of Charge","ru":"Бесплатно","fr":"Essayer et acheter"},
+        "Waiting Mode":  {"en":"yes","ru":"есть","fr":"oui"},
+        "Total Operators":  {"en":"1","ru":"1","fr":"1"},
+        "Multi Operator Mode":  {"en":"no","ru":"no","fr":"non"},
+        "Total Depts":{"en":"none","ru":"нет","fr":"non"},
+        "Dedicated Servers":"no",
+        "Full Support":"no",
+        "Price":{"en":"$0","ru":"₽0","fr":"€0"}
+    },
+
+    "basic":{
+        "status":"active",
+        "trial":30,
+        "Desc": {"en":"Try and Buy","ru":"Попробовать и купить","fr":"Essayer et acheter"},
+        "Waiting Mode":  {"en":"yes","ru":"есть","fr":"oui"},
+        "Total Operators":  {"en":"up to 50","ru":"до 50","fr":"jusqu'à 50"},
+        "Multi Operator Mode":  {"en":"yes","ru":"да","fr":"oui"},
+        "Total Depts": {"en":"up to 10","ru":"до 10","fr":"usqu'à 10"},
+        "Dedicated Servers":"no",
+        "Full Support":"no",
+        "Price":{"en":"$10","ru":"₽700","fr":"€9"},
+        "Ribbon":"Best Value"
+    },
+    "premium":{
+        "Desc": {"en":"All Inclusive","ru":"Все включено","fr":"Tout compris"},
+        "Waiting Mode":  {"en":"yes","ru":"есть","fr":"oui"},
+        "Total Operators": {"en":"unlim.","ru":"неогр.","fr":"illimité"},
+        "Multi Operator Mode":  {"en":"yes","ru":"да","fr":"oui"},
+        "Total Depts": {"en":"unlim","ru":"неогр.","fr":"Illimité"},
+        "Dedicated Servers":"yes",
+        "Full Support":"yes",
+        "Price":{"en":"$100","ru":"₽7000","fr":"€90"}
+    }
+}

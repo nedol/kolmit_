@@ -105,6 +105,6 @@ export default class SignalingChannel{
 
 
 (async ()=>{
-    const host = (await (await fetch('/kolmit/host.json')).json());
+    const host = (await (await fetch('../assets/host.json')).json());
     new SignalingChannel(host);    
 })();

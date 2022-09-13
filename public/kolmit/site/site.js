@@ -37,6 +37,16 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
             const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
@@ -19134,12 +19144,12 @@ var app = (function () {
 
     let dicts = writable();
 
+
     (async ()=>{
-        const host = (await (await fetch('/kolmit/host.json')).json());     
-        let dict = (await (await fetch(host.host_server+'dict/dict.json')).json());
+        (await (await fetch('../host.json')).json());     
+        let dict = (await (await fetch('../assets/dict.json')).json());
         dicts.set( new Dict(dict));
     })();
-
 
     class Dict {
 
@@ -19356,12 +19366,12 @@ var app = (function () {
     		},
     		m(target, anchor) {
     			insert(target, input, anchor);
-    			/*input_binding*/ ctx[24](input);
+    			/*input_binding*/ ctx[23](input);
 
     			if (!mounted) {
     				dispose = [
     					listen(input, "change", /*OnChangeFile*/ ctx[17]),
-    					listen(input, "change", /*input_change_handler*/ ctx[25])
+    					listen(input, "change", /*input_change_handler*/ ctx[24])
     				];
 
     				mounted = true;
@@ -19370,7 +19380,7 @@ var app = (function () {
     		p: noop,
     		d(detaching) {
     			if (detaching) detach(input);
-    			/*input_binding*/ ctx[24](null);
+    			/*input_binding*/ ctx[23](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -19381,8 +19391,6 @@ var app = (function () {
     function create_if_block_5$1(ctx) {
     	let iframe;
     	let iframe_src_value;
-    	let mounted;
-    	let dispose;
 
     	return {
     		c() {
@@ -19394,15 +19402,12 @@ var app = (function () {
     			set_style(iframe, "position", "absolute");
     			set_style(iframe, "top", "0");
     			set_style(iframe, "left", "0");
-    			attr(iframe, "title", "");
+    			set_style(iframe, "height", "40px");
+    			set_style(iframe, "width", "100%");
+    			attr(iframe, "title", "User Frame");
     		},
     		m(target, anchor) {
     			insert(target, iframe, anchor);
-
-    			if (!mounted) {
-    				dispose = listen(iframe, "load", /*OnLoad*/ ctx[20]);
-    				mounted = true;
-    			}
     		},
     		p(ctx, dirty) {
     			if (dirty[0] & /*user, abonent*/ 18 && !src_url_equal(iframe.src, iframe_src_value = "/kolmit/user/iframe.html?em=" + /*user*/ ctx[1].email + "&abonent=" + /*abonent*/ ctx[4])) {
@@ -19411,8 +19416,6 @@ var app = (function () {
     		},
     		d(detaching) {
     			if (detaching) detach(iframe);
-    			mounted = false;
-    			dispose();
     		}
     	};
     }
@@ -19542,9 +19545,9 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen(input0, "change", /*OnChange*/ ctx[18]),
-    					listen(input0, "input", /*input0_input_handler*/ ctx[26]),
+    					listen(input0, "input", /*input0_input_handler*/ ctx[25]),
     					listen(input1, "change", /*OnChange*/ ctx[18]),
-    					listen(input1, "input", /*input1_input_handler*/ ctx[27])
+    					listen(input1, "input", /*input1_input_handler*/ ctx[26])
     				];
 
     				mounted = true;
@@ -19592,7 +19595,7 @@ var app = (function () {
     	let current;
 
     	function forward_status_binding(value) {
-    		/*forward_status_binding*/ ctx[29](value);
+    		/*forward_status_binding*/ ctx[28](value);
     	}
 
     	let forward_props = {
@@ -19761,7 +19764,7 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = !/*edited_display*/ ctx[2] && create_if_block_6$1(ctx);
+    	let if_block0 = /*edited_display*/ ctx[2] && create_if_block_6$1(ctx);
     	let if_block1 = /*user*/ ctx[1].email && /*operator*/ ctx[3].email !== /*user*/ ctx[1].email && create_if_block_5$1(ctx);
     	let if_block2 = /*edited_display*/ ctx[2] && create_if_block_3$2(ctx);
     	let if_block3 = /*Dict*/ ctx[12] && create_if_block_2$4(ctx);
@@ -19838,14 +19841,14 @@ var app = (function () {
     			if (if_block4) if_block4.m(div2, null);
     			append(div2, t6);
     			if (if_block5) if_block5.m(div2, null);
-    			/*div3_binding*/ ctx[30](div3);
+    			/*div3_binding*/ ctx[29](div3);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
     					listen(img, "click", /*OnClickUpload*/ ctx[16]),
     					listen(textarea, "change", /*OnChange*/ ctx[18]),
-    					listen(textarea, "input", /*textarea_input_handler*/ ctx[28])
+    					listen(textarea, "input", /*textarea_input_handler*/ ctx[27])
     				];
 
     				mounted = true;
@@ -19856,7 +19859,7 @@ var app = (function () {
     				attr(img, "src", img_src_value);
     			}
 
-    			if (!/*edited_display*/ ctx[2]) {
+    			if (/*edited_display*/ ctx[2]) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
@@ -19985,7 +19988,7 @@ var app = (function () {
     			if (if_block3) if_block3.d();
     			if (if_block4) if_block4.d();
     			if (if_block5) if_block5.d();
-    			/*div3_binding*/ ctx[30](null);
+    			/*div3_binding*/ ctx[29](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -20078,11 +20081,6 @@ var app = (function () {
     		}
     	});
 
-    	//status changed postMessage from iframe
-    	function OnMessage(params) {
-    		if (params.data.status) $$invalidate(7, user_status = params.data.status);
-    	}
-
     	function OnClickUpload(ev) {
     		let event = new MouseEvent("click",
     		{
@@ -20167,42 +20165,8 @@ var app = (function () {
     					});
     				});
 
-    			$$invalidate(21, dep.staff = res.dep.staff, dep);
+    			$$invalidate(20, dep.staff = res.dep.staff, dep);
     			update();
-    		}
-    	}
-
-    	function OnLoad(ev) {
-    		let iframe = ev.currentTarget;
-    		const rect = iframe.previousElementSibling.getBoundingClientRect();
-
-    		if (iframe && iframe.previousElementSibling) {
-    			if (iframe.previousElementSibling.tagName.toLowerCase() === "img") {
-    				iframe.style.width = iframe.previousElementSibling.width + "px";
-    				iframe.style.height = iframe.previousElementSibling.height + "px";
-
-    				// iframe.style.top =  rect.top + window.scrollY +'px';
-    				iframe.style.left = "0px";
-    			} else if (iframe.previousElementSibling.tagName.toLowerCase() === "svg") {
-    				iframe.style.width = iframe.previousElementSibling.width.baseVal.valueAsString + "px";
-    				iframe.style.height = iframe.previousElementSibling.height.baseVal.valueAsString + "px";
-    				iframe.style.top = rect.top + window.scrollY + "px";
-    				iframe.style.left = rect.left + window.scrollX + "px";
-    			} else {
-    				iframe.style.maxWidth = "100px";
-    				iframe.style.maxHeight = "100px";
-    			}
-    		}
-
-    		iframe.contentWindow.postMessage(JSON.stringify({
-    			message: "this should be delivered to an iframe"
-    		}));
-
-    		if (iframe.contentWindow.addEventListener) {
-    			iframe.contentWindow.addEventListener("message", OnMessage);
-    		} else {
-    			// IE8
-    			iframe.contentWindow.attachEvent("onmessage", OnMessage);
     		}
     	}
 
@@ -20247,12 +20211,12 @@ var app = (function () {
 
     	$$self.$$set = $$props => {
     		if ('operator' in $$props) $$invalidate(3, operator = $$props.operator);
-    		if ('id' in $$props) $$invalidate(22, id = $$props.id);
+    		if ('id' in $$props) $$invalidate(21, id = $$props.id);
     		if ('status' in $$props) $$invalidate(0, status = $$props.status);
-    		if ('dep' in $$props) $$invalidate(21, dep = $$props.dep);
+    		if ('dep' in $$props) $$invalidate(20, dep = $$props.dep);
     		if ('user' in $$props) $$invalidate(1, user = $$props.user);
     		if ('abonent' in $$props) $$invalidate(4, abonent = $$props.abonent);
-    		if ('update' in $$props) $$invalidate(23, update = $$props.update);
+    		if ('update' in $$props) $$invalidate(22, update = $$props.update);
     		if ('rtc' in $$props) $$invalidate(5, rtc = $$props.rtc);
     		if ('edited_display' in $$props) $$invalidate(2, edited_display = $$props.edited_display);
     	};
@@ -20278,7 +20242,6 @@ var app = (function () {
     		OnChangeFile,
     		OnChange,
     		OnRemoveOper,
-    		OnLoad,
     		dep,
     		id,
     		update,
@@ -20304,12 +20267,12 @@ var app = (function () {
     			safe_not_equal,
     			{
     				operator: 3,
-    				id: 22,
+    				id: 21,
     				status: 0,
-    				dep: 21,
+    				dep: 20,
     				user: 1,
     				abonent: 4,
-    				update: 23,
+    				update: 22,
     				rtc: 5,
     				edited_display: 2
     			},
@@ -21044,110 +21007,6 @@ var app = (function () {
 
     }
 
-    // export const msg = writable(''); 
-
-    class SignalingChannel{
-
-        constructor(host) {
-
-            this.host = host;
-            this.cb;
-            this.timeout = 10000;
-            this.cb = {};
-
-            this.openSocket();
-
-        }
-
-        openSocket(){
-
-            if(!this.ws)
-                this.ws = new WebSocket(this.host.host_ws);
-
-                this.ws.onerror = function (error) {
-                    utils.log('Connect Error: ' + error.toString());
-                };
-
-                this.ws.onopen = ()=>{
-                    this.waitForSocketConnection(this.ws, ()=>{
-                        signal.set(this);
-                    });
-                    this.keepAlive();
-                };
-        
-                this.ws.onclose = function () {
-                    utils.log('echo-protocol Connection Closed');
-                    this.ws = new WebSocket(this.url);
-                };   
-
-        }
-
-        keepAlive(){
-            setInterval(()=>{
-                if(this.ws.readyState === 1)
-                    this.ws.send(encodeURIComponent('kolmit'));
-            },this.timeout);
-        }
-
-        waitForSocketConnection(socket, callback){
-
-            let that = this;
-            setTimeout(
-                function () {
-                    if (socket.readyState === 1) {
-               
-                        if (callback != null){
-                            callback();
-                        }
-                    } else {
-                        console.log("wait for connection...");
-                        that.waitForSocketConnection(socket, callback);
-                    }
-        
-                }, 5); // wait 5 milisecond for the connection...
-        }
-
-        SendMessage(rtc_par,cb){
-            let that= this;
-            this.cb[rtc_par.func] = cb;
-            this.ws.onmessage =   (message) =>{
-                if (message.type === 'message') {
-                    // log("Received: '" + message.originalEvent.data + "'");    
-                    const data = JSON.parse(decodeURIComponent(message.data));
-                    if(that.cb[data.func]){           
-                        that.cb[data.func](data); 
-                        delete that.cb[data.func];
-                    }                           
-                    
-                    // msg.set(data);
-                    msg_1.set(data);
-                    if(window.operator)
-                        window.operator.OnMessage(data);
-                    cb(data);
-                }
-            };
-            try {
-                if(that.ws.readyState===1)
-                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
-                else {
-                    that.openSocket(); 
-                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
-                }
-            }catch(ex){
-                return false;
-            }   
-              
-        }
-
-
-    }
-
-
-    (async ()=>{
-        const host = (await (await fetch('/kolmit/host.json')).json());
-        new SignalingChannel(host);    
-    })();
-
     // import {host_port, host_server, host_ws } from './host'
 
     // const host_port = 'https://delivery-angels.com/server/';
@@ -21296,7 +21155,14 @@ var app = (function () {
 
         async InitRTC(pc_key, cb) {
 
-            this.conf = (await (await fetch(this.signch.host.host_server+'kolmit/ice_conf.json')).json());
+
+            try{
+                this.conf = (await (await fetch('../assets/ice_conf.json')).json());
+                // let res = fetch(this.signch.host.host_server+'kolmit/users/'+this.email+'/ice_conf.json');
+                // this.conf = (await (await res).json());
+            }catch(ex){
+
+            }
 
             let pc_config = {
                 iceTransportPolicy: 'all',
@@ -21507,23 +21373,23 @@ var app = (function () {
         }
 
 
-        SendVideoOffer(key){
-            let that = this;
-            that.pcPull[key].params['loc_desc'] = '';
-            that.pcPull[key].params['loc_cand'] = '';
+        // SendVideoOffer(key){
+        //     let that = this;
+        //     that.pcPull[key].params['loc_desc'] = '';
+        //     that.pcPull[key].params['loc_cand'] = '';
 
-            that.pcPull[key].con.createOffer(
-                that.mode={
-                    offerToReceiveAudio: 1,
-                    offerToReceiveVideo: 1,
-                    iceRestart:1
-                }
-            ).then(
-                desc => that.pcPull[key].onCreateVideoOfferSuccess(desc),
-                that.pcPull[key].onCreateOfferError
-            );
+        //     that.pcPull[key].con.createOffer(
+        //         that.mode={
+        //             offerToReceiveAudio: 1,
+        //             offerToReceiveVideo: 1,
+        //             iceRestart:1
+        //         }
+        //     ).then(
+        //         desc => that.pcPull[key].onCreateVideoOfferSuccess(desc),
+        //         that.pcPull[key].onCreateOfferError
+        //     );
 
-        }
+        // }
 
         async Offer(){
      
@@ -21714,20 +21580,20 @@ var app = (function () {
 
     function get_each_context$2(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[33] = list[i];
-    	child_ctx[34] = list;
-    	child_ctx[35] = i;
+    	child_ctx[34] = list[i];
+    	child_ctx[35] = list;
+    	child_ctx[36] = i;
     	return child_ctx;
     }
 
     // (2:2) {#if dep.id!=='0'}
-    function create_if_block_6(ctx) {
+    function create_if_block_4$1(ctx) {
     	let button_1;
     	let input;
     	let t;
     	let mounted;
     	let dispose;
-    	let if_block = /*edited_display*/ ctx[3] && create_if_block_7(ctx);
+    	let if_block = /*edited_display*/ ctx[1] && create_if_block_5(ctx);
 
     	return {
     		c() {
@@ -21736,46 +21602,50 @@ var app = (function () {
     			t = space();
     			if (if_block) if_block.c();
     			attr(input, "type", "text");
-    			input.readOnly = /*readonly*/ ctx[13];
+    			input.readOnly = /*readonly*/ ctx[11];
     			set_style(input, "border-width", "0px");
     			attr(input, "placeholder", "input dep name");
     			attr(input, "class", "svelte-1fx3n49");
     			attr(button_1, "class", "collapsible svelte-1fx3n49");
-    			attr(button_1, "owner", /*owner*/ ctx[4]);
+    			attr(button_1, "owner", /*owner*/ ctx[3]);
     		},
     		m(target, anchor) {
     			insert(target, button_1, anchor);
     			append(button_1, input);
-    			set_input_value(input, /*dep*/ ctx[1].alias);
+    			set_input_value(input, /*dep*/ ctx[0].alias);
     			append(button_1, t);
     			if (if_block) if_block.m(button_1, null);
-    			/*button_1_binding*/ ctx[19](button_1);
+    			/*button_1_binding*/ ctx[18](button_1);
 
     			if (!mounted) {
     				dispose = [
-    					listen(input, "change", /*OnDepChange*/ ctx[16]),
-    					listen(input, "click", /*OnClickInput*/ ctx[15]),
-    					listen(input, "input", /*input_input_handler*/ ctx[18]),
-    					listen(button_1, "click", /*OnCollClick*/ ctx[17])
+    					listen(input, "change", function () {
+    						if (is_function(/*OnDepChange*/ ctx[14]({ dep: /*dep*/ ctx[0] }))) /*OnDepChange*/ ctx[14]({ dep: /*dep*/ ctx[0] }).apply(this, arguments);
+    					}),
+    					listen(input, "click", /*OnClickInput*/ ctx[13]),
+    					listen(input, "input", /*input_input_handler*/ ctx[17]),
+    					listen(button_1, "click", /*OnCollClick*/ ctx[15])
     				];
 
     				mounted = true;
     			}
     		},
-    		p(ctx, dirty) {
-    			if (dirty[0] & /*readonly*/ 8192) {
-    				input.readOnly = /*readonly*/ ctx[13];
+    		p(new_ctx, dirty) {
+    			ctx = new_ctx;
+
+    			if (dirty[0] & /*readonly*/ 2048) {
+    				input.readOnly = /*readonly*/ ctx[11];
     			}
 
-    			if (dirty[0] & /*dep*/ 2 && input.value !== /*dep*/ ctx[1].alias) {
-    				set_input_value(input, /*dep*/ ctx[1].alias);
+    			if (dirty[0] & /*dep*/ 1 && input.value !== /*dep*/ ctx[0].alias) {
+    				set_input_value(input, /*dep*/ ctx[0].alias);
     			}
 
-    			if (/*edited_display*/ ctx[3]) {
+    			if (/*edited_display*/ ctx[1]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
-    					if_block = create_if_block_7(ctx);
+    					if_block = create_if_block_5(ctx);
     					if_block.c();
     					if_block.m(button_1, null);
     				}
@@ -21784,14 +21654,14 @@ var app = (function () {
     				if_block = null;
     			}
 
-    			if (dirty[0] & /*owner*/ 16) {
-    				attr(button_1, "owner", /*owner*/ ctx[4]);
+    			if (dirty[0] & /*owner*/ 8) {
+    				attr(button_1, "owner", /*owner*/ ctx[3]);
     			}
     		},
     		d(detaching) {
     			if (detaching) detach(button_1);
     			if (if_block) if_block.d();
-    			/*button_1_binding*/ ctx[19](null);
+    			/*button_1_binding*/ ctx[18](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -21799,7 +21669,42 @@ var app = (function () {
     }
 
     // (6:4) {#if edited_display}
-    function create_if_block_7(ctx) {
+    function create_if_block_5(ctx) {
+    	let if_block_anchor;
+    	let if_block = /*operator*/ ctx[4].email === /*operator*/ ctx[4].abonent && create_if_block_6(ctx);
+
+    	return {
+    		c() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert(target, if_block_anchor, anchor);
+    		},
+    		p(ctx, dirty) {
+    			if (/*operator*/ ctx[4].email === /*operator*/ ctx[4].abonent) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block_6(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		d(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach(if_block_anchor);
+    		}
+    	};
+    }
+
+    // (7:4) {#if operator.email===operator.abonent}
+    function create_if_block_6(ctx) {
     	let svg;
     	let glyph;
     	let g;
@@ -21835,7 +21740,7 @@ var app = (function () {
 
     			if (!mounted) {
     				dispose = listen(svg, "click", function () {
-    					if (is_function(/*RemoveDep*/ ctx[10](/*dep*/ ctx[1].id))) /*RemoveDep*/ ctx[10](/*dep*/ ctx[1].id).apply(this, arguments);
+    					if (is_function(/*RemoveDep*/ ctx[8](/*dep*/ ctx[0].id))) /*RemoveDep*/ ctx[8](/*dep*/ ctx[0].id).apply(this, arguments);
     				});
 
     				mounted = true;
@@ -21852,16 +21757,21 @@ var app = (function () {
     	};
     }
 
-    // (20:4) {#if dep.admin}
-    function create_if_block_5(ctx) {
+    // (22:4) {#if dep.admin}
+    function create_if_block_3$1(ctx) {
     	let div;
     	let oper;
     	let updating_status;
+    	let updating_dep;
     	let updating_user;
     	let current;
 
     	function oper_status_binding(value) {
-    		/*oper_status_binding*/ ctx[20](value);
+    		/*oper_status_binding*/ ctx[19](value);
+    	}
+
+    	function oper_dep_binding(value) {
+    		/*oper_dep_binding*/ ctx[20](value);
     	}
 
     	function oper_user_binding(value) {
@@ -21869,25 +21779,28 @@ var app = (function () {
     	}
 
     	let oper_props = {
-    		id: /*dep*/ ctx[1].admin.id,
-    		operator: /*operator*/ ctx[5],
-    		dep: /*dep*/ ctx[1],
-    		abonent: /*abonent*/ ctx[6],
-    		update: /*update*/ ctx[8],
-    		readonly: /*readonly*/ ctx[13],
-    		rtc: /*rtc*/ ctx[7]
+    		id: /*dep*/ ctx[0].admin.id,
+    		operator: /*operator*/ ctx[4],
+    		abonent: /*abonent*/ ctx[5],
+    		update: /*update*/ ctx[6],
+    		readonly: /*readonly*/ ctx[11]
     	};
 
-    	if (/*status*/ ctx[0] !== void 0) {
-    		oper_props.status = /*status*/ ctx[0];
+    	if (/*status*/ ctx[2] !== void 0) {
+    		oper_props.status = /*status*/ ctx[2];
     	}
 
-    	if (/*dep*/ ctx[1].admin !== void 0) {
-    		oper_props.user = /*dep*/ ctx[1].admin;
+    	if (/*dep*/ ctx[0] !== void 0) {
+    		oper_props.dep = /*dep*/ ctx[0];
+    	}
+
+    	if (/*dep*/ ctx[0].admin !== void 0) {
+    		oper_props.user = /*dep*/ ctx[0].admin;
     	}
 
     	oper = new Oper({ props: oper_props });
     	binding_callbacks.push(() => bind$1(oper, 'status', oper_status_binding));
+    	binding_callbacks.push(() => bind$1(oper, 'dep', oper_dep_binding));
     	binding_callbacks.push(() => bind$1(oper, 'user', oper_user_binding));
 
     	return {
@@ -21902,23 +21815,27 @@ var app = (function () {
     		},
     		p(ctx, dirty) {
     			const oper_changes = {};
-    			if (dirty[0] & /*dep*/ 2) oper_changes.id = /*dep*/ ctx[1].admin.id;
-    			if (dirty[0] & /*operator*/ 32) oper_changes.operator = /*operator*/ ctx[5];
-    			if (dirty[0] & /*dep*/ 2) oper_changes.dep = /*dep*/ ctx[1];
-    			if (dirty[0] & /*abonent*/ 64) oper_changes.abonent = /*abonent*/ ctx[6];
-    			if (dirty[0] & /*update*/ 256) oper_changes.update = /*update*/ ctx[8];
-    			if (dirty[0] & /*readonly*/ 8192) oper_changes.readonly = /*readonly*/ ctx[13];
-    			if (dirty[0] & /*rtc*/ 128) oper_changes.rtc = /*rtc*/ ctx[7];
+    			if (dirty[0] & /*dep*/ 1) oper_changes.id = /*dep*/ ctx[0].admin.id;
+    			if (dirty[0] & /*operator*/ 16) oper_changes.operator = /*operator*/ ctx[4];
+    			if (dirty[0] & /*abonent*/ 32) oper_changes.abonent = /*abonent*/ ctx[5];
+    			if (dirty[0] & /*update*/ 64) oper_changes.update = /*update*/ ctx[6];
+    			if (dirty[0] & /*readonly*/ 2048) oper_changes.readonly = /*readonly*/ ctx[11];
 
-    			if (!updating_status && dirty[0] & /*status*/ 1) {
+    			if (!updating_status && dirty[0] & /*status*/ 4) {
     				updating_status = true;
-    				oper_changes.status = /*status*/ ctx[0];
+    				oper_changes.status = /*status*/ ctx[2];
     				add_flush_callback(() => updating_status = false);
     			}
 
-    			if (!updating_user && dirty[0] & /*dep*/ 2) {
+    			if (!updating_dep && dirty[0] & /*dep*/ 1) {
+    				updating_dep = true;
+    				oper_changes.dep = /*dep*/ ctx[0];
+    				add_flush_callback(() => updating_dep = false);
+    			}
+
+    			if (!updating_user && dirty[0] & /*dep*/ 1) {
     				updating_user = true;
-    				oper_changes.user = /*dep*/ ctx[1].admin;
+    				oper_changes.user = /*dep*/ ctx[0].admin;
     				add_flush_callback(() => updating_user = false);
     			}
 
@@ -21940,11 +21857,11 @@ var app = (function () {
     	};
     }
 
-    // (27:4) {#if dep.staff}
-    function create_if_block_3$1(ctx) {
+    // (29:4) {#if dep.staff}
+    function create_if_block_1$5(ctx) {
     	let each_1_anchor;
     	let current;
-    	let each_value = /*dep*/ ctx[1].staff;
+    	let each_value = /*dep*/ ctx[0].staff;
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -21972,8 +21889,8 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*operator, dep, abonent, update, readonly, rtc, status, owner*/ 8691) {
-    				each_value = /*dep*/ ctx[1].staff;
+    			if (dirty[0] & /*operator, abonent, update, readonly, status, dep, owner*/ 2173) {
+    				each_value = /*dep*/ ctx[0].staff;
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -22024,10 +21941,11 @@ var app = (function () {
     	};
     }
 
-    // (29:6) {#if user.email || (!user.email && owner===operator.email)}
-    function create_if_block_4$1(ctx) {
+    // (31:6) {#if user.email || (!user.email && owner===operator.email)}
+    function create_if_block_2$3(ctx) {
     	let oper;
     	let updating_status;
+    	let updating_dep;
     	let updating_user;
     	let t;
     	let br;
@@ -22037,30 +21955,37 @@ var app = (function () {
     		/*oper_status_binding_1*/ ctx[22](value);
     	}
 
+    	function oper_dep_binding_1(value) {
+    		/*oper_dep_binding_1*/ ctx[23](value);
+    	}
+
     	function oper_user_binding_1(value) {
-    		/*oper_user_binding_1*/ ctx[23](value, /*user*/ ctx[33], /*each_value*/ ctx[34], /*u*/ ctx[35]);
+    		/*oper_user_binding_1*/ ctx[24](value, /*user*/ ctx[34], /*each_value*/ ctx[35], /*u*/ ctx[36]);
     	}
 
     	let oper_props = {
-    		id: /*u*/ ctx[35],
-    		operator: /*operator*/ ctx[5],
-    		dep: /*dep*/ ctx[1],
-    		abonent: /*abonent*/ ctx[6],
-    		update: /*update*/ ctx[8],
-    		readonly: /*readonly*/ ctx[13],
-    		rtc: /*rtc*/ ctx[7]
+    		id: /*u*/ ctx[36],
+    		operator: /*operator*/ ctx[4],
+    		abonent: /*abonent*/ ctx[5],
+    		update: /*update*/ ctx[6],
+    		readonly: /*readonly*/ ctx[11]
     	};
 
-    	if (/*status*/ ctx[0] !== void 0) {
-    		oper_props.status = /*status*/ ctx[0];
+    	if (/*status*/ ctx[2] !== void 0) {
+    		oper_props.status = /*status*/ ctx[2];
     	}
 
-    	if (/*user*/ ctx[33] !== void 0) {
-    		oper_props.user = /*user*/ ctx[33];
+    	if (/*dep*/ ctx[0] !== void 0) {
+    		oper_props.dep = /*dep*/ ctx[0];
+    	}
+
+    	if (/*user*/ ctx[34] !== void 0) {
+    		oper_props.user = /*user*/ ctx[34];
     	}
 
     	oper = new Oper({ props: oper_props });
     	binding_callbacks.push(() => bind$1(oper, 'status', oper_status_binding_1));
+    	binding_callbacks.push(() => bind$1(oper, 'dep', oper_dep_binding_1));
     	binding_callbacks.push(() => bind$1(oper, 'user', oper_user_binding_1));
 
     	return {
@@ -22078,22 +22003,26 @@ var app = (function () {
     		p(new_ctx, dirty) {
     			ctx = new_ctx;
     			const oper_changes = {};
-    			if (dirty[0] & /*operator*/ 32) oper_changes.operator = /*operator*/ ctx[5];
-    			if (dirty[0] & /*dep*/ 2) oper_changes.dep = /*dep*/ ctx[1];
-    			if (dirty[0] & /*abonent*/ 64) oper_changes.abonent = /*abonent*/ ctx[6];
-    			if (dirty[0] & /*update*/ 256) oper_changes.update = /*update*/ ctx[8];
-    			if (dirty[0] & /*readonly*/ 8192) oper_changes.readonly = /*readonly*/ ctx[13];
-    			if (dirty[0] & /*rtc*/ 128) oper_changes.rtc = /*rtc*/ ctx[7];
+    			if (dirty[0] & /*operator*/ 16) oper_changes.operator = /*operator*/ ctx[4];
+    			if (dirty[0] & /*abonent*/ 32) oper_changes.abonent = /*abonent*/ ctx[5];
+    			if (dirty[0] & /*update*/ 64) oper_changes.update = /*update*/ ctx[6];
+    			if (dirty[0] & /*readonly*/ 2048) oper_changes.readonly = /*readonly*/ ctx[11];
 
-    			if (!updating_status && dirty[0] & /*status*/ 1) {
+    			if (!updating_status && dirty[0] & /*status*/ 4) {
     				updating_status = true;
-    				oper_changes.status = /*status*/ ctx[0];
+    				oper_changes.status = /*status*/ ctx[2];
     				add_flush_callback(() => updating_status = false);
     			}
 
-    			if (!updating_user && dirty[0] & /*dep*/ 2) {
+    			if (!updating_dep && dirty[0] & /*dep*/ 1) {
+    				updating_dep = true;
+    				oper_changes.dep = /*dep*/ ctx[0];
+    				add_flush_callback(() => updating_dep = false);
+    			}
+
+    			if (!updating_user && dirty[0] & /*dep*/ 1) {
     				updating_user = true;
-    				oper_changes.user = /*user*/ ctx[33];
+    				oper_changes.user = /*user*/ ctx[34];
     				add_flush_callback(() => updating_user = false);
     			}
 
@@ -22116,11 +22045,11 @@ var app = (function () {
     	};
     }
 
-    // (28:4) {#each dep.staff as user, u}
+    // (30:4) {#each dep.staff as user, u}
     function create_each_block$2(ctx) {
     	let if_block_anchor;
     	let current;
-    	let if_block = (/*user*/ ctx[33].email || !/*user*/ ctx[33].email && /*owner*/ ctx[4] === /*operator*/ ctx[5].email) && create_if_block_4$1(ctx);
+    	let if_block = (/*user*/ ctx[34].email || !/*user*/ ctx[34].email && /*owner*/ ctx[3] === /*operator*/ ctx[4].email) && create_if_block_2$3(ctx);
 
     	return {
     		c() {
@@ -22133,15 +22062,15 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (/*user*/ ctx[33].email || !/*user*/ ctx[33].email && /*owner*/ ctx[4] === /*operator*/ ctx[5].email) {
+    			if (/*user*/ ctx[34].email || !/*user*/ ctx[34].email && /*owner*/ ctx[3] === /*operator*/ ctx[4].email) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
 
-    					if (dirty[0] & /*dep, owner, operator*/ 50) {
+    					if (dirty[0] & /*dep, owner, operator*/ 25) {
     						transition_in(if_block, 1);
     					}
     				} else {
-    					if_block = create_if_block_4$1(ctx);
+    					if_block = create_if_block_2$3(ctx);
     					if_block.c();
     					transition_in(if_block, 1);
     					if_block.m(if_block_anchor.parentNode, if_block_anchor);
@@ -22172,78 +22101,9 @@ var app = (function () {
     	};
     }
 
-    // (38:4) {#if edited_display}
+    // (39:4) {#if edited_display}
     function create_if_block$7(ctx) {
-    	let if_block_anchor;
-    	let if_block = /*tarif*/ ctx[2].deps && create_if_block_1$5(ctx);
-
-    	return {
-    		c() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert(target, if_block_anchor, anchor);
-    		},
-    		p(ctx, dirty) {
-    			if (/*tarif*/ ctx[2].deps) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block_1$5(ctx);
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		d(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach(if_block_anchor);
-    		}
-    	};
-    }
-
-    // (39:4) {#if tarif.deps}
-    function create_if_block_1$5(ctx) {
-    	let if_block_anchor;
-    	let if_block = /*isAddOper*/ ctx[12] && create_if_block_2$3(ctx);
-
-    	return {
-    		c() {
-    			if (if_block) if_block.c();
-    			if_block_anchor = empty();
-    		},
-    		m(target, anchor) {
-    			if (if_block) if_block.m(target, anchor);
-    			insert(target, if_block_anchor, anchor);
-    		},
-    		p(ctx, dirty) {
-    			if (/*isAddOper*/ ctx[12]) {
-    				if (if_block) {
-    					if_block.p(ctx, dirty);
-    				} else {
-    					if_block = create_if_block_2$3(ctx);
-    					if_block.c();
-    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
-    				}
-    			} else if (if_block) {
-    				if_block.d(1);
-    				if_block = null;
-    			}
-    		},
-    		d(detaching) {
-    			if (if_block) if_block.d(detaching);
-    			if (detaching) detach(if_block_anchor);
-    		}
-    	};
-    }
-
-    // (40:4) {#if isAddOper}
-    function create_if_block_2$3(ctx) {
+    	let div;
     	let svg;
     	let title;
     	let t;
@@ -22254,6 +22114,7 @@ var app = (function () {
 
     	return {
     		c() {
+    			div = element("div");
     			svg = svg_element("svg");
     			title = svg_element("title");
     			t = text("add-user");
@@ -22265,27 +22126,32 @@ var app = (function () {
     			attr(path, "d", "M134.1 761.6c-14.5 0-26.39999999999999-11.899999999999977-26.39999999999999-26.399999999999977v-523.5c0-14.500000000000057 11.899999999999991-26.400000000000034 26.39999999999999-26.400000000000034h639.8c14.5 0 26.399999999999977 11.899999999999977 26.399999999999977 26.399999999999977v239.40000000000003c15.800000000000068 2.3999999999999773 30.90000000000009 6.2999999999999545 45.40000000000009 11.899999999999977v-288.7c0-14.5-11.900000000000091-26.400000000000006-26.40000000000009-26.400000000000006h-730.4c-14.499999999999972 0-26.399999999999977 11.900000000000006-26.399999999999977 26.400000000000006v598.7c0 14.399999999999977 11.900000000000006 26.299999999999955 26.400000000000006 26.299999999999955h479.30000000000007c-7.400000000000091-11.899999999999977-13.700000000000045-24.59999999999991-18.700000000000045-37.69999999999993h-415.4z m164.70000000000002-245h-19.400000000000034c-41.69999999999999 0-75.39999999999998 33.799999999999955-75.39999999999998 75.39999999999998v21c0 13.100000000000023 10.699999999999989 23.799999999999955 23.80000000000001 23.799999999999955h251.7c13.100000000000023 0 23.899999999999977-10.699999999999932 23.899999999999977-23.799999999999955v-21c0-41.60000000000002-33.799999999999955-75.39999999999998-75.39999999999998-75.39999999999998h-19.600000000000023c-10.099999999999966 0-18.299999999999955-8.100000000000023-18.299999999999955-18.30000000000001 0-3.8000000000000114 1.5-7.300000000000011 4.199999999999989-10 11.300000000000011-11 20.899999999999977-25.80000000000001 27.69999999999999-41.80000000000001 1.5 1.1000000000000227 2.8999999999999773 1.8000000000000114 4.5 1.8000000000000114 10.899999999999977 0 23.80000000000001-24.19999999999999 23.80000000000001-40.80000000000001 0-16.399999999999977-1.5-29.80000000000001-12.300000000000011-29.80000000000001-1.3000000000000114 0-2.8000000000000114 0.30000000000001137-4 0.6000000000000227-0.8000000000000114-44.69999999999999-12.100000000000023-100.40000000000003-80.30000000000001-100.40000000000003-71.19999999999999 0-79.5 55.60000000000002-80.19999999999999 100.20000000000005-1-0.20000000000004547-2-0.4000000000000341-2.8999999999999773-0.4000000000000341-11 0-12.5 13.400000000000034-12.5 29.80000000000001 0 16.5 12.899999999999977 40.80000000000001 23.799999999999955 40.80000000000001 1.3000000000000114 0 2.6000000000000227-0.4000000000000341 3.8000000000000114-1.1000000000000227 6.800000000000011 15.699999999999989 16.19999999999999 30.30000000000001 27.30000000000001 41 2.8000000000000114 2.6000000000000227 4.199999999999989 6.300000000000011 4.199999999999989 10-0.19999999999998863 10.199999999999989-8.399999999999977 18.400000000000034-18.399999999999977 18.400000000000034z m381.2-189.3c0-9.699999999999989-7.899999999999977-17.80000000000001-17.799999999999955-17.80000000000001h-211.00000000000006c6 13.600000000000023 10.300000000000011 30.100000000000023 12.199999999999989 50.60000000000002 4.600000000000023 2.8999999999999773 7.900000000000034 7.399999999999977 10.700000000000045 12.799999999999955h188.10000000000002c9.699999999999932 0 17.799999999999955-7.899999999999977 17.799999999999955-17.599999999999966v-28z m-2.1000000000000227 151.09999999999997c1.1000000000000227-2.3999999999999773 2.1000000000000227-5 2.1000000000000227-7.699999999999989v-28c0-9.699999999999989-7.899999999999977-17.80000000000001-17.799999999999955-17.80000000000001h-183.80000000000007c-5 18.900000000000034-17.099999999999966 38.700000000000045-34.299999999999955 43.900000000000034l-1.6000000000000227 2.8000000000000114v16.69999999999999h213.20000000000005c7.2999999999999545-3.6999999999999886 14.699999999999932-7 22.199999999999932-9.900000000000034z m-125 125.10000000000002c8.899999999999977-23.299999999999955 21.5-44.5 37.39999999999998-63.200000000000045h-71.69999999999993c9.399999999999977 15 15.100000000000023 32.700000000000045 15.100000000000023 51.60000000000002v11.5h19.199999999999932v0.10000000000002274z m332.20000000000005-55.39999999999998c-30.700000000000045-31.100000000000023-73.10000000000002-50.60000000000002-119.70000000000005-52.400000000000034h-6.2999999999999545c-49.700000000000045 0-94 19.900000000000034-126.5 52.400000000000034-32.10000000000002 32.10000000000002-52.39999999999998 76.79999999999995-52.39999999999998 126 0 25.299999999999955 5.399999999999977 49.299999999999955 14.899999999999977 71 9 20.699999999999932 21.699999999999932 39.69999999999993 37.5 55.60000000000002 32.5 32.09999999999991 76.79999999999995 52 126.5 52 98.39999999999998 0 178.39999999999998-80 178.39999999999998-178.4000000000001 0-49.39999999999998-19.899999999999977-94.09999999999991-52.39999999999998-126.19999999999993z m-41.60000000000002 152.19999999999993h-58.700000000000045v58.30000000000007h-52v-58.30000000000007h-58.299999999999955v-52.39999999999998h58.299999999999955v-58.299999999999955h52v58.299999999999955h58.700000000000045v52.39999999999998z");
     			attr(path, "transform", "scale(.04)");
     			set_style(path, "fill", "grey");
-    			attr(svg, "class", "add_oper");
-    			attr(svg, "height", "40");
-    			attr(svg, "width", "40");
     			set_style(svg, "position", "relative");
     			set_style(svg, "left", "45%");
+    			set_style(svg, "height", "40, width=40");
+    			attr(div, "class", "add_oper");
+    			set_style(div, "display", /*isAddOper*/ ctx[10]);
     		},
     		m(target, anchor) {
-    			insert(target, svg, anchor);
+    			insert(target, div, anchor);
+    			append(div, svg);
     			append(svg, title);
     			append(title, t);
     			append(svg, glyph);
     			append(svg, path);
 
     			if (!mounted) {
-    				dispose = listen(svg, "click", /*AddOper*/ ctx[9]);
+    				dispose = listen(div, "click", /*AddOper*/ ctx[7]);
     				mounted = true;
     			}
     		},
-    		p: noop,
+    		p(ctx, dirty) {
+    			if (dirty[0] & /*isAddOper*/ 1024) {
+    				set_style(div, "display", /*isAddOper*/ ctx[10]);
+    			}
+    		},
     		d(detaching) {
-    			if (detaching) detach(svg);
+    			if (detaching) detach(div);
     			mounted = false;
     			dispose();
     		}
@@ -22300,10 +22166,10 @@ var app = (function () {
     	let t2;
     	let t3;
     	let current;
-    	let if_block0 = /*dep*/ ctx[1].id !== '0' && create_if_block_6(ctx);
-    	let if_block1 = /*dep*/ ctx[1].admin && create_if_block_5(ctx);
-    	let if_block2 = /*dep*/ ctx[1].staff && create_if_block_3$1(ctx);
-    	let if_block3 = /*edited_display*/ ctx[3] && create_if_block$7(ctx);
+    	let if_block0 = /*dep*/ ctx[0].id !== '0' && create_if_block_4$1(ctx);
+    	let if_block1 = /*dep*/ ctx[0].admin && create_if_block_3$1(ctx);
+    	let if_block2 = /*dep*/ ctx[0].staff && create_if_block_1$5(ctx);
+    	let if_block3 = /*edited_display*/ ctx[1] && create_if_block$7(ctx);
 
     	return {
     		c() {
@@ -22318,6 +22184,7 @@ var app = (function () {
     			t3 = space();
     			if (if_block3) if_block3.c();
     			attr(div, "class", "content svelte-1fx3n49");
+    			set_style(div, "max-height", "0px");
     		},
     		m(target, anchor) {
     			if (if_block0) if_block0.m(target, anchor);
@@ -22330,15 +22197,15 @@ var app = (function () {
     			if (if_block2) if_block2.m(div, null);
     			append(div, t3);
     			if (if_block3) if_block3.m(div, null);
-    			/*div_binding*/ ctx[24](div);
+    			/*div_binding*/ ctx[25](div);
     			current = true;
     		},
     		p(ctx, dirty) {
-    			if (/*dep*/ ctx[1].id !== '0') {
+    			if (/*dep*/ ctx[0].id !== '0') {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_6(ctx);
+    					if_block0 = create_if_block_4$1(ctx);
     					if_block0.c();
     					if_block0.m(t0.parentNode, t0);
     				}
@@ -22347,15 +22214,15 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (/*dep*/ ctx[1].admin) {
+    			if (/*dep*/ ctx[0].admin) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
 
-    					if (dirty[0] & /*dep*/ 2) {
+    					if (dirty[0] & /*dep*/ 1) {
     						transition_in(if_block1, 1);
     					}
     				} else {
-    					if_block1 = create_if_block_5(ctx);
+    					if_block1 = create_if_block_3$1(ctx);
     					if_block1.c();
     					transition_in(if_block1, 1);
     					if_block1.m(div, t2);
@@ -22370,15 +22237,15 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (/*dep*/ ctx[1].staff) {
+    			if (/*dep*/ ctx[0].staff) {
     				if (if_block2) {
     					if_block2.p(ctx, dirty);
 
-    					if (dirty[0] & /*dep*/ 2) {
+    					if (dirty[0] & /*dep*/ 1) {
     						transition_in(if_block2, 1);
     					}
     				} else {
-    					if_block2 = create_if_block_3$1(ctx);
+    					if_block2 = create_if_block_1$5(ctx);
     					if_block2.c();
     					transition_in(if_block2, 1);
     					if_block2.m(div, t3);
@@ -22393,7 +22260,7 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (/*edited_display*/ ctx[3]) {
+    			if (/*edited_display*/ ctx[1]) {
     				if (if_block3) {
     					if_block3.p(ctx, dirty);
     				} else {
@@ -22424,32 +22291,32 @@ var app = (function () {
     			if (if_block1) if_block1.d();
     			if (if_block2) if_block2.d();
     			if (if_block3) if_block3.d();
-    			/*div_binding*/ ctx[24](null);
+    			/*div_binding*/ ctx[25](null);
     		}
     	};
     }
 
     function instance$i($$self, $$props, $$invalidate) {
+    	let $signal;
+    	component_subscribe($$self, signal, $$value => $$invalidate(28, $signal = $$value));
     	let { status } = $$props;
     	let { dep } = $$props;
     	let { owner } = $$props;
     	let { operator } = $$props;
     	let { abonent } = $$props;
     	let { tarif } = $$props;
-    	let { rtc } = $$props;
     	let button;
-    	let isAddOper = false;
-    	let signalch = false;
-
-    	signal.subscribe(data => {
-    		if (data) {
-    			signalch = data;
-    		}
-    	});
+    	let isAddOper = "none";
+    	const signalch = $signal;
 
     	(async () => {
-    		$$invalidate(2, tarif.params = (await (await fetch('/server/kolmit/tarifs/tarifs.json?')).json())[tarif.name], tarif);
-    		if (tarif.params && dep.staff) $$invalidate(2, tarif.deps = tarif.params['Total Depts']['en'].split('up to ')[1] >= dep.staff.length || tarif.params['Total Depts']['en'] === 'unlim', tarif);
+    		try {
+    			$$invalidate(16, tarif.params = (await (await fetch('../assets/tarifs/tarifs.json')).json())[tarif.name], tarif);
+    		} catch(ex) {
+    			console.log(ex);
+    		}
+
+    		if (tarif && tarif.params && dep.staff) $$invalidate(16, tarif.deps = tarif.params['Total Depts']['en'].split('up to ')[1] >= dep.staff.length || tarif.params['Total Depts']['en'] === 'unlim', tarif);
     	})();
 
     	let readonly = false;
@@ -22457,7 +22324,7 @@ var app = (function () {
 
     	onMount(() => {
     		if (dep.id === '0') {
-    			$$invalidate(14, content.style.maxHeight = 200 + content.scrollHeight + "px", content);
+    			$$invalidate(12, content.style.maxHeight = 200 + content.scrollHeight + "px", content);
     		}
 
     		let ar = document.getElementsByClassName('add_oper');
@@ -22468,18 +22335,14 @@ var app = (function () {
     				OnCollClick(new Event('expand'));
     			}
     		}
-
-    		if (!abonent && dep.id === '0' || !abonent && !dep.admin || abonent && operator.email === dep.admin.email) {
-    			$$invalidate(12, isAddOper = true);
-    		}
     	});
 
     	let { update } = $$props;
     	let { edited_display } = $$props;
 
     	const us_edit = editable.subscribe(data => {
-    		$$invalidate(3, edited_display = data);
-    		$$invalidate(13, readonly = !edited_display);
+    		$$invalidate(1, edited_display = data);
+    		$$invalidate(11, readonly = !edited_display);
     	});
 
     	let lang = 'en';
@@ -22519,12 +22382,10 @@ var app = (function () {
     	}
 
     	async function AddOper(ev) {
-    		$$invalidate(14, content.style.maxHeight = 200 + content.scrollHeight + "px", content);
+    		$$invalidate(12, content.style.maxHeight = 100 + content.scrollHeight + "px", content);
     		await HandleOper("add", abonent);
     		update();
     	}
-
-    	let { RemoveDep } = $$props;
 
     	function HandleOper(func, abonent, resolve) {
     		let par = {};
@@ -22543,77 +22404,98 @@ var app = (function () {
     			});
     	}
 
+    	let { RemoveDep } = $$props;
+
     	function OnCollClick(ev) {
-    		if (content) if (content.style.maxHeight && ev.type !== 'expand') {
-    			$$invalidate(14, content.style.maxHeight = null, content);
+    		if (content && ev.type !== 'expand') if (content.style.maxHeight == '0px') {
+    			$$invalidate(12, content.style.maxHeight = content.scrollHeight + "px", content);
     		} else {
-    			$$invalidate(14, content.style.maxHeight = content.scrollHeight + "px", content);
+    			$$invalidate(12, content.style.maxHeight = '0px', content);
     		}
+
+    		console.log(content.style.maxHeight);
     	}
 
     	function input_input_handler() {
     		dep.alias = this.value;
-    		$$invalidate(1, dep);
+    		$$invalidate(0, dep);
     	}
 
     	function button_1_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			button = $$value;
-    			$$invalidate(11, button);
+    			$$invalidate(9, button);
     		});
     	}
 
     	function oper_status_binding(value) {
     		status = value;
-    		$$invalidate(0, status);
+    		$$invalidate(2, status);
+    	}
+
+    	function oper_dep_binding(value) {
+    		dep = value;
+    		$$invalidate(0, dep);
     	}
 
     	function oper_user_binding(value) {
     		if ($$self.$$.not_equal(dep.admin, value)) {
     			dep.admin = value;
-    			$$invalidate(1, dep);
+    			$$invalidate(0, dep);
     		}
     	}
 
     	function oper_status_binding_1(value) {
     		status = value;
-    		$$invalidate(0, status);
+    		$$invalidate(2, status);
+    	}
+
+    	function oper_dep_binding_1(value) {
+    		dep = value;
+    		$$invalidate(0, dep);
     	}
 
     	function oper_user_binding_1(value, user, each_value, u) {
     		each_value[u] = value;
-    		$$invalidate(1, dep);
+    		$$invalidate(0, dep);
     	}
 
     	function div_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			content = $$value;
-    			$$invalidate(14, content);
+    			$$invalidate(12, content);
     		});
     	}
 
     	$$self.$$set = $$props => {
-    		if ('status' in $$props) $$invalidate(0, status = $$props.status);
-    		if ('dep' in $$props) $$invalidate(1, dep = $$props.dep);
-    		if ('owner' in $$props) $$invalidate(4, owner = $$props.owner);
-    		if ('operator' in $$props) $$invalidate(5, operator = $$props.operator);
-    		if ('abonent' in $$props) $$invalidate(6, abonent = $$props.abonent);
-    		if ('tarif' in $$props) $$invalidate(2, tarif = $$props.tarif);
-    		if ('rtc' in $$props) $$invalidate(7, rtc = $$props.rtc);
-    		if ('update' in $$props) $$invalidate(8, update = $$props.update);
-    		if ('edited_display' in $$props) $$invalidate(3, edited_display = $$props.edited_display);
-    		if ('RemoveDep' in $$props) $$invalidate(10, RemoveDep = $$props.RemoveDep);
+    		if ('status' in $$props) $$invalidate(2, status = $$props.status);
+    		if ('dep' in $$props) $$invalidate(0, dep = $$props.dep);
+    		if ('owner' in $$props) $$invalidate(3, owner = $$props.owner);
+    		if ('operator' in $$props) $$invalidate(4, operator = $$props.operator);
+    		if ('abonent' in $$props) $$invalidate(5, abonent = $$props.abonent);
+    		if ('tarif' in $$props) $$invalidate(16, tarif = $$props.tarif);
+    		if ('update' in $$props) $$invalidate(6, update = $$props.update);
+    		if ('edited_display' in $$props) $$invalidate(1, edited_display = $$props.edited_display);
+    		if ('RemoveDep' in $$props) $$invalidate(8, RemoveDep = $$props.RemoveDep);
+    	};
+
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty[0] & /*edited_display, operator, dep*/ 19) {
+    			if (edited_display) {
+    				if (!operator.abonent && dep.id === '0' || !operator.abonent && !dep.admin || operator.abonent && operator.email === dep.admin.email) {
+    					$$invalidate(10, isAddOper = 'block');
+    				}
+    			}
+    		}
     	};
 
     	return [
-    		status,
     		dep,
-    		tarif,
     		edited_display,
+    		status,
     		owner,
     		operator,
     		abonent,
-    		rtc,
     		update,
     		AddOper,
     		RemoveDep,
@@ -22624,17 +22506,20 @@ var app = (function () {
     		OnClickInput,
     		OnDepChange,
     		OnCollClick,
+    		tarif,
     		input_input_handler,
     		button_1_binding,
     		oper_status_binding,
+    		oper_dep_binding,
     		oper_user_binding,
     		oper_status_binding_1,
+    		oper_dep_binding_1,
     		oper_user_binding_1,
     		div_binding
     	];
     }
 
-    class Dep extends SvelteComponent {
+    class Dep_1 extends SvelteComponent {
     	constructor(options) {
     		super();
 
@@ -22645,17 +22530,16 @@ var app = (function () {
     			create_fragment$i,
     			safe_not_equal,
     			{
-    				status: 0,
-    				dep: 1,
-    				owner: 4,
-    				operator: 5,
-    				abonent: 6,
-    				tarif: 2,
-    				rtc: 7,
-    				update: 8,
-    				edited_display: 3,
-    				AddOper: 9,
-    				RemoveDep: 10
+    				status: 2,
+    				dep: 0,
+    				owner: 3,
+    				operator: 4,
+    				abonent: 5,
+    				tarif: 16,
+    				update: 6,
+    				edited_display: 1,
+    				AddOper: 7,
+    				RemoveDep: 8
     			},
     			null,
     			[-1, -1]
@@ -22663,7 +22547,7 @@ var app = (function () {
     	}
 
     	get AddOper() {
-    		return this.$$.ctx[9];
+    		return this.$$.ctx[7];
     	}
     }
 
@@ -22671,8 +22555,8 @@ var app = (function () {
 
     function get_each_context$1(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[11] = list[i];
-    	child_ctx[23] = i;
+    	child_ctx[10] = list[i];
+    	child_ctx[22] = i;
     	return child_ctx;
     }
 
@@ -22686,33 +22570,33 @@ var app = (function () {
     	let current;
 
     	function dep_1_tarif_binding(value) {
-    		/*dep_1_tarif_binding*/ ctx[12](value);
+    		/*dep_1_tarif_binding*/ ctx[11](value);
     	}
 
     	function dep_1_edited_display_binding(value) {
-    		/*dep_1_edited_display_binding*/ ctx[13](value);
+    		/*dep_1_edited_display_binding*/ ctx[12](value);
     	}
 
     	let dep_1_props = {
-    		dep: /*dep*/ ctx[11],
-    		status: /*status*/ ctx[3],
-    		rtc: /*rtc*/ ctx[8],
-    		owner: /*dep*/ ctx[11].admin.email,
+    		dep: /*dep*/ ctx[10],
+    		status,
+    		rtc: /*rtc*/ ctx[7],
+    		owner: /*dep*/ ctx[10].admin.email,
     		operator: /*operator*/ ctx[0],
     		abonent: /*abonent*/ ctx[2],
-    		update: /*GetUsers*/ ctx[4],
-    		RemoveDep: /*RemoveDep*/ ctx[10]
+    		update: /*GetUsers*/ ctx[3],
+    		RemoveDep: /*RemoveDep*/ ctx[9]
     	};
 
     	if (/*tarif*/ ctx[1] !== void 0) {
     		dep_1_props.tarif = /*tarif*/ ctx[1];
     	}
 
-    	if (/*edited_display*/ ctx[6] !== void 0) {
-    		dep_1_props.edited_display = /*edited_display*/ ctx[6];
+    	if (/*edited_display*/ ctx[5] !== void 0) {
+    		dep_1_props.edited_display = /*edited_display*/ ctx[5];
     	}
 
-    	dep_1 = new Dep({ props: dep_1_props });
+    	dep_1 = new Dep_1({ props: dep_1_props });
     	binding_callbacks.push(() => bind$1(dep_1, 'tarif', dep_1_tarif_binding));
     	binding_callbacks.push(() => bind$1(dep_1, 'edited_display', dep_1_edited_display_binding));
 
@@ -22731,9 +22615,8 @@ var app = (function () {
     		},
     		p(ctx, dirty) {
     			const dep_1_changes = {};
-    			if (dirty & /*cc_data*/ 32) dep_1_changes.dep = /*dep*/ ctx[11];
-    			if (dirty & /*status*/ 8) dep_1_changes.status = /*status*/ ctx[3];
-    			if (dirty & /*cc_data*/ 32) dep_1_changes.owner = /*dep*/ ctx[11].admin.email;
+    			if (dirty & /*cc_data*/ 16) dep_1_changes.dep = /*dep*/ ctx[10];
+    			if (dirty & /*cc_data*/ 16) dep_1_changes.owner = /*dep*/ ctx[10].admin.email;
     			if (dirty & /*operator*/ 1) dep_1_changes.operator = /*operator*/ ctx[0];
     			if (dirty & /*abonent*/ 4) dep_1_changes.abonent = /*abonent*/ ctx[2];
 
@@ -22743,9 +22626,9 @@ var app = (function () {
     				add_flush_callback(() => updating_tarif = false);
     			}
 
-    			if (!updating_edited_display && dirty & /*edited_display*/ 64) {
+    			if (!updating_edited_display && dirty & /*edited_display*/ 32) {
     				updating_edited_display = true;
-    				dep_1_changes.edited_display = /*edited_display*/ ctx[6];
+    				dep_1_changes.edited_display = /*edited_display*/ ctx[5];
     				add_flush_callback(() => updating_edited_display = false);
     			}
 
@@ -22771,7 +22654,7 @@ var app = (function () {
     // (8:2) {#if edited_display }
     function create_if_block$6(ctx) {
     	let if_block_anchor;
-    	let if_block = /*tarif*/ ctx[1].deps && /*addDep*/ ctx[7] && create_if_block_1$4(ctx);
+    	let if_block = /*addDep*/ ctx[6] && create_if_block_1$4(ctx);
 
     	return {
     		c() {
@@ -22783,7 +22666,7 @@ var app = (function () {
     			insert(target, if_block_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (/*tarif*/ ctx[1].deps && /*addDep*/ ctx[7]) {
+    			if (/*addDep*/ ctx[6]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -22803,7 +22686,7 @@ var app = (function () {
     	};
     }
 
-    // (9:4) {#if tarif.deps && addDep}
+    // (9:4) {#if addDep}
     function create_if_block_1$4(ctx) {
     	let svg;
     	let title;
@@ -22817,7 +22700,7 @@ var app = (function () {
     		c() {
     			svg = svg_element("svg");
     			title = svg_element("title");
-    			t = text("plus-circle");
+    			t = text("add dep");
     			glyph = svg_element("glyph");
     			path = svg_element("path");
     			attr(title, "class", "svelte-wc9qks");
@@ -22842,7 +22725,7 @@ var app = (function () {
     			append(svg, path);
 
     			if (!mounted) {
-    				dispose = listen(svg, "click", /*AddDep*/ ctx[9]);
+    				dispose = listen(svg, "click", /*AddDep*/ ctx[8]);
     				mounted = true;
     			}
     		},
@@ -22861,7 +22744,7 @@ var app = (function () {
     	let t1;
     	let div0;
     	let current;
-    	let each_value = /*cc_data*/ ctx[5];
+    	let each_value = /*cc_data*/ ctx[4];
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -22872,7 +22755,7 @@ var app = (function () {
     		each_blocks[i] = null;
     	});
 
-    	let if_block = /*edited_display*/ ctx[6] && create_if_block$6(ctx);
+    	let if_block = /*edited_display*/ ctx[5] && create_if_block$6(ctx);
 
     	return {
     		c() {
@@ -22906,8 +22789,8 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*cc_data, status, rtc, operator, abonent, GetUsers, RemoveDep, tarif, edited_display*/ 1407) {
-    				each_value = /*cc_data*/ ctx[5];
+    			if (dirty & /*cc_data, status, rtc, operator, abonent, GetUsers, RemoveDep, tarif, edited_display*/ 703) {
+    				each_value = /*cc_data*/ ctx[4];
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -22933,7 +22816,7 @@ var app = (function () {
     				check_outros();
     			}
 
-    			if (/*edited_display*/ ctx[6]) {
+    			if (/*edited_display*/ ctx[5]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -22973,34 +22856,23 @@ var app = (function () {
     }
 
     function instance$h($$self, $$props, $$invalidate) {
+    	let $langs;
+    	let $signal;
+    	let $pswd;
+    	component_subscribe($$self, langs, $$value => $$invalidate(15, $langs = $$value));
+    	component_subscribe($$self, signal, $$value => $$invalidate(16, $signal = $$value));
+    	component_subscribe($$self, pswd, $$value => $$invalidate(17, $pswd = $$value));
     	let { operator } = $$props;
     	let { abonent } = $$props;
     	let rtc = window.operator;
-    	let { status } = $$props;
     	let cnt;
     	let dep = { title: '' };
     	new URL(window.location.href);
-    	let psw;
-
-    	pswd.subscribe(data => {
-    		psw = data;
-    	});
-
-    	let signalch = false;
-
-    	const us_signal = signal.subscribe(data => {
-    		if (data) {
-    			signalch = data;
-    		}
-    	});
-
+    	let psw = $pswd;
+    	let signalch = $signal;
     	let lang = 'en';
-
-    	langs.subscribe(data => {
-    		lang = data;
-    	});
-
-    	onDestroy(us_signal);
+    	lang = $langs;
+    	onDestroy();
     	let edited_display = false;
     	let addDep = false;
     	let { tarif } = $$props;
@@ -23016,7 +22888,7 @@ var app = (function () {
     		par.uid = rtc.uid;
     		par.psw = psw;
 
-    		$$invalidate(5, cc_data = (await new Promise((resolve, reject) => {
+    		$$invalidate(4, cc_data = (await new Promise((resolve, reject) => {
     				signalch.SendMessage(par, data => {
     					resolve(data);
     				});
@@ -23041,7 +22913,7 @@ var app = (function () {
     					});
     				}))['dep'];
 
-    			$$invalidate(5, cc_data[res.id] = res, cc_data);
+    			$$invalidate(4, cc_data[res.id] = res, cc_data);
     		}
     	}
 
@@ -23060,7 +22932,7 @@ var app = (function () {
     			par.uid = rtc.uid;
     			par.psw = psw;
 
-    			$$invalidate(5, cc_data = (await new Promise((resolve, reject) => {
+    			$$invalidate(4, cc_data = (await new Promise((resolve, reject) => {
     					signalch.SendMessage(par, data => {
     						resolve(data);
     					});
@@ -23075,23 +22947,34 @@ var app = (function () {
 
     	function dep_1_edited_display_binding(value) {
     		edited_display = value;
-    		$$invalidate(6, edited_display);
+    		$$invalidate(5, edited_display);
     	}
 
     	$$self.$$set = $$props => {
     		if ('operator' in $$props) $$invalidate(0, operator = $$props.operator);
     		if ('abonent' in $$props) $$invalidate(2, abonent = $$props.abonent);
-    		if ('status' in $$props) $$invalidate(3, status = $$props.status);
     		if ('tarif' in $$props) $$invalidate(1, tarif = $$props.tarif);
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*cc_data, operator*/ 33) {
+    		if ($$self.$$.dirty & /*cc_data, operator*/ 17) {
+    			if (cc_data && cc_data.length > 0) {
+    				lodash.forEach(cc_data, (dep, k) => {
+    					if (dep.admin && dep.admin.email === operator.email) {
+    						$$invalidate(0, operator.role = dep.admin.role, operator);
+    					}
+
+    					cnt = k;
+    				});
+    			}
+    		}
+
+    		if ($$self.$$.dirty & /*cc_data, operator*/ 17) {
     			if (cc_data && cc_data.length > 0) {
     				lodash.forEach(cc_data, (dep, k) => {
     					if (dep.admin && dep.admin.email === operator.email) {
     						// if(!abonent) 
-    						$$invalidate(7, addDep = true);
+    						$$invalidate(6, addDep = true);
 
     						$$invalidate(0, operator.role = "admin", operator);
     					}
@@ -23102,13 +22985,12 @@ var app = (function () {
     		}
     	};
 
-    	if (rtc) GetUsers();
+    	if (signalch) GetUsers();
 
     	return [
     		operator,
     		tarif,
     		abonent,
-    		status,
     		GetUsers,
     		cc_data,
     		edited_display,
@@ -23129,14 +23011,13 @@ var app = (function () {
     		init(this, options, instance$h, create_fragment$h, safe_not_equal, {
     			operator: 0,
     			abonent: 2,
-    			status: 3,
     			tarif: 1,
-    			GetUsers: 4
+    			GetUsers: 3
     		});
     	}
 
     	get GetUsers() {
-    		return this.$$.ctx[4];
+    		return this.$$.ctx[3];
     	}
     }
 
@@ -25228,7 +25109,7 @@ var app = (function () {
     			set_style(video, "display", /*display*/ ctx[0]);
     			set_style(video, "position", "absolute");
     			set_style(video, "height", "100px");
-    			set_style(video, "max-width", "100%");
+    			set_style(video, "max-width", "12%");
     			set_style(video, "background-color", "white");
     			set_style(video, "z-index", "10");
     		},
@@ -25537,6 +25418,110 @@ var app = (function () {
     	}
     }
 
+    // export const msg = writable(''); 
+
+    class SignalingChannel{
+
+        constructor(host) {
+
+            this.host = host;
+            this.cb;
+            this.timeout = 10000;
+            this.cb = {};
+
+            this.openSocket();
+
+        }
+
+        openSocket(){
+
+            if(!this.ws)
+                this.ws = new WebSocket(this.host.host_ws);
+
+                this.ws.onerror = function (error) {
+                    utils.log('Connect Error: ' + error.toString());
+                };
+
+                this.ws.onopen = ()=>{
+                    this.waitForSocketConnection(this.ws, ()=>{
+                        signal.set(this);
+                    });
+                    this.keepAlive();
+                };
+        
+                this.ws.onclose = function () {
+                    utils.log('echo-protocol Connection Closed');
+                    this.ws = new WebSocket(this.url);
+                };   
+
+        }
+
+        keepAlive(){
+            setInterval(()=>{
+                if(this.ws.readyState === 1)
+                    this.ws.send(encodeURIComponent('kolmit'));
+            },this.timeout);
+        }
+
+        waitForSocketConnection(socket, callback){
+
+            let that = this;
+            setTimeout(
+                function () {
+                    if (socket.readyState === 1) {
+               
+                        if (callback != null){
+                            callback();
+                        }
+                    } else {
+                        console.log("wait for connection...");
+                        that.waitForSocketConnection(socket, callback);
+                    }
+        
+                }, 5); // wait 5 milisecond for the connection...
+        }
+
+        SendMessage(rtc_par,cb){
+            let that= this;
+            this.cb[rtc_par.func] = cb;
+            this.ws.onmessage =   (message) =>{
+                if (message.type === 'message') {
+                    // log("Received: '" + message.originalEvent.data + "'");    
+                    const data = JSON.parse(decodeURIComponent(message.data));
+                    if(that.cb[data.func]){           
+                        that.cb[data.func](data); 
+                        delete that.cb[data.func];
+                    }                           
+                    
+                    // msg.set(data);
+                    msg_1.set(data);
+                    if(window.operator)
+                        window.operator.OnMessage(data);
+                    cb(data);
+                }
+            };
+            try {
+                if(that.ws.readyState===1)
+                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));    
+                else {
+                    that.openSocket(); 
+                    that.ws.send(encodeURIComponent(JSON.stringify(rtc_par)));  
+                }
+            }catch(ex){
+                return false;
+            }   
+              
+        }
+
+
+    }
+
+
+    (async ()=>{
+        const host = (await (await fetch('../assets/host.json')).json());
+        new SignalingChannel(host);    
+    })();
+
     /* src\operator\kolmit\Operator.svelte generated by Svelte v3.40.2 */
 
     function create_default_slot_1(ctx) {
@@ -25602,39 +25587,71 @@ var app = (function () {
 
     // (37:16) {#if video_button_display}
     function create_if_block_4(ctx) {
-    	let i;
+    	let div;
+    	let svg;
+    	let glyph;
+    	let g;
+    	let path;
     	let mounted;
     	let dispose;
 
     	return {
     		c() {
-    			i = element("i");
-    			attr(i, "class", "video icofont-ui-video-chat");
-    			set_style(i, "position", "absolute");
-    			set_style(i, "right", "80px");
-    			set_style(i, "top", "0px");
-    			set_style(i, "color", "lightgrey");
-    			set_style(i, "font-size", "30px");
-    			set_style(i, "z-index", "20");
+    			div = element("div");
+    			svg = svg_element("svg");
+    			glyph = svg_element("glyph");
+    			g = svg_element("g");
+    			path = svg_element("path");
+    			attr(glyph, "glyph-name", "ui-video-chat");
+    			attr(glyph, "unicode", "");
+    			attr(glyph, "horiz-adv-x", "50");
+    			attr(path, "d", "M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z");
+    			attr(path, "transform", "scale(.03)");
+    			set_style(path, "fill", "lightgrey");
+    			set_style(path, "stroke", "black");
+    			set_style(path, "stroke-width", "20px");
+    			attr(g, "class", "currentLayer");
+    			set_style(g, "position", "absolute");
+    			set_style(g, "right", "0");
+    			set_style(g, "top", "0");
+    			set_style(g, "stroke", "grey");
+    			set_style(g, "stroke-width", "2px");
+    			set_style(g, "fill", "lightgrey");
+    			set_style(g, "font-size", "30px");
+    			attr(svg, "height", "30");
+    			attr(svg, "width", "30");
+    			set_style(svg, "position", "absolute");
+    			set_style(svg, "bottom", "70px");
+    			set_style(svg, "right", "0px");
+    			set_style(svg, "z-index", "30");
+    			attr(div, "class", "video");
+    			set_style(div, "position", "absolute");
+    			set_style(div, "top", "0");
+    			set_style(div, "width", "100px");
+    			set_style(div, "height", "100px");
     		},
     		m(target, anchor) {
-    			insert(target, i, anchor);
+    			insert(target, div, anchor);
+    			append(div, svg);
+    			append(svg, glyph);
+    			append(svg, g);
+    			append(g, path);
 
     			if (!mounted) {
-    				dispose = listen(i, "click", /*OnClickVideoButton*/ ctx[17]);
+    				dispose = listen(svg, "click", /*OnClickVideoButton*/ ctx[17]);
     				mounted = true;
     			}
     		},
     		p: noop,
     		d(detaching) {
-    			if (detaching) detach(i);
+    			if (detaching) detach(div);
     			mounted = false;
     			dispose();
     		}
     	};
     }
 
-    // (54:16) {#if Dict}
+    // (71:16) {#if Dict}
     function create_if_block_3(ctx) {
     	let t0_value = /*Dict*/ ctx[8].dict['Language Select'][/*lang*/ ctx[7]] + "";
     	let t0;
@@ -25659,7 +25676,7 @@ var app = (function () {
     	};
     }
 
-    // (73:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
+    // (90:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
     function create_if_block_1$2(ctx) {
     	let if_block_anchor;
 
@@ -25700,9 +25717,9 @@ var app = (function () {
     	};
     }
 
-    // (76:16) {:else}
+    // (93:16) {:else}
     function create_else_block_1(ctx) {
-    	let h2;
+    	let h4;
     	let t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "";
     	let t;
     	let mounted;
@@ -25710,15 +25727,15 @@ var app = (function () {
 
     	return {
     		c() {
-    			h2 = element("h2");
+    			h4 = element("h4");
     			t = text(t_value);
     		},
     		m(target, anchor) {
-    			insert(target, h2, anchor);
-    			append(h2, t);
+    			insert(target, h4, anchor);
+    			append(h4, t);
 
     			if (!mounted) {
-    				dispose = listen(h2, "click", /*click_handler_1*/ ctx[27]);
+    				dispose = listen(h4, "click", /*click_handler_1*/ ctx[27]);
     				mounted = true;
     			}
     		},
@@ -25726,16 +25743,16 @@ var app = (function () {
     			if (dirty[0] & /*Dict, lang*/ 384 && t_value !== (t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "")) set_data(t, t_value);
     		},
     		d(detaching) {
-    			if (detaching) detach(h2);
+    			if (detaching) detach(h4);
     			mounted = false;
     			dispose();
     		}
     	};
     }
 
-    // (74:16) {#if !edited_display}
+    // (91:16) {#if !edited_display}
     function create_if_block_2$1(ctx) {
-    	let h2;
+    	let h4;
     	let t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "";
     	let t;
     	let mounted;
@@ -25743,15 +25760,15 @@ var app = (function () {
 
     	return {
     		c() {
-    			h2 = element("h2");
+    			h4 = element("h4");
     			t = text(t_value);
     		},
     		m(target, anchor) {
-    			insert(target, h2, anchor);
-    			append(h2, t);
+    			insert(target, h4, anchor);
+    			append(h4, t);
 
     			if (!mounted) {
-    				dispose = listen(h2, "click", /*click_handler*/ ctx[26]);
+    				dispose = listen(h4, "click", /*click_handler*/ ctx[26]);
     				mounted = true;
     			}
     		},
@@ -25759,14 +25776,14 @@ var app = (function () {
     			if (dirty[0] & /*Dict, lang*/ 384 && t_value !== (t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "")) set_data(t, t_value);
     		},
     		d(detaching) {
-    			if (detaching) detach(h2);
+    			if (detaching) detach(h4);
     			mounted = false;
     			dispose();
     		}
     	};
     }
 
-    // (53:8) <BurgerMenu padding={'25px'}>
+    // (70:8) <BurgerMenu padding={'25px'}>
     function create_default_slot$1(ctx) {
     	let t0;
     	let div;
@@ -25935,7 +25952,7 @@ var app = (function () {
     	};
     }
 
-    // (88:0) {:else}
+    // (105:0) {:else}
     function create_else_block$1(ctx) {
     	let callcenter_1;
     	let updating_status;
@@ -26012,7 +26029,7 @@ var app = (function () {
     	};
     }
 
-    // (86:0) {#if (!tarif || tarif.name==='free') && !abonent}
+    // (103:0) {#if (!tarif || tarif.name==='free') && !abonent}
     function create_if_block$3(ctx) {
     	let landpage;
     	let current;
@@ -26454,6 +26471,11 @@ var app = (function () {
     		isPaid = new Date(tarif.paid) > Date.now();
     	}
 
+    	// import {window.operator.} from './js/stores.js'
+    	// const us_rtc = window.operator..subscribe((data) => {
+    	//         window.operator.= data;
+    	// });
+    	window.operator = {};
     	let call_cnt, status, inter;
     	let video_button_display = false;
     	let edited_display = false;
@@ -26585,10 +26607,9 @@ var app = (function () {
     		};
 
     		window.operator.SetRemoteVideo = src => {
-    			if (src) {
+    			if (status === 'talk') {
     				$$invalidate(12, remote.video.srcObject = src, remote);
     				$$invalidate(12, remote.video.display = 'block', remote);
-    				$$invalidate(4, status = 'talk');
     				$$invalidate(11, local.audio.paused = true, local);
     			}
     		};
@@ -26619,6 +26640,7 @@ var app = (function () {
     			case 'active':
     				$$invalidate(4, status = 'inactive');
     				window.operator.OnInactive();
+    				$$invalidate(5, video_button_display = false);
     				break;
     			case 'call':
     				$$invalidate(4, status = 'talk');
@@ -26635,7 +26657,7 @@ var app = (function () {
     				window.operator.OnInactive();
     				$$invalidate(12, remote.audio.muted = true, remote);
     				$$invalidate(11, local.video.display = 'none', local);
-    				$$invalidate(5, video_button_display = true);
+    				$$invalidate(5, video_button_display = false);
     				$$invalidate(12, remote.video.display = 'none', remote);
     				$$invalidate(12, remote.video.srcObject = '', remote);
     				$$invalidate(12, remote.video.poster = '', remote);
@@ -26647,7 +26669,7 @@ var app = (function () {
     				break;
     			case 'muted':
     				$$invalidate(4, status = 'inactive');
-    				// local.video.display = 'none';
+    				$$invalidate(5, video_button_display = false);
     				$$invalidate(11, local.video.srcObject = '', local);
     				$$invalidate(12, remote.audio.muted = true, remote);
     				$$invalidate(12, remote.video.display = 'none', remote);
@@ -26678,7 +26700,7 @@ var app = (function () {
     		if (data.func === 'mute') {
     			$$invalidate(11, local.audio.paused = true, local);
     			$$invalidate(12, remote.audio.muted = true, remote);
-    			$$invalidate(5, video_button_display = true);
+    			$$invalidate(5, video_button_display = false);
     			$$invalidate(11, local.video.display = 'none', local);
     			$$invalidate(11, local.video.srcObject = '', local);
 
@@ -26696,8 +26718,12 @@ var app = (function () {
 
     			if (status === 'talk') {
     				$$invalidate(4, status = 'inactive');
+
+    				// window.operator.OnInactive();
+    				$$invalidate(5, video_button_display = false);
     			} else if (status === 'call') {
-    				$$invalidate(4, status = 'inactive'); // window.operator.OnInactive();
+    				$$invalidate(4, status = 'inactive');
+    				$$invalidate(5, video_button_display = false);
     				window.operator.OnMute();
 
     				// callcenter.GetUsers();
@@ -28090,7 +28116,7 @@ var app = (function () {
     	};
     }
 
-    // (6:0) {#if checked}
+    // (6:0) {#if checked && tarif}
     function create_if_block_1(ctx) {
     	let div;
     	let operator_1;
@@ -28135,7 +28161,7 @@ var app = (function () {
     	};
     }
 
-    // (13:0) {#if !operator.email}
+    // (12:0) {#if !operator.email}
     function create_if_block(ctx) {
     	let selectmenu;
     	let updating_lang;
@@ -28247,7 +28273,7 @@ var app = (function () {
     			}
     		});
 
-    	let if_block0 = /*checked*/ ctx[0] && create_if_block_1(ctx);
+    	let if_block0 = /*checked*/ ctx[0] && /*tarif*/ ctx[2] && create_if_block_1(ctx);
     	let if_block1 = !/*operator*/ ctx[4].email && create_if_block(ctx);
 
     	return {
@@ -28277,11 +28303,11 @@ var app = (function () {
 
     			modal.$set(modal_changes);
 
-    			if (/*checked*/ ctx[0]) {
+    			if (/*checked*/ ctx[0] && /*tarif*/ ctx[2]) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
 
-    					if (dirty & /*checked*/ 1) {
+    					if (dirty & /*checked, tarif*/ 5) {
     						transition_in(if_block0, 1);
     					}
     				} else {
@@ -28361,7 +28387,7 @@ var app = (function () {
     	let showDialog;
     	let tarif;
     	let lang = 'en';
-    	let operator = {}, abonent = "", hash = "";
+    	let operator = {}, abonent = "", hash = null;
     	let kolmit = JSON.parse(localStorage.getItem('kolmit'));
 
     	if (!operator && kolmit.email) {
@@ -28384,11 +28410,7 @@ var app = (function () {
     	const url = new URL(window.location.href);
     	if (url.searchParams.get('operator')) operator.email = url.searchParams.get('operator');
     	if (url.searchParams.get('abonent')) abonent = url.searchParams.get('abonent');
-
-    	if (url.searchParams.get('hash')) hash = url.searchParams.get('hash')
-    	? url.searchParams.get('hash')
-    	: '';
-
+    	if (url.searchParams.get('hash')) hash = url.searchParams.get('hash');
     	if (!abonent) abonent = operator.email;
     	let signch;
 
@@ -28447,17 +28469,12 @@ var app = (function () {
     					kolmit.abonent = abonent;
     					localStorage.setItem('kolmit', JSON.stringify(kolmit));
 
-    					if (hash) {
+    					if (par.hash === null) {
+    						$$invalidate(2, tarif = data.tarif);
+    						$$invalidate(0, checked = true);
+    					} else {
     						const url = window.location.href.split('&hash=')[0];
     						window.location.assign(url);
-    					} else {
-    						if (!abonent) {
-    							$$invalidate(2, tarif = data.tarif);
-    							$$invalidate(0, checked = true);
-    						} else if (abonent) {
-    							$$invalidate(2, tarif = data.tarif);
-    							$$invalidate(0, checked = true);
-    						}
     					}
     				} else {
     					let psw_ = prompt(Dict.getValByKey(lang, 'invalid password') + String(data.check));
@@ -28466,13 +28483,12 @@ var app = (function () {
     						psw = md5(psw_);
     						pswd.set(psw);
     						sendCheck();
-    					} else {
-    						localStorage.removeItem('kolmit');
-    						const url = window.location.href;
-    						window.location.assign(url);
     					}
-    				}
-    			});
+    				} // else{
+    				// 	localStorage.removeItem('kolmit');
+    			}); // 	const url = window.location.href;
+    			// 	window.location.assign(url);	
+    			// }
     		}
     	}
 
@@ -28592,5 +28608,5 @@ var app = (function () {
 
     return app;
 
-})();
+}());
 //# sourceMappingURL=site.js.map

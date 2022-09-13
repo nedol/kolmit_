@@ -18,12 +18,33 @@
 
 <VideoLocal slot="local" {...local.video} />
 
-{#if video_button_pos}
-  <i
+{#if video_button_display}
+  <div  class="video"  style="
+    position: absolute;
+    top: 0;
+    width: 100%; 
+
+    ">
+    <svg 
+      height="30" width="30" 
+            style="position: absolute;
+            right: 8px;
+            z-index: 30;"
+            on:click = {OnClickVideoButton}>
+            <glyph glyph-name="ui-video-chat" unicode="&#xec90;" horiz-adv-x="50" />
+            <g class="currentLayer" style=" position: absolute; right: 0; top: 0; stroke:grey; stroke-width:2px;fill:lightgrey;font-size: 30px;">
+            <path d="M891.5 23h-783c-59.7 0-108.5 48.8-108.5 108.5v466.20000000000005c0 59.59999999999991 48.8 108.5 108.5 108.5h222.39999999999998v270.5999999999999l270.70000000000005-270.5999999999999h289.9c59.700000000000045 0 108.5-48.90000000000009 108.5-108.5v-466.20000000000005c0-59.7-48.799999999999955-108.5-108.5-108.5z m-223.5 370l-252.8 134.70000000000005c-26.30000000000001 14-47.89999999999998 1.099999999999909-47.89999999999998-28.700000000000045v-262.9c0-29.900000000000034 21.599999999999966-42.80000000000001 47.89999999999998-28.80000000000001l252.8 134.7c26.299999999999955 14 26.299999999999955 37 0 51z"
+                    transform="scale(.03)"
+                    style="fill:lightgrey; stroke:black; stroke-width:20px"
+            />
+            </g>
+    </svg>
+  </div>
+  <!-- <i
     class="video icofont-ui-video-chat"
     on:click={OnClickVideoButton}
     style="display:{video_button_display};position:absolute;right:0px;top:0;color:lightgrey;margin:0px;font-size:30px;z-index:20"
-  />
+  /> -->
 {/if}
 
 <VideoRemote slot="remote" {...remote.video}>
@@ -105,8 +126,8 @@
 
   let selected;
   let name, email, src, profileSrc, call_cnt, status, inter;
-  let video_button_display = "none";
-  let video_button_pos = false;
+
+  let video_button_display = false;
 
   let files;
   let list;
@@ -172,10 +193,10 @@
     }
 
   onMount(async () => {
-    if (window.frameElement.previousElementSibling)
+    // if (window.frameElement.previousElementSibling)
       // if(window.frameElement.previousElementSibling.tagName==='svg'
       // || window.frameElement.previousElementSibling.tagName==='img')
-      video_button_pos = true;
+      // video_button_pos = true;
 
     let ab = url.searchParams.get("abonent");
     window.user = new RTCUser(ab, "user", em, window.uid);
@@ -259,6 +280,7 @@
         window.user.Call();
         remote.video.srcObject = null;
         break;
+ 
 
       case "wait":
         status = "inactive";
@@ -272,7 +294,6 @@
         window.user.Call();
         status = "call";
         remote.video.srcObject = null;
-        video_button_pos = true;
 
         break;
       case "call":
@@ -310,7 +331,7 @@
     status = "talk";
     local.audio.paused = true;
     local.video.display = "block";
-    video_button_pos = false;
+    video_button_display = false;
 
     if (window.user.DC.dc.readyState === "open") {
       window.user.GetUserMedia({ audio: 0, video: 1 }, function () {
@@ -333,6 +354,7 @@
           status = "busy";
           const event = new Event("display");
           event.data = "none";
+          
           window.frameElement.dispatchEvent(event);
         }
       } else if (
@@ -375,7 +397,7 @@
     if (data.func === "mute") {
       local.audio.paused = true;
       remote.audio.muted = true;
-      video_button_display = "none";
+      video_button_display = false;
       local.video.display = "none";
       remote.video.display = "none";
       // window.user.abonent = url.searchParams.get('abonent');
@@ -394,11 +416,11 @@
     if (data.func === "talk") {
       status = "talk";
       clearInterval(inter);
-      video_button_pos = true;
+      video_button_display = true;
       local.audio.paused = true;
       remote.audio.muted = false;
       video_button_display = "block";
-      local.video.display = "block";
+      // local.video.display = "block";
       video.display = "block";
       // window.frameElement.style.maxWidth = "200px";
       // window.frameElement.style.maxHeight = "100px";

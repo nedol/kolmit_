@@ -1,3 +1,4 @@
+/* user.kolmit.RTCUser.svelte*/
 import { writable } from 'svelte/store';
 import  {RTCBase} from "./RTCBase";
 import {getParameterByName, log} from './utils';
@@ -24,7 +25,7 @@ export default class RTCUser extends RTCBase {
         this.dataProgress = document.getElementById('dataProgress')?document.getElementById('dataProgress'):'';
                 
         (async ()=>{
-            this.host = (await (await fetch('/kolmit/host.json')).json());
+            this.host = (await (await fetch('../assets/host.json')).json());
                 
             if(!this.signch) {
                 this.signch = new SignalingChannel(this.host.host_ws);
@@ -56,7 +57,7 @@ export default class RTCUser extends RTCBase {
         }
     }
 
-    Call(resolve){
+    Call(){
         let that = this;
 
         this.GetUserMedia({audio: 1, video: 0}, function () {
@@ -72,7 +73,6 @@ export default class RTCUser extends RTCBase {
             that.signch.SendMessage(par);
             that.status = 'call';
 
-            resolve();
         });
     }
 

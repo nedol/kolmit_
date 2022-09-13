@@ -1,8 +1,8 @@
-
+/* user/kolmit/RTCBase                                */
 import {Peer} from './Peer'
 import {DataChannelUser} from "./DataChannelUser";
 import {log} from './utils';
-import {SignalingChannel} from './signalingChannel.js';
+
 // import {host_port, host_ws, host_server } from './host'
 
 // const host_port = 'https://delivery-angels.com/server/';
@@ -165,12 +165,12 @@ export class RTCBase{
 
         let that = this;
 
-        this.conf = (await (await fetch(this.host.host_server+'kolmit/ice_conf.json')).json());
-       try{
-            this.conf = (await (await fetch(this.host.host_server+'kolmit/users/'+this.em+'/ice_conf.json')).json());
-        }catch(ex){
+        this.conf = (await (await fetch('../assets/ice_conf.json')).json());
+    //    try{
+    //         this.conf = (await (await fetch(this.host.host_server+'users/'+this.em+'ice_conf.json')).json());
+    //     }catch(ex){
 
-        }
+    //     }
 
         let pc_config = {
             iceTransportPolicy: 'all',

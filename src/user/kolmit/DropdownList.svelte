@@ -12,6 +12,7 @@
 
     onMount(()=>{
         window.parent.document.body.append(profile);
+ 
     })
 
     function OnBlurSelect(){
@@ -21,7 +22,7 @@
  
 </script>
 
-<div style='z-index: 30;position: absolute;top:5px;height: 70px;' bind:this={profile}>
+<div style='position:fixed;z-index: 30;top:5px;height: 70px;' bind:this={profile}>
     <Select placeholder="Options:" on:blur = {OnBlurSelect}  bind:selected={selected}>
         {#each options as opt (opt.id)}
             {#if opt.id==1 && status==='talk'}

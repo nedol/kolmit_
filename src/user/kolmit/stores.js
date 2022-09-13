@@ -5,16 +5,6 @@ export let tarif = writable();
 export let editable = writable(false);
 
 
-(async ()=>{
-
-    (async ()=>{
-        try{
-            tarif.set((await (await fetch('/server/kolmit/tarifs/tarifs.json?')).json()));
-        }catch(ex){
-        }
-    })();
-})();
-
 export let langs = writable();
 let lang = 'en';
 

@@ -1,9 +1,10 @@
 <!-- <Collapse>     -->
   {#if dep.id!=='0'}
   <button class="collapsible" {owner} bind:this={button}  on:click={OnCollClick}> 
-    <input type="text" {readonly} style="border-width: 0px;" on:change={OnDepChange} on:click={OnClickInput} 
+    <input type="text" {readonly} style="border-width: 0px;" on:change={OnDepChange({dep})} on:click={OnClickInput} 
       bind:value={dep.alias}  placeholder="input dep name"/>
     {#if edited_display}
+    {#if operator.email===operator.abonent} 
     <svg height="30" width="30"  on:click={RemoveDep(dep.id)} style="position: relative;float:right">
       <glyph glyph-name="minus-circle" unicode="&#xefc0;" horiz-adv-x="50" />
       <g class="currentLayer">
@@ -12,33 +13,32 @@
       </g>
     </svg>
     {/if}
+    {/if}
   </button>
   {/if}
 
-  <div class="content"  bind:this={content}>
+  <div class="content"  bind:this={content} style="max-height:0px">
       <br>
     {#if dep.admin}     
       <div>
         <Oper id={dep.admin.id}
-          bind:status={status} {operator} {dep} {abonent} bind:user={dep.admin} {update} {readonly} {rtc}></Oper>
+          bind:status={status} {operator} {abonent} bind:dep={dep} bind:user={dep.admin} {update} {readonly}></Oper>
       </div>
 
     {/if}
     {#if dep.staff}
     {#each dep.staff as user, u} 
       {#if user.email || (!user.email && owner===operator.email)}
-        <!-- {@debug rtc.} -->
         <Oper id={u}
-          bind:status={status} {operator} {dep} bind:user={user} {abonent} {update} {readonly} {rtc}>
+          bind:status={status} {operator} {abonent} bind:dep={dep} bind:user={user} {update} {readonly}>
         </Oper>
         <br>
       {/if}
     {/each} 
     {/if}
     {#if edited_display}
-    {#if tarif.deps}
-    {#if isAddOper}
-      <svg class="add_oper" height="40" width="40" on:click={AddOper} style="position: relative;left: 45%;">
+    <div class="add_oper" on:click={AddOper} style="display:{isAddOper}">
+      <svg   style="position: relative;left: 45%; height:40, width=40">
         <title>add-user</title>
         <glyph glyph-name="contact-add" unicode="&#xefc0;" horiz-adv-x="50" />
         <!-- <g class="currentLayer" style="color:green; stroke:lightgrey; stroke-width:10px"> -->
@@ -46,10 +46,10 @@
         transform = "scale(.04)"  style="fill:grey"/>
         <!-- </g> -->
       </svg>
-    {/if}
-    {/if}
-    {/if}
-  </div>
+    </div>
+  <!-- {/if} -->
+  {/if}
+</div>
 <!-- </Collapse> -->
 <style>
   .collapsible {
@@ -95,6 +95,7 @@
 <script>
     import {onDestroy, onMount } from 'svelte';
     // import { Collapse, Input  } from 'svelma';
+    import Dep from './Dep.svelte';
    
     // import "https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css";
     // import { Button, Col, Row } from 'sveltestrap';
@@ -108,27 +109,33 @@
   export let operator;
   export let abonent;
   export let tarif;  
-  export let rtc;
+
   let button;
-  let isAddOper = false;
-
-
+  let isAddOper = "none";
 
   import {signal} from '../js/stores.js'
-    let signalch = false;
-    const us_signal = signal.subscribe((data) => {
-      if(data){
-        signalch = data;
-      }
-  });
 
-  
+  const signalch = $signal;      
+
   (async ()=>{
-    tarif.params =  
-    (await (await fetch('/server/kolmit/tarifs/tarifs.json?')).json())[tarif.name];
-    if(tarif.params && dep.staff)
+    try{
+      tarif.params = (await (await fetch('../assets/tarifs/tarifs.json')).json())[tarif.name];
+    }catch(ex){
+      console.log(ex)
+    }
+    if(tarif && tarif.params && dep.staff)
       tarif.deps = tarif.params['Total Depts']['en'].split('up to ')[1]>=dep.staff.length || tarif.params['Total Depts']['en']==='unlim' ;
   })();
+
+  $:if(edited_display){
+    if (
+      (!operator.abonent && dep.id==='0')  
+      || (!operator.abonent && !dep.admin)
+      || (operator.abonent && operator.email===dep.admin.email)
+      ){
+      isAddOper = 'block';
+    }
+  }
 
 
   let readonly = false;
@@ -147,14 +154,6 @@
               ar[b].scrollIntoView(false);
             OnCollClick(new Event('expand'));
           }        
-    }
-
-    if (
-      (!abonent && dep.id==='0')  
-      || (!abonent && !dep.admin)
-      || (abonent && operator.email===dep.admin.email)
-      ){
-      isAddOper = true;
     }
   });
 
@@ -208,13 +207,12 @@
 
   export async function AddOper(ev){
 
-    content.style.maxHeight = 200 + content.scrollHeight +  "px";       
+    content.style.maxHeight = 100 + content.scrollHeight +  "px";       
     let res   = await  HandleOper("add", abonent);     
     
     update();
   }
 
-  export let RemoveDep;
 
   function HandleOper(func, abonent, resolve){
 
@@ -234,16 +232,20 @@
     });
   }
   
+  export let RemoveDep;
+  
   function OnCollClick(ev){
 
-    if(content)  
-    if (content.style.maxHeight && ev.type !=='expand'){
-        content.style.maxHeight = null;
+    if(content && ev.type !=='expand')  
+    if (content.style.maxHeight == '0px'){
+      content.style.maxHeight = content.scrollHeight +  "px";
       } else {
-        content.style.maxHeight = content.scrollHeight +  "px";
-
+        content.style.maxHeight = '0px';
       } 
+
+      console.log(content.style.maxHeight)
   }
+    
     
   </script>
 

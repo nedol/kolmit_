@@ -28,12 +28,13 @@
     z-index: 1;">
     <video  id="remoteVideo" autoplay playsinline
         style="
-        position: relative;
-        width: 100%;
-        height: 100%;
-        left: 0;
-        top: 0;
-        opacity: 1;">
+        position: absolute;
+        /* width: 100%; */
+        height: 107%;
+        /* left: 0px; */
+        top: 0px;
+        opacity: 1;
+        ">
             <track kind="captions">
     </video>
 </div>

@@ -110,23 +110,23 @@ export default class  RTCOperator extends RTCBase{
     }
 
 
-    SendVideoOffer(key){
-        let that = this;
-        that.pcPull[key].params['loc_desc'] = '';
-        that.pcPull[key].params['loc_cand'] = '';
+    // SendVideoOffer(key){
+    //     let that = this;
+    //     that.pcPull[key].params['loc_desc'] = '';
+    //     that.pcPull[key].params['loc_cand'] = '';
 
-        that.pcPull[key].con.createOffer(
-            that.mode={
-                offerToReceiveAudio: 1,
-                offerToReceiveVideo: 1,
-                iceRestart:1
-            }
-        ).then(
-            desc => that.pcPull[key].onCreateVideoOfferSuccess(desc),
-            that.pcPull[key].onCreateOfferError
-        );
+    //     that.pcPull[key].con.createOffer(
+    //         that.mode={
+    //             offerToReceiveAudio: 1,
+    //             offerToReceiveVideo: 1,
+    //             iceRestart:1
+    //         }
+    //     ).then(
+    //         desc => that.pcPull[key].onCreateVideoOfferSuccess(desc),
+    //         that.pcPull[key].onCreateOfferError
+    //     );
 
-    }
+    // }
 
     async Offer(){
  

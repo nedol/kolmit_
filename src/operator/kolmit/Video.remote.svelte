@@ -32,12 +32,13 @@
 
     <video  id="remoteVideo" autoplay playsinline poster={poster}
         style="
-            display:{display};
+            display: {display};
             position: absolute;
             height: 100px;
-            max-width:100%;
+            max-width: 12%;
             background-color: white;
-            z-index: 10;">
+            z-index: 10;
+            ">
             <track kind="captions">
     </video>
 

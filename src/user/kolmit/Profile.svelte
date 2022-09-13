@@ -1,4 +1,4 @@
-<form  class="form-signin"  style='display:block; position:absolute;top:0' bind:this={form} use:setForm>
+<form  class="form-signin"  style='display:block; position:fixed;top:0' bind:this={form} use:setForm>
     <style>
         input{
             border-width:0;
@@ -77,11 +77,16 @@
     export let profile;
     export let selected;
 
-    let src ="../assets/user.svg";
+    let src ="../kolmit/assets/user.svg";
     let name;
     let email;
     let form;
     let files;
+
+
+    onMount(()=>{
+        console.log() ;
+    })
 
     $: if (files) {
         // Переменная `files` будет типа `FileList`, а не массивом:
@@ -89,7 +94,7 @@
         console.log(files);
     }
 
-    import {langs} from './js/stores.js'
+    import {langs} from './stores.js'
     let lang = 'en';
     const us_lang = langs.subscribe((data) => {
             lang = data;
@@ -115,15 +120,19 @@
     async function setForm(form){
         // window.parent.document.body.append(document.getElementsByClassName('form-signin')[0]);
         window.parent.document.body.append(form);
-
-        let item  = JSON.parse(localStorage.getItem('kolmi_abonent'));
-        name = item.name;
-        email = item.email;
-        src = item.src;
+        if(localStorage.getItem('kolmi_abonent')){
+            let item  = JSON.parse(localStorage.getItem('kolmi_abonent'));
+            name = item.name;
+            email = item.email;
+            src = item.src;
+        }
 
     }
 
-
+    //TODO: import { createEventDispatcher } from 'svelte'
+    //      const dispatch =  createEventDispatcher()
+    //  ... dispatch('custom_event')
+    
     function OnClickUpload(){
         let event =  new MouseEvent('click', {
         bubbles: true,
