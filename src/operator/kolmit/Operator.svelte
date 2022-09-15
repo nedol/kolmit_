@@ -1,3 +1,4 @@
+
 <div style="display:flex; min-height:100px; flex-wrap: nowrap;justify-content: space-between;">
 
         <div style="flex:1">
@@ -149,20 +150,12 @@ if(tarif && tarif.paid){
         isPaid = new Date(tarif.paid)>Date.now();
 }
 
-// import {window.operator.} from './js/stores.js'
-
-// const us_rtc = window.operator..subscribe((data) => {
-//         window.operator.= data;
-// });
-
 window.operator = {};
 
 let selected;
 let call_cnt, status, inter;
 let video_button_display = false;
 let edited_display = false;
-
-
 
 import {editable} from './js/stores.js'
 const us_edit = editable.subscribe((data) => {
@@ -196,13 +189,6 @@ const us_signal = signal.subscribe((signalch) => {
 
 
 import {msg} from './js/signalingChannel.js'
-// const us_msg = msg.subscribe((data) => {
-//         console.log();
-//         if(window.operator.&& window.operator.OnMessage)
-//                 window.operator.OnMessage(data);
-        
-//         OnMessage(data);
-// });
 
 import {msg_1} from './js/stores.js'
 const us_msg_1 = msg_1.subscribe((data) => {
@@ -274,6 +260,7 @@ let  remote = {
 let profile = {
         display:'none'
 }
+
 
 
 
