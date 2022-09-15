@@ -20,3 +20,10 @@ let lang = 'en';
 export let msg_1 = writable();
 
 export let signal = writable();
+
+export let dicts = writable();
+
+(async ()=>{   
+    let dict = (await (await fetch('../assets/dict.json')).json());
+    dicts.set( dict);
+})();

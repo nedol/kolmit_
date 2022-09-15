@@ -9,10 +9,10 @@
   },
   "turn":{
     "urls": [
-      "turn:delivery-angels.com:3478?transport=udp",
-      "turn:delivery-angels.com:3478?transport=tcp",
-      "turn:delivery-angels.com:5349?transport=udp",
-      "turn:delivery-angels.com:5349?transport=tcp"
+      "turn:193.200.74.37:3478?transport=udp",
+      "turn:193.200.74.37:3478?transport=tcp",
+      "turn:193.200.74.37:5349?transport=udp",
+      "turn:193.200.74.37:5349?transport=tcp"
     ],
     "username": "guest", "credential": "password"
   },

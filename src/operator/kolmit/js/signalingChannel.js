@@ -82,8 +82,9 @@ export default class SignalingChannel{
                 
                 // msg.set(data);
                 msg_1.set(data);
-                if(window.operator)
+                if(window.operator){
                     window.operator.OnMessage(data);
+                }
                 cb(data);
             }
         }

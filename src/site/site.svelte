@@ -37,6 +37,7 @@
 
 	import {pswd} from '../operator/kolmit/js/stores.js'
 	let psw;
+
     // const us_pswd = pswd.subscribe((data) => {
 	// 	if(data){
 	// 		psw = data;
@@ -101,15 +102,10 @@
 		}							
 	});
 
-	import {dicts} from '../operator/kolmit/js/dict.js';
-  	let Dict;
-  	const us_dict = dicts.subscribe(data => {
-      if(data){
-        Dict = data;
-      }
-  	});
+	import {dicts} from '../operator/kolmit/js/stores.js';
+  	let dict = $dicts
 
-	onDestroy(us_signal,us_dict);
+	onDestroy(us_signal);
 
 	onMount(async() => {
 		if(!psw){
@@ -155,7 +151,7 @@
 					}
 
 				}else{
-					let psw_ = prompt(Dict.getValByKey(lang, 'invalid password')+String(data.check));
+					let psw_ = prompt(dict['invalid password'][lang]) +String(data.check);
 					if(psw_){
 						psw = md5(psw_);
 						pswd.set(psw);

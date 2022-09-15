@@ -37,6 +37,16 @@ var app = (function () {
     function is_empty(obj) {
         return Object.keys(obj).length === 0;
     }
+    function subscribe(store, ...callbacks) {
+        if (store == null) {
+            return noop;
+        }
+        const unsub = store.subscribe(...callbacks);
+        return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+    }
+    function component_subscribe(component, store, callback) {
+        component.$$.on_destroy.push(subscribe(store, callback));
+    }
     function create_slot(definition, ctx, $$scope, fn) {
         if (definition) {
             const slot_ctx = get_slot_context(definition, ctx, $$scope, fn);
@@ -18662,21 +18672,13 @@ var app = (function () {
     // module id = 343
     // module chunks = 0
 
-    class DataChannel {
+    class DataChannelUser{
         constructor(rtc,pc){
             this.rtc = rtc;
             this.pc = pc;
             this.call_num = 3;
             this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
             this.forward;
-        }
-
-
-    }
-
-    class DataChannelUser extends DataChannel{
-        constructor(rtc,pc){
-            super (rtc, pc);
 
             let that = this;
             that.cnt_call = 0;
@@ -19370,11 +19372,6 @@ var app = (function () {
 
                 window.user.SendCheck();
 
-                this.Init(() => {
-                    //this.callButton.attributes.status.value = 'inactive';
-                    //document.getElementsByClassName('fa-spinner')[0].style.display ='none';
-                });
-
             })();
 
 
@@ -19395,22 +19392,24 @@ var app = (function () {
         }
 
         Call(){
-            let that = this;
 
-            this.GetUserMedia({audio: 1, video: 0}, function () {
-                // document.getElementsByClassName('browser_container')[0].style.display = 'none';
-                let par = {};
-                par.proj = 'kolmit';
-                par.func = 'call';
-                par.status = 'call';
-                par.type = that.type;
-                par.abonent = that.abonent.toLowerCase();
-                par.em = that.em.toLowerCase();
-                par.uid = that.uid;
-                that.signch.SendMessage(par);
-                that.status = 'call';
-
+            
+            this.Init(() => {
+                this.GetUserMedia({audio: 1, video: 0}, ()=> {
+                    // document.getElementsByClassName('browser_container')[0].style.display = 'none';
+                    let par = {};
+                    par.proj = 'kolmit';
+                    par.func = 'call';
+                    par.status = 'call';
+                    par.type = this.type;
+                    par.abonent = this.abonent.toLowerCase();
+                    par.em = this.em.toLowerCase();
+                    par.uid = this.uid;
+                    this.signch.SendMessage(par);
+                    this.status = 'call';    
+                });
             });
+
         }
 
         Hangup(){
@@ -20095,205 +20094,8 @@ var app = (function () {
 
     (async ()=>{   
         let dict = (await (await fetch('../assets/dict.json')).json());
-        dicts.set( new Dict(dict));
+        dicts.set( dict);
     })();
-
-
-    class Dict {
-
-        constructor(dict) {
-
-            this.dict  = dict;
-        }
-
-
-    // Function for swapping dictionaries
-        set_lang(lang, el, default_lang) {
-            Object.keys(this.dict);
-            let dtAr = $(el).find("[data-translate]");
-
-            for (let i = 0; i < dtAr.length; i++) {
-                let item = dtAr[i];
-                let k = $(item).attr("data-translate").toLowerCase();
-
-                //замена по ключу
-                if(item.attributes.placeholder && this.dict[item.attributes.placeholder.value] && this.dict[item.attributes.placeholder.value][lang]){
-                    $(item).attr('placeholder',this.dict[item.attributes.placeholder.value][lang]);
-                    continue;
-                }
-                if(item.attributes.title && this.dict[item.attributes.title.value] && this.dict[item.attributes.title.value][lang]){
-                    $(item).attr('title',this.dict[item.attributes.title.value][lang]);
-                }
-                if(item.value && this.dict[item.value] && this.dict[item.value][lang]){
-                    item.value = this.dict[item.value][lang];
-                }
-                if($(item).text() && this.dict[$(item).text()] && this.dict[$(item).text()][lang]){
-                    $(item).text(this.dict[$(item).text()][lang]);
-                }
-                //замена по аргументу
-                if (this.dict[k]) {
-                    let def_lang = default_lang?default_lang:Object.keys(this.dict[k])[0];
-                    let val = this.dict[k][lang] ? this.dict[k][lang] : this.dict[k][def_lang];
-                    if(!val) {
-                        for(let l in this.dict[k]){
-                            if(this.dict[k][l]) {
-                                val = this.dict[k][l];
-                                break;
-                            }
-                        }
-                    }
-                    try {
-                        //val = urlencode.decode(val);
-                        val = val.replace(/\\n/g, String.fromCharCode(13, 10) );
-                        val = val.replace('%0D',String.fromCharCode(13, 10));
-                    }catch(ex){
-                    }
-
-                    if(item.isEntity)//a-frame
-                        item.setAttribute('text','value',val);
-
-                    if(item.tagName.toLowerCase()==='input' || item.tagName.toLowerCase()==='textarea')
-                        $(item).val(val);
-                    else if(item.tagName.toLowerCase()==='div')
-                        $(item).text(val);
-                    else
-                        $(item).html(val);
-
-                    if($(item).attr("title"))
-                        $(item).attr("title", val);
-                    if($(item).attr("value"))
-                        $(item).attr("value", val);
-
-                }
-            }
-        }
-
-        getValByKey(lang, k, default_lang) {
-
-            function findValue(k) {
-                for (let l in Object.keys(this.dict[k])){
-                    if(this.dict[k][Object.keys(this.dict[k])[l]]) {
-                        return this.dict[k][Object.keys(this.dict[k])[l]];
-                    }
-                }
-            }
-            try {
-                let res = this.dict[k][lang] ?
-                    this.dict[k][lang] :
-                    (this.dict[k][default_lang] ? this.dict[k][default_lang] : findValue(k));
-                return res.replace(/%0D/g,String.fromCharCode(13, 10)).replace(/%22/g,String.fromCharCode(22)).replace(/%10/g,String.fromCharCode(10));
-            } catch (ex) {
-                return '';
-            }
-        }
-
-        getDictValue(lang, value) {
-            let res = $.grep(Object.values(this.dict), function (a) {
-                for (let l in Object.values(a))
-                    if (a[Object.keys(a)[l]].toLowerCase() === value.toLowerCase())
-                        return a[lang];
-            });
-
-            if (res.length > 0 && res[0][lang])
-                return res[0][lang];
-            else
-                return value;
-        }
-
-        getKeyByValue(lang, value) {
-            let res = $.grep(Object.values(this.dict), function (a) {
-                for (let l in Object.values(a))
-                    if (a[Object.keys(a)[l]].toLowerCase() === value.toLowerCase())
-                        return Object.keys(a)[l];
-            });
-
-            if (res.length > 0)
-                return res[0];
-            else
-                return null;
-        }
-
-
-        Translate(from, to, cb) {
-
-            if (from === to) {
-                cb();
-                return;
-            }
-            this.getDict();
-            let trAr = {};
-            let dtAr = $('[data-translate]');
-            for (let i = 0; i < dtAr.length; i++) {
-                let k = $(dtAr[i]).attr('data-translate').toLowerCase();
-                let val = $(dtAr[i]).text() || $(dtAr[i]).val();
-                if (dtAr[i].getAttribute('text') && dtAr[i].getAttribute('text').value)
-                    val = dtAr[i].getAttribute('text').value;
-                if (!val)
-                    continue;
-
-                if (this.dict[k] && !this.dict[k][to]) {
-                    let from = Object.keys(this.dict[k])[0];
-                    trAr[k] = {[from]: this.dict[k][from]};
-                }
-                // else if ((!this.dict[k] && !this.dict[k][to]) && !trAr[k])
-                //     trAr[k] = {[from]: val};
-            }
-
-
-            if (Object.keys(trAr).length > 0) {
-
-                let data_obj = {
-                    "proj":"bm",
-                    "func": "translate",
-                    "data": JSON.stringify(trAr),
-                    "to": to
-                };
-
-                $.ajax({
-                    url: host_port,
-                    method: "POST",
-                    dataType: 'json',
-                    data: data_obj,
-                    dict: this.dict,
-                    cb: cb,
-                    async: true,   // asynchronous request? (synchronous requests are discouraged...)
-                    success: function (resp) {
-                        //$("[data-translate='" + this.k + "']").parent().val(resp);
-
-                    },
-                    error: function (xhr, status, error) {
-                        //let err = eval("(" + xhr.responseText + ")");
-                        console.log(error.Message);
-                        this.cb();
-                    },
-
-                    complete: function (data) {
-                        if (data.status == 200) {
-                            let add = data.responseJSON;
-                            for (let k in add) {
-                                //window.this.dict.this.dict = Object.assign(this.dict, add);
-                                if (!window.this.dict.this.dict[k])
-                                    window.this.dict.this.dict[k] = {};
-                                for (let l in add[k]) {
-                                    if (window.this.dict.this.dict[k][l])
-                                        window.this.dict.this.dict[k][l] = {};
-                                    window.this.dict.this.dict[k][l] = add[k][l];
-                                }
-                            }
-
-                            if (this.cb)
-                                this.cb();
-                        }
-                    },
-                });
-            } else {
-                if (cb)
-                    cb();
-            }
-        }
-
-
-    }
 
     /* src\user\kolmit\Profile.svelte generated by Svelte v3.40.2 */
 
@@ -20303,7 +20105,7 @@ var app = (function () {
     	let t1;
     	let div6;
     	let h2;
-    	let t2_value = /*Dict*/ ctx[6].dict['How to introduce you?'][/*lang*/ ctx[5]] + "";
+    	let t2_value = /*dict*/ ctx[6]['How to introduce you?'][/*lang*/ ctx[5]] + "";
     	let t2;
     	let t3;
     	let div2;
@@ -20326,7 +20128,7 @@ var app = (function () {
     	let div5;
     	let t11;
     	let button;
-    	let t12_value = /*Dict*/ ctx[6].dict['Save and Close'][/*lang*/ ctx[5]] + "";
+    	let t12_value = /*dict*/ ctx[6]['Save and Close'][/*lang*/ ctx[5]] + "";
     	let t12;
     	let mounted;
     	let dispose;
@@ -20370,13 +20172,13 @@ var app = (function () {
     			attr(input0, "type", "text");
     			attr(input0, "id", "name");
     			attr(input0, "class", "form-control");
-    			attr(input0, "placeholder", input0_placeholder_value = /*Dict*/ ctx[6].dict['input user name *'][/*lang*/ ctx[5]]);
+    			attr(input0, "placeholder", input0_placeholder_value = /*dict*/ ctx[6]['input user name *'][/*lang*/ ctx[5]]);
     			input0.required = true;
     			set_style(div0, "width", "250px");
     			attr(input1, "type", "email");
     			attr(input1, "id", "email");
     			attr(input1, "class", "form-control");
-    			attr(input1, "placeholder", input1_placeholder_value = /*Dict*/ ctx[6].dict['input email address'][/*lang*/ ctx[5]]);
+    			attr(input1, "placeholder", input1_placeholder_value = /*dict*/ ctx[6]['input email address'][/*lang*/ ctx[5]]);
     			input1.required = true;
     			set_style(input1, "width", "100%");
     			set_style(div1, "flex", "1");
@@ -20454,9 +20256,9 @@ var app = (function () {
     			}
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*Dict, lang*/ 96 && t2_value !== (t2_value = /*Dict*/ ctx[6].dict['How to introduce you?'][/*lang*/ ctx[5]] + "")) set_data(t2, t2_value);
+    			if (dirty & /*lang*/ 32 && t2_value !== (t2_value = /*dict*/ ctx[6]['How to introduce you?'][/*lang*/ ctx[5]] + "")) set_data(t2, t2_value);
 
-    			if (dirty & /*Dict, lang*/ 96 && input0_placeholder_value !== (input0_placeholder_value = /*Dict*/ ctx[6].dict['input user name *'][/*lang*/ ctx[5]])) {
+    			if (dirty & /*lang*/ 32 && input0_placeholder_value !== (input0_placeholder_value = /*dict*/ ctx[6]['input user name *'][/*lang*/ ctx[5]])) {
     				attr(input0, "placeholder", input0_placeholder_value);
     			}
 
@@ -20464,7 +20266,7 @@ var app = (function () {
     				set_input_value(input0, /*name*/ ctx[2]);
     			}
 
-    			if (dirty & /*Dict, lang*/ 96 && input1_placeholder_value !== (input1_placeholder_value = /*Dict*/ ctx[6].dict['input email address'][/*lang*/ ctx[5]])) {
+    			if (dirty & /*lang*/ 32 && input1_placeholder_value !== (input1_placeholder_value = /*dict*/ ctx[6]['input email address'][/*lang*/ ctx[5]])) {
     				attr(input1, "placeholder", input1_placeholder_value);
     			}
 
@@ -20476,7 +20278,7 @@ var app = (function () {
     				attr(img, "src", img_src_value);
     			}
 
-    			if (dirty & /*Dict, lang*/ 96 && t12_value !== (t12_value = /*Dict*/ ctx[6].dict['Save and Close'][/*lang*/ ctx[5]] + "")) set_data(t12, t12_value);
+    			if (dirty & /*lang*/ 32 && t12_value !== (t12_value = /*dict*/ ctx[6]['Save and Close'][/*lang*/ ctx[5]] + "")) set_data(t12, t12_value);
     		},
     		i: noop,
     		o: noop,
@@ -20490,6 +20292,10 @@ var app = (function () {
     }
 
     function instance$k($$self, $$props, $$invalidate) {
+    	let $dicts;
+    	let $langs;
+    	component_subscribe($$self, dicts, $$value => $$invalidate(17, $dicts = $$value));
+    	component_subscribe($$self, langs, $$value => $$invalidate(18, $langs = $$value));
     	let { profile } = $$props;
     	let { selected } = $$props;
     	let src = "../kolmit/assets/user.svg";
@@ -20503,20 +20309,9 @@ var app = (function () {
     	});
 
     	let lang = 'en';
-
-    	langs.subscribe(data => {
-    		$$invalidate(5, lang = data);
-    	});
-
-    	let Dict;
-
-    	const us_dict = dicts.subscribe(data => {
-    		if (data) {
-    			$$invalidate(6, Dict = data);
-    		}
-    	});
-
-    	onDestroy(us_dict);
+    	lang = $langs;
+    	const dict = $dicts;
+    	onDestroy();
 
     	function OnClickSend() {
     		localStorage.setItem('kolmi_abonent', JSON.stringify({ id: window.id, src, name, email }));
@@ -20622,7 +20417,7 @@ var app = (function () {
     		email,
     		form,
     		lang,
-    		Dict,
+    		dict,
     		OnClickSend,
     		setForm,
     		OnClickUpload,
@@ -20936,10 +20731,10 @@ var app = (function () {
     			attr(path, "id", "svg_1");
     			attr(path, "class", "selected");
     			attr(path, "transform", "scale(.03)");
-    			attr(g, "class", "currentLayer svelte-jvsbvw");
+    			attr(g, "class", "currentLayer svelte-slhsq7");
     			set_style(g, "stroke", "black");
     			set_style(g, "stroke-width", "10px");
-    			attr(svg, "class", "callButton svelte-jvsbvw");
+    			attr(svg, "class", "callButton svelte-slhsq7");
     			attr(svg, "status", /*status*/ ctx[0]);
     			attr(svg, "width", "35");
     			attr(svg, "height", "35");
@@ -20957,7 +20752,7 @@ var app = (function () {
     			set_style(div, "max-width", "100%");
     			set_style(div, "height", "100%");
     			set_style(div, "top", "0");
-    			set_style(div, "left", "15px");
+    			set_style(div, "left", "6px");
     			set_style(div, "z-index", "10");
     		},
     		m(target, anchor) {
@@ -24925,7 +24720,7 @@ var app = (function () {
     			video.muted = true;
     			set_style(video, "display", /*display*/ ctx[0]);
     			set_style(video, "position", "absolute");
-    			set_style(video, "top", "10px");
+    			set_style(video, "bottom", "0px");
     			set_style(video, "right", "0px");
     			set_style(video, "max-width", "40%");
     			set_style(video, "max-height", "40%");
@@ -24933,6 +24728,7 @@ var app = (function () {
     		},
     		m(target, anchor) {
     			insert(target, video, anchor);
+    			/*video_binding*/ ctx[3](video);
     		},
     		p(ctx, [dirty]) {
     			if (dirty & /*display*/ 1) {
@@ -24943,6 +24739,7 @@ var app = (function () {
     		o: noop,
     		d(detaching) {
     			if (detaching) detach(video);
+    			/*video_binding*/ ctx[3](null);
     		}
     	};
     }
@@ -24953,36 +24750,43 @@ var app = (function () {
     	let lv;
 
     	onMount(async () => {
-    		$$invalidate(2, lv = document.getElementById('localVideo'));
+    		
     	});
+
+    	function video_binding($$value) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			lv = $$value;
+    			($$invalidate(1, lv), $$invalidate(2, srcObject));
+    		});
+    	}
 
     	$$self.$$set = $$props => {
     		if ('display' in $$props) $$invalidate(0, display = $$props.display);
-    		if ('srcObject' in $$props) $$invalidate(1, srcObject = $$props.srcObject);
+    		if ('srcObject' in $$props) $$invalidate(2, srcObject = $$props.srcObject);
     	};
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*lv, srcObject*/ 6) {
     			if (lv && srcObject) {
-    				$$invalidate(2, lv.srcObject = srcObject, lv);
+    				$$invalidate(1, lv.srcObject = srcObject, lv);
     			} else if (lv && lv.srcObject) {
     				lv.srcObject.getVideoTracks().forEach(track => {
     					track.stop();
     					lv.srcObject.removeTrack(track);
     				});
 
-    				$$invalidate(2, lv.src = '', lv);
+    				$$invalidate(1, lv.src = '', lv);
     			}
     		}
     	};
 
-    	return [display, srcObject, lv];
+    	return [display, lv, srcObject, video_binding];
     }
 
     class Video_local extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$6, create_fragment$7, safe_not_equal, { display: 0, srcObject: 1 });
+    		init(this, options, instance$6, create_fragment$7, safe_not_equal, { display: 0, srcObject: 2 });
     	}
     }
 
@@ -25006,7 +24810,7 @@ var app = (function () {
     			attr(video, "id", "remoteVideo");
     			video.autoplay = true;
     			video.playsInline = true;
-    			attr(video, "style", "\r\n        position: absolute;\r\n        /* width: 100%; */\r\n        height: 107%;\r\n        /* left: 0px; */\r\n        top: 0px;\r\n        opacity: 1;\r\n        ");
+    			attr(video, "style", "\r\n        position: absolute;\r\n        /* width: 100%; */\r\n        height: 100%;\r\n        /* left: 0px; */\r\n        top: 0px;\r\n        opacity: 1;\r\n        ");
     			set_style(div, "display", /*display*/ ctx[0]);
     			set_style(div, "position", "relative");
     			set_style(div, "width", "100%");

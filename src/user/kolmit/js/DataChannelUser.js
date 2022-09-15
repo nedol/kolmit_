@@ -1,8 +1,12 @@
-import {DataChannel} from "./DataChannel";
 
-export class DataChannelUser extends DataChannel{
+
+export class DataChannelUser{
     constructor(rtc,pc){
-        super (rtc, pc);
+        this.rtc = rtc;
+        this.pc = pc;
+        this.call_num = 3;
+        this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
+        this.forward;
 
         let that = this;
         that.cnt_call = 0;

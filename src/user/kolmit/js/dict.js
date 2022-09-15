@@ -1,11 +1,7 @@
-import { writable } from 'svelte/store';
+import { dicts } from '../stores';
+const dict = $dicts;
 
-export let dicts = writable();
 
-(async ()=>{   
-    let dict = (await (await fetch('../assets/dict.json')).json());
-    dicts.set( new Dict(dict));
-})();
 
 
 class Dict {

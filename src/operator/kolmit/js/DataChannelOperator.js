@@ -1,18 +1,21 @@
-import {DataChannel} from "./DataChannel";
+
 import { writable } from 'svelte/store';
 
 export const dc_msg = writable(); 
 
-export class DataChannelOperator extends DataChannel{
+export class DataChannelOperator{
     constructor(rtc,pc){
-        super (rtc, pc);
+
+        this.rtc = rtc;
+        this.pc = pc;
+        this.call_num = 3;
+        this.forward;
 
         let that = this;
         that.cnt_call = 0;
         // this.dc.onopen = () => {
         //     console.log('OnOpenDataChannel');
         // }
-
         
         this.dc = pc.con.createDataChannel(pc.pc_key+" data channel"); 
 
@@ -36,6 +39,8 @@ export class DataChannelOperator extends DataChannel{
             console.log('Receive Channel Callback');
 
             this.dc = event.channel;//change dc
+
+            rtc.PlayCallCnt(); 
             
         };
         

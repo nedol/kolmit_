@@ -2,7 +2,7 @@
   <section class="pricing-table">
       <div class="container">
           <div class="block-heading">
-              <h2>{Dict.getValByKey(lang,['Our Pricing'])}</h2>
+              <h2>{dict['Our Pricing'][lang]}</h2>
               <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc quam urna, dignissim nec auctor in, mattis vitae leo.</p>
           </div>
 
@@ -12,7 +12,7 @@
               <div class="col-md-5 col-lg-4">
                   <div class="item">
                       {#if tarif['Ribbon']}
-                      <div class="ribbon">{Dict.dict[tarif['Ribbon']][lang]}</div>
+                      <div class="ribbon">{dict[tarif['Ribbon']][lang]}</div>
                       {/if}
                       <div class="heading">
                           <h3>{name.toUpperCase()}</h3>
@@ -20,19 +20,19 @@
                       <p>{tarif['Desc'][lang]}</p>
                       <div class="features">  
                         {#if tarif.Duration}                      
-                        <h4><span class="feature">{Dict.dict['Duration'][lang]}</span> : <span class="value">{tarif.Duration} {Dict.dict['Days'][lang]}</span></h4>
+                        <h4><span class="feature">{dict['Duration'][lang]}</span> : <span class="value">{tarif.Duration} {dict['Days'][lang]}</span></h4>
                         {/if}
-                        <h4><span class="feature">{Dict.getValByKey(lang,['Waiting Mode'])}</span> : <span class="value">{tarif['Waiting Mode'][lang]}</span></h4>
-                        <h4><span class="feature">{Dict.getValByKey(lang,['Total Operators'])}</span> : <span class="value">{tarif['Total Operators'][lang]}</span></h4>
-                        <h4><span class="feature">{Dict.getValByKey(lang,['Multi Operator Mode'])}</span> : <span class="value">{tarif['Multi Operator Mode'][lang]}</span></h4>
-                        <h4><span class="feature">{Dict.getValByKey(lang,['Total Depts'])}</span> : <span class="value">{tarif['Total Depts'][lang]}</span></h4>
-                        <h4><span class="feature">{Dict.getValByKey(lang,['Dedicated Servers'])}</span> : <span class="value">{Dict.dict[tarif['Dedicated Servers']][lang]}</span></h4>                      
-                        <h4><span class="feature">{Dict.getValByKey(lang,['Full Support'])}</span> : <span class="value">{Dict.dict[tarif['Full Support']][lang]}</span></h4>
+                        <h4><span class="feature">{dict['Waiting Mode'][lang]}</span> : <span class="value">{tarif['Waiting Mode'][lang]}</span></h4>
+                        <h4><span class="feature">{dict['Total Operators'][lang]}</span> : <span class="value">{tarif['Total Operators'][lang]}</span></h4>
+                        <h4><span class="feature">{dict['Multi Operator Mode'][lang]}</span> : <span class="value">{dict['Multi Operator Mode'][lang]}</span></h4>
+                        <h4><span class="feature">{dict['Total Depts'][lang]}</span> : <span class="value">{dict['Total Depts'][lang]}</span></h4>
+                        <h4><span class="feature">{dict['Dedicated Servers'][lang]}</span> : <span class="value">{dict['Dedicated Servers'][lang]}</span></h4>                      
+                        <h4><span class="feature">{dict['Full Support'][lang]}</span> : <span class="value">{dict['Full Support'][lang]}</span></h4>
                       </div>
                       <div class="price">
-                          <h4>{tarif['Price'][lang]}</h4><h5>/{Dict.dict['month'][lang]}</h5>
+                          <h4>{tarif['Price'][lang]}</h4><h5>/{dict['month'][lang]}</h5>
                       </div>
-                      <button class="btn btn-block btn-outline-primary" type="submit" tarif={name} on:click={onSubmit}>{Dict.dict['Choose'][lang]}</button>
+                      <button class="btn btn-block btn-outline-primary" type="submit" tarif={name} on:click={onSubmit}>{dict['Choose'][lang]}</button>
                   </div>
               </div>
               {/each}
@@ -176,13 +176,8 @@
         lang = data;
     });
 
-    import {dicts} from '../js/dict.js';
-    let Dict;
-    const us_dict = dicts.subscribe(data => {
-        if(data){
-            Dict = data;
-        }
-    });
+    import {dicts} from '../js/stores.js';
+    const dict = $dicts
 
 
     let tarif = 'free';

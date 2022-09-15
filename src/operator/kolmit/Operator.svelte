@@ -70,8 +70,8 @@
         </div>
    
         <BurgerMenu padding={'25px'}>
-                {#if Dict}
-                {Dict.dict['Language Select'][lang]}:
+                {#if dict}
+                {dict['Language Select'][lang]}:
                 {/if}
                 <div style="display: flex;">
                         <label style="flex:1">
@@ -89,11 +89,11 @@
                                 <img src="https://www.sic-info.org/wp-content/uploads/2014/01/ru.png" alt="Russian">
                         </label>
                 </div>
-                {#if Dict && (window.operator && operator.role==="admin") && isPaid}      
+                {#if dict && (window.operator && operator.role==="admin") && isPaid}      
                 {#if !edited_display}                          
-                        <h4 on:click="{()=>editable.set(true)}">{Dict.dict['Edit Call Center'][lang]}</h4>                 
+                        <h4 on:click="{()=>editable.set(true)}">{dict['Edit Call Center'][lang]}</h4>                 
                 {:else}
-                        <h4 on:click="{()=>editable.set(false)}">{Dict.dict['Cancel Edit Call Center'][lang]}</h4>
+                        <h4 on:click="{()=>editable.set(false)}">{dict['Cancel Edit Call Center'][lang]}</h4>
                 {/if}
                 {/if}
         </BurgerMenu>
@@ -176,13 +176,8 @@ const us_lang = langs.subscribe((data) => {
 });
 
 
-import {dicts} from './js/dict.js';
-  let Dict;
-  const us_dict = dicts.subscribe(data => {
-      if(data){
-        Dict = data;
-      }
-  });
+import {dicts} from './js/stores.js';
+const dict = $dicts
 
 
 import {pswd} from './js/stores.js'
@@ -195,9 +190,7 @@ const us_pswd = pswd.subscribe((data) => {
 import {signal} from './js/stores.js'
 const us_signal = signal.subscribe((signalch) => {
         if(signalch){
-
                 window.operator  = new RTCOperator("operator", operator, abonent, MD5(JSON.stringify(Date.now())+operator.email), psw, signalch);
-                initRTC(signalch);  
         }
 });
 
@@ -240,7 +233,7 @@ onMount(() => {
 
 });
 
-onDestroy(us_lang, us_signal,us_dict,us_msg_1,us_dcmsg,us_edit,us_pswd);
+onDestroy(us_lang, us_signal,us_msg_1,us_dcmsg,us_edit,us_pswd);
 
 
 let progress ={
@@ -389,6 +382,7 @@ catch (ex) {
         switch(status){
 
         case'inactive':
+                initRTC();
                 window.operator.Offer();
                 status='active'
                 break;

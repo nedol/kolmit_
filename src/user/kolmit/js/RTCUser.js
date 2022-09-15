@@ -33,11 +33,6 @@ export default class RTCUser extends RTCBase {
 
             window.user.SendCheck();
 
-            this.Init(() => {
-                //this.callButton.attributes.status.value = 'inactive';
-                //document.getElementsByClassName('fa-spinner')[0].style.display ='none';
-            });
-
         })();
 
 
@@ -58,22 +53,24 @@ export default class RTCUser extends RTCBase {
     }
 
     Call(){
-        let that = this;
 
-        this.GetUserMedia({audio: 1, video: 0}, function () {
-            // document.getElementsByClassName('browser_container')[0].style.display = 'none';
-            let par = {};
-            par.proj = 'kolmit';
-            par.func = 'call';
-            par.status = 'call';
-            par.type = that.type;
-            par.abonent = that.abonent.toLowerCase();
-            par.em = that.em.toLowerCase();
-            par.uid = that.uid;
-            that.signch.SendMessage(par);
-            that.status = 'call';
-
+        
+        this.Init(() => {
+            this.GetUserMedia({audio: 1, video: 0}, ()=> {
+                // document.getElementsByClassName('browser_container')[0].style.display = 'none';
+                let par = {};
+                par.proj = 'kolmit';
+                par.func = 'call';
+                par.status = 'call';
+                par.type = this.type;
+                par.abonent = this.abonent.toLowerCase();
+                par.em = this.em.toLowerCase();
+                par.uid = this.uid;
+                this.signch.SendMessage(par);
+                this.status = 'call';    
+            });
         });
+
     }
 
     Hangup(){

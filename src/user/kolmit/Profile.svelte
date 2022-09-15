@@ -33,13 +33,13 @@
     
     </style>
     <div class="row" style="border-style: groove; border-radius:2px;border-color: #cbced2;padding: 10px">
-        <h2 class="form-signin-heading">{Dict.dict['How to introduce you?'][lang]}</h2>
+        <h2 class="form-signin-heading">{dict['How to introduce you?'][lang]}</h2>
         <div style="display:flex;flex-direction: column;">
             <div style='width:250px'>
-                <input type="text" id="name" class="form-control" placeholder={Dict.dict['input user name *'][lang]} required bind:value = {name}>
+                <input type="text" id="name" class="form-control" placeholder={dict['input user name *'][lang]} required bind:value = {name}>
             </div>
             <div style='flex: 1'>
-                <input type="email" id="email" class="form-control" placeholder={Dict.dict['input email address'][lang]} required bind:value = {email} style="width:100%">  
+                <input type="email" id="email" class="form-control" placeholder={dict['input email address'][lang]} required bind:value = {email} style="width:100%">  
             </div>
         </div>
         <div>  
@@ -64,7 +64,7 @@
                 style="display: none"/>
         </div>
         <div for="send_form">&nbsp;</div>
-        <button id="send_form" class="btn btn-primary"  on:click|preventDefault|stopPropagation={OnClickSend}>{Dict.dict['Save and Close'][lang]}</button>
+        <button id="send_form" class="btn btn-primary"  on:click|preventDefault|stopPropagation={OnClickSend}>{dict['Save and Close'][lang]}</button>
     </div>
 </form> 
 
@@ -94,21 +94,14 @@
         console.log(files);
     }
 
-    import {langs} from './stores.js'
+    import {langs} from './js/stores.js'
     let lang = 'en';
-    const us_lang = langs.subscribe((data) => {
-            lang = data;
-    });
+    lang = $langs;
 
-    import {dicts} from './js/dict.js';
-    let Dict;
-    const us_dict = dicts.subscribe(data => {
-        if(data){
-            Dict = data;
-        }
-    });
+    import {dicts} from './js/stores.js'
+    const dict = $dicts;
 
-    onDestroy(us_dict);
+    onDestroy();
 
 
     function OnClickSend(){

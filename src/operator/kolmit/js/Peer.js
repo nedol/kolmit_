@@ -120,7 +120,7 @@ export class Peer{
                             clearTimeout(timr);
                         }
                         
-                    }, 100);
+                    }, 200);
                 }
 
             }
@@ -159,19 +159,21 @@ export class Peer{
 
     setRemoteDesc(desc) {
 
-        let that = this;
-        log('setRemoteDescription start', that);
-        log('Peer connectionState:'+this.con.connectionState, that);
+        log('setRemoteDescription start', this);
+        log('Peer connectionState:'+this.con.connectionState, this);
 
-        this.con.setRemoteDescription(desc).then(
-            function () {
-                that.params['rem_desc'] = that.con.remoteDescription;
-                if (that.con.remoteDescription.type === 'offer') {
-                    that.con.createAnswer().then(
-                        desc => that.onCreateAnswerSuccess(desc),
-                        that.onCreateAnswerError
+        this.con.setRemoteDescription(desc).then(()=> {
+            this.params['rem_desc'] = this.con.remoteDescription;
+            if (this.con.remoteDescription.type === 'offer') {
+                try{
+                    this.con.createAnswer().then(
+                        desc => this.onCreateAnswerSuccess(desc),
+                        this.onCreateAnswerError
                     );
+                }catch(ex){
+                    console.log(ex)
                 }
+            }
             },
             function (error) {
                 log('Failed to set remote description: ' + error.toString(), this);

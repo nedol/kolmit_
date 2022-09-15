@@ -28,16 +28,11 @@
         lang = data;
     });
 
-    import {dicts} from '../js/dict.js';
+    import {dicts} from '../js/stores.js';
+    const dict = $dicts
     let txt = 'Download Call Center';
-    let dnld = '';
-    let Dict;
-    const unsubscribe = dicts.subscribe(data => {
-        if(data){
-            Dict = data;
-            dnld = Dict.dict[txt][lang]
-        }
-    });
+    let dnld = dict[txt][lang]
+
     onDestroy(unsubscribe);
 
     $:if(lang && Dict && txt){

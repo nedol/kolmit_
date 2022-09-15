@@ -9,6 +9,14 @@ export let pswd = writable();
 
 let lang = 'en', psw = '';
 
+export let dicts = writable();
+
+(async ()=>{    
+    let dict = (await (await fetch('../assets/dict.json')).json());
+    dicts.set( dict);
+})();
+
+
 (async ()=>{
     try{
         lang = JSON.parse(localStorage.getItem('kolmit'))['lang'];
@@ -19,6 +27,8 @@ let lang = 'en', psw = '';
     }
     langs.set(lang);    
     pswd.set(psw);
+
+
 })();
 
 export let posterst = writable();
@@ -26,3 +36,4 @@ export let posterst = writable();
 export let msg_1 = writable();
 
 export let signal = writable();
+

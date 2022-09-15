@@ -67,7 +67,7 @@ export  class RTCBase{
             if(pc.con.iceConnectionState==='checking'){
                 log(pc.pc_key +' ICE state change event: checking', this);
                 this.checking_tmr = setTimeout(()=> {
-                    pc.con.restartIce();
+                    // pc.con.restartIce();
                 },5000)
 
             }
@@ -185,7 +185,7 @@ export  class RTCBase{
             }
         }
 
-        let params = {};//this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
+        let params = this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
 
         this.pcPull[pc_key] = null;
         this.pcPull[pc_key] = new Peer(this, pc_config, pc_key);
@@ -193,9 +193,9 @@ export  class RTCBase{
         this.pcPull[pc_key].params = params;
 
         // setTimeout(()=>{
-        this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);   
-        this.startTime = Date.now();         
-        cb();
+            this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);   
+            this.startTime = Date.now();         
+            cb();
         // },1000); 
  
     }

@@ -22,7 +22,7 @@
     {/if}
 
     <!-- src="/kolmit/user/iframe.html?em=oper@komi&abonent={user.email}" -->
-    <!-- {#if edited_display} -->
+    {#if !edited_display}
       {#if user.email && operator.email !== user.email}
         <iframe
           class="user_frame"
@@ -31,14 +31,13 @@
           frameBorder="0"
           style="position: absolute;
             top: 0px;
-            left: -20px;
-            height: 40px;
+            left: -6px;
             width: 100%;"
       
           title="User Frame"
         />
       {/if}
-    <!-- {/if} -->
+    {/if}
 
     {#if edited_display}
       {#if (operator.email!==user.email && user.role === "operator")}
@@ -66,7 +65,7 @@
   </div>
 
   <div style="flex:1; margin-left:10px; font-size:xx-small">
-    {#if Dict}
+    {#if dict}
       <input
         type="text"
         class="user_name"
@@ -74,7 +73,7 @@
         on:change={OnChange}
         bind:value={user.name}
         readonly  = {readonlyOper}
-        style="width:80%;"
+        style="width:80%; font-weight:800"
       />
       <input
         type="text"
@@ -183,32 +182,23 @@
     placeholder_desc,
     upload;
 
-  import { dicts } from "../js/dict.js";
-  let Dict;
-  const us_dict = dicts.subscribe((data) => {
-    if (data) {
-      Dict = data;
-      placeholder_name = Dict.getValByKey(lang, "input operator name");
-      placeholder_email = Dict.getValByKey(lang, "input operator email");
-      placeholder_desc = Dict.getValByKey(lang, "input description");
-    }
-  });
+  import { dicts } from "../js/stores.js";
+  let dict = $dicts
+
+  $:if(dict && lang){
+      placeholder_name = dict ["input operator name"][lang];
+      placeholder_email = dict["input operator email"][lang];
+      placeholder_desc = dict["input description"][lang];
+  }
+
 
   import { signal } from "../js/stores.js";
-  let signalch = false;
-  const us_signal = signal.subscribe((data) => {
-    if (data) {
-      signalch = data;
-    }
-  });
+  const signalch = $signal
 
   import { pswd } from "../js/stores.js";
-  let psw;
-  const us_pswd = pswd.subscribe((data) => {
-    psw = data;
-  });
+  const psw = $pswd
 
-  onDestroy(us_signal, us_lang, us_dict, us_pswd);
+  onDestroy( us_lang);
 
     
   export let edited_display;

@@ -19125,6 +19125,14 @@ var app = (function () {
 
     let lang = 'en', psw = '';
 
+    let dicts = writable();
+
+    (async ()=>{    
+        let dict = (await (await fetch('../assets/dict.json')).json());
+        dicts.set( dict);
+    })();
+
+
     (async ()=>{
         try{
             lang = JSON.parse(localStorage.getItem('kolmit'))['lang'];
@@ -19135,6 +19143,8 @@ var app = (function () {
         }
         langs.set(lang);    
         pswd.set(psw);
+
+
     })();
 
     let posterst = writable();
@@ -19143,214 +19153,9 @@ var app = (function () {
 
     let signal = writable();
 
-    let dicts = writable();
-
-
-    (async ()=>{
-        (await (await fetch('../host.json')).json());     
-        let dict = (await (await fetch('../assets/dict.json')).json());
-        dicts.set( new Dict(dict));
-    })();
-
-    class Dict {
-
-        constructor(dict) {
-
-            this.dict  = dict;
-        }
-
-
-    // Function for swapping dictionaries
-        set_lang(lang, el, default_lang) {
-            Object.keys(this.dict);
-            let dtAr = $(el).find("[data-translate]");
-
-            for (let i = 0; i < dtAr.length; i++) {
-                let item = dtAr[i];
-                let k = $(item).attr("data-translate").toLowerCase();
-
-                //замена по ключу
-                if(item.attributes.placeholder && this.dict[item.attributes.placeholder.value] && this.dict[item.attributes.placeholder.value][lang]){
-                    $(item).attr('placeholder',this.dict[item.attributes.placeholder.value][lang]);
-                    continue;
-                }
-                if(item.attributes.title && this.dict[item.attributes.title.value] && this.dict[item.attributes.title.value][lang]){
-                    $(item).attr('title',this.dict[item.attributes.title.value][lang]);
-                }
-                if(item.value && this.dict[item.value] && this.dict[item.value][lang]){
-                    item.value = this.dict[item.value][lang];
-                }
-                if($(item).text() && this.dict[$(item).text()] && this.dict[$(item).text()][lang]){
-                    $(item).text(this.dict[$(item).text()][lang]);
-                }
-                //замена по аргументу
-                if (this.dict[k]) {
-                    let def_lang = default_lang?default_lang:Object.keys(this.dict[k])[0];
-                    let val = this.dict[k][lang] ? this.dict[k][lang] : this.dict[k][def_lang];
-                    if(!val) {
-                        for(let l in this.dict[k]){
-                            if(this.dict[k][l]) {
-                                val = this.dict[k][l];
-                                break;
-                            }
-                        }
-                    }
-                    try {
-                        //val = urlencode.decode(val);
-                        val = val.replace(/\\n/g, String.fromCharCode(13, 10) );
-                        val = val.replace('%0D',String.fromCharCode(13, 10));
-                    }catch(ex){
-                    }
-
-                    if(item.isEntity)//a-frame
-                        item.setAttribute('text','value',val);
-
-                    if(item.tagName.toLowerCase()==='input' || item.tagName.toLowerCase()==='textarea')
-                        $(item).val(val);
-                    else if(item.tagName.toLowerCase()==='div')
-                        $(item).text(val);
-                    else
-                        $(item).html(val);
-
-                    if($(item).attr("title"))
-                        $(item).attr("title", val);
-                    if($(item).attr("value"))
-                        $(item).attr("value", val);
-
-                }
-            }
-        }
-
-        getValByKey(lang, k, default_lang) {
-
-            function findValue(k) {
-                for (let l in Object.keys(this.dict[k])){
-                    if(this.dict[k][Object.keys(this.dict[k])[l]]) {
-                        return this.dict[k][Object.keys(this.dict[k])[l]];
-                    }
-                }
-            }
-            try {
-                let res = this.dict[k][lang] ?
-                    this.dict[k][lang] :
-                    (this.dict[k][default_lang] ? this.dict[k][default_lang] : findValue(k));
-                return res.replace(/%0D/g,String.fromCharCode(13, 10)).replace(/%22/g,String.fromCharCode(22)).replace(/%10/g,String.fromCharCode(10));
-            } catch (ex) {
-                return '';
-            }
-        }
-
-        getDictValue(lang, value) {
-            let res = $.grep(Object.values(this.dict), function (a) {
-                for (let l in Object.values(a))
-                    if (a[Object.keys(a)[l]].toLowerCase() === value.toLowerCase())
-                        return a[lang];
-            });
-
-            if (res.length > 0 && res[0][lang])
-                return res[0][lang];
-            else
-                return value;
-        }
-
-        getKeyByValue(lang, value) {
-            let res = $.grep(Object.values(this.dict), function (a) {
-                for (let l in Object.values(a))
-                    if (a[Object.keys(a)[l]].toLowerCase() === value.toLowerCase())
-                        return Object.keys(a)[l];
-            });
-
-            if (res.length > 0)
-                return res[0];
-            else
-                return null;
-        }
-
-
-        Translate(from, to, cb) {
-
-            if (from === to) {
-                cb();
-                return;
-            }
-            this.getDict();
-            let trAr = {};
-            let dtAr = $('[data-translate]');
-            for (let i = 0; i < dtAr.length; i++) {
-                let k = $(dtAr[i]).attr('data-translate').toLowerCase();
-                let val = $(dtAr[i]).text() || $(dtAr[i]).val();
-                if (dtAr[i].getAttribute('text') && dtAr[i].getAttribute('text').value)
-                    val = dtAr[i].getAttribute('text').value;
-                if (!val)
-                    continue;
-
-                if (this.dict[k] && !this.dict[k][to]) {
-                    let from = Object.keys(this.dict[k])[0];
-                    trAr[k] = {[from]: this.dict[k][from]};
-                }
-                // else if ((!this.dict[k] && !this.dict[k][to]) && !trAr[k])
-                //     trAr[k] = {[from]: val};
-            }
-
-
-            if (Object.keys(trAr).length > 0) {
-
-                let data_obj = {
-                    "proj":"bm",
-                    "func": "translate",
-                    "data": JSON.stringify(trAr),
-                    "to": to
-                };
-
-                $.ajax({
-                    url: host_port,
-                    method: "POST",
-                    dataType: 'json',
-                    data: data_obj,
-                    dict: this.dict,
-                    cb: cb,
-                    async: true,   // asynchronous request? (synchronous requests are discouraged...)
-                    success: function (resp) {
-                        //$("[data-translate='" + this.k + "']").parent().val(resp);
-
-                    },
-                    error: function (xhr, status, error) {
-                        //let err = eval("(" + xhr.responseText + ")");
-                        console.log(error.Message);
-                        this.cb();
-                    },
-
-                    complete: function (data) {
-                        if (data.status == 200) {
-                            let add = data.responseJSON;
-                            for (let k in add) {
-                                //window.this.dict.this.dict = Object.assign(this.dict, add);
-                                if (!window.this.dict.this.dict[k])
-                                    window.this.dict.this.dict[k] = {};
-                                for (let l in add[k]) {
-                                    if (window.this.dict.this.dict[k][l])
-                                        window.this.dict.this.dict[k][l] = {};
-                                    window.this.dict.this.dict[k][l] = add[k][l];
-                                }
-                            }
-
-                            if (this.cb)
-                                this.cb();
-                        }
-                    },
-                });
-            } else {
-                if (cb)
-                    cb();
-            }
-        }
-
-
-    }
-
     /* src\operator\kolmit\callcenter\Oper.svelte generated by Svelte v3.40.2 */
 
-    function create_if_block_6$1(ctx) {
+    function create_if_block_7(ctx) {
     	let input;
     	let mounted;
     	let dispose;
@@ -19367,12 +19172,12 @@ var app = (function () {
     		},
     		m(target, anchor) {
     			insert(target, input, anchor);
-    			/*input_binding*/ ctx[23](input);
+    			/*input_binding*/ ctx[24](input);
 
     			if (!mounted) {
     				dispose = [
     					listen(input, "change", /*OnChangeFile*/ ctx[17]),
-    					listen(input, "change", /*input_change_handler*/ ctx[24])
+    					listen(input, "change", /*input_change_handler*/ ctx[25])
     				];
 
     				mounted = true;
@@ -19381,15 +19186,50 @@ var app = (function () {
     		p: noop,
     		d(detaching) {
     			if (detaching) detach(input);
-    			/*input_binding*/ ctx[23](null);
+    			/*input_binding*/ ctx[24](null);
     			mounted = false;
     			run_all(dispose);
     		}
     	};
     }
 
-    // (26:6) {#if user.email && operator.email !== user.email}
+    // (25:4) {#if !edited_display}
     function create_if_block_5$1(ctx) {
+    	let if_block_anchor;
+    	let if_block = /*user*/ ctx[1].email && /*operator*/ ctx[3].email !== /*user*/ ctx[1].email && create_if_block_6$1(ctx);
+
+    	return {
+    		c() {
+    			if (if_block) if_block.c();
+    			if_block_anchor = empty();
+    		},
+    		m(target, anchor) {
+    			if (if_block) if_block.m(target, anchor);
+    			insert(target, if_block_anchor, anchor);
+    		},
+    		p(ctx, dirty) {
+    			if (/*user*/ ctx[1].email && /*operator*/ ctx[3].email !== /*user*/ ctx[1].email) {
+    				if (if_block) {
+    					if_block.p(ctx, dirty);
+    				} else {
+    					if_block = create_if_block_6$1(ctx);
+    					if_block.c();
+    					if_block.m(if_block_anchor.parentNode, if_block_anchor);
+    				}
+    			} else if (if_block) {
+    				if_block.d(1);
+    				if_block = null;
+    			}
+    		},
+    		d(detaching) {
+    			if (if_block) if_block.d(detaching);
+    			if (detaching) detach(if_block_anchor);
+    		}
+    	};
+    }
+
+    // (26:6) {#if user.email && operator.email !== user.email}
+    function create_if_block_6$1(ctx) {
     	let iframe;
     	let iframe_src_value;
 
@@ -19402,8 +19242,7 @@ var app = (function () {
     			attr(iframe, "frameborder", "0");
     			set_style(iframe, "position", "absolute");
     			set_style(iframe, "top", "0px");
-    			set_style(iframe, "left", "-20px");
-    			set_style(iframe, "height", "40px");
+    			set_style(iframe, "left", "-6px");
     			set_style(iframe, "width", "100%");
     			attr(iframe, "title", "User Frame");
     		},
@@ -19421,7 +19260,7 @@ var app = (function () {
     	};
     }
 
-    // (43:4) {#if edited_display}
+    // (42:4) {#if edited_display}
     function create_if_block_3$2(ctx) {
     	let if_block_anchor;
     	let if_block = /*operator*/ ctx[3].email !== /*user*/ ctx[1].email && /*user*/ ctx[1].role === "operator" && create_if_block_4$2(ctx);
@@ -19456,7 +19295,7 @@ var app = (function () {
     	};
     }
 
-    // (44:6) {#if (operator.email!==user.email && user.role === "operator")}
+    // (43:6) {#if (operator.email!==user.email && user.role === "operator")}
     function create_if_block_4$2(ctx) {
     	let svg;
     	let glyph;
@@ -19511,7 +19350,7 @@ var app = (function () {
     	};
     }
 
-    // (69:4) {#if Dict}
+    // (68:4) {#if dict}
     function create_if_block_2$4(ctx) {
     	let input0;
     	let t;
@@ -19527,12 +19366,13 @@ var app = (function () {
     			attr(input0, "type", "text");
     			attr(input0, "class", "user_name svelte-kknszv");
     			attr(input0, "placeholder", /*placeholder_name*/ ctx[8]);
-    			input0.readOnly = /*readonlyOper*/ ctx[13];
+    			input0.readOnly = /*readonlyOper*/ ctx[12];
     			set_style(input0, "width", "80%");
+    			set_style(input0, "font-weight", "800");
     			attr(input1, "type", "text");
     			attr(input1, "class", "user_email svelte-kknszv");
     			attr(input1, "placeholder", /*placeholder_email*/ ctx[9]);
-    			input1.readOnly = /*readonlyAdm*/ ctx[14];
+    			input1.readOnly = /*readonlyAdm*/ ctx[13];
     			set_style(input1, "width", "100%");
     			set_style(input1, "max-height", "100px");
     		},
@@ -19546,9 +19386,9 @@ var app = (function () {
     			if (!mounted) {
     				dispose = [
     					listen(input0, "change", /*OnChange*/ ctx[18]),
-    					listen(input0, "input", /*input0_input_handler*/ ctx[25]),
+    					listen(input0, "input", /*input0_input_handler*/ ctx[26]),
     					listen(input1, "change", /*OnChange*/ ctx[18]),
-    					listen(input1, "input", /*input1_input_handler*/ ctx[26])
+    					listen(input1, "input", /*input1_input_handler*/ ctx[27])
     				];
 
     				mounted = true;
@@ -19559,8 +19399,8 @@ var app = (function () {
     				attr(input0, "placeholder", /*placeholder_name*/ ctx[8]);
     			}
 
-    			if (dirty[0] & /*readonlyOper*/ 8192) {
-    				input0.readOnly = /*readonlyOper*/ ctx[13];
+    			if (dirty[0] & /*readonlyOper*/ 4096) {
+    				input0.readOnly = /*readonlyOper*/ ctx[12];
     			}
 
     			if (dirty[0] & /*user*/ 2 && input0.value !== /*user*/ ctx[1].name) {
@@ -19571,8 +19411,8 @@ var app = (function () {
     				attr(input1, "placeholder", /*placeholder_email*/ ctx[9]);
     			}
 
-    			if (dirty[0] & /*readonlyAdm*/ 16384) {
-    				input1.readOnly = /*readonlyAdm*/ ctx[14];
+    			if (dirty[0] & /*readonlyAdm*/ 8192) {
+    				input1.readOnly = /*readonlyAdm*/ ctx[13];
     			}
 
     			if (dirty[0] & /*user*/ 2 && input1.value !== /*user*/ ctx[1].email) {
@@ -19589,14 +19429,14 @@ var app = (function () {
     	};
     }
 
-    // (104:4) {#if status === "talk" && (user_status === "active")  && user.email !== operator.email}
+    // (103:4) {#if status === "talk" && (user_status === "active")  && user.email !== operator.email}
     function create_if_block_1$6(ctx) {
     	let forward;
     	let updating_status;
     	let current;
 
     	function forward_status_binding(value) {
-    		/*forward_status_binding*/ ctx[28](value);
+    		/*forward_status_binding*/ ctx[29](value);
     	}
 
     	let forward_props = {
@@ -19653,7 +19493,7 @@ var app = (function () {
     	};
     }
 
-    // (105:6) <Forward bind:status {rtc} operator={user.email}>
+    // (104:6) <Forward bind:status {rtc} operator={user.email}>
     function create_default_slot_1$1(ctx) {
     	let img;
     	let img_src_value;
@@ -19675,7 +19515,7 @@ var app = (function () {
     	};
     }
 
-    // (114:4) {#if  user_status === "talk" || (status === "talk" && user.email === operator.email)}
+    // (113:4) {#if  user_status === "talk" || (status === "talk" && user.email === operator.email)}
     function create_if_block$8(ctx) {
     	let filetransfer;
     	let current;
@@ -19725,7 +19565,7 @@ var app = (function () {
     	};
     }
 
-    // (115:6) <FileTransfer {status} {rtc} operator={user.email}>
+    // (114:6) <FileTransfer {status} {rtc} operator={user.email}>
     function create_default_slot$3(ctx) {
     	let img;
     	let img_src_value;
@@ -19765,10 +19605,10 @@ var app = (function () {
     	let current;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*edited_display*/ ctx[2] && create_if_block_6$1(ctx);
-    	let if_block1 = /*user*/ ctx[1].email && /*operator*/ ctx[3].email !== /*user*/ ctx[1].email && create_if_block_5$1(ctx);
+    	let if_block0 = /*edited_display*/ ctx[2] && create_if_block_7(ctx);
+    	let if_block1 = !/*edited_display*/ ctx[2] && create_if_block_5$1(ctx);
     	let if_block2 = /*edited_display*/ ctx[2] && create_if_block_3$2(ctx);
-    	let if_block3 = /*Dict*/ ctx[12] && create_if_block_2$4(ctx);
+    	let if_block3 = /*dict*/ ctx[15] && create_if_block_2$4(ctx);
     	let if_block4 = /*status*/ ctx[0] === "talk" && /*user_status*/ ctx[7] === "active" && /*user*/ ctx[1].email !== /*operator*/ ctx[3].email && create_if_block_1$6(ctx);
     	let if_block5 = (/*user_status*/ ctx[7] === "talk" || /*status*/ ctx[0] === "talk" && /*user*/ ctx[1].email === /*operator*/ ctx[3].email) && create_if_block$8(ctx);
 
@@ -19806,7 +19646,7 @@ var app = (function () {
     			attr(textarea, "rows", "3");
     			attr(textarea, "class", "user_desc svelte-kknszv");
     			attr(textarea, "placeholder", /*placeholder_desc*/ ctx[10]);
-    			textarea.readOnly = /*readonlyOper*/ ctx[13];
+    			textarea.readOnly = /*readonlyOper*/ ctx[12];
     			set_style(textarea, "width", "85%");
     			set_style(textarea, "overflow", "auto");
     			set_style(textarea, "max-height", "100px");
@@ -19843,14 +19683,14 @@ var app = (function () {
     			if (if_block4) if_block4.m(div2, null);
     			append(div2, t6);
     			if (if_block5) if_block5.m(div2, null);
-    			/*div3_binding*/ ctx[29](div3);
+    			/*div3_binding*/ ctx[30](div3);
     			current = true;
 
     			if (!mounted) {
     				dispose = [
     					listen(img, "click", /*OnClickUpload*/ ctx[16]),
     					listen(textarea, "change", /*OnChange*/ ctx[18]),
-    					listen(textarea, "input", /*textarea_input_handler*/ ctx[27])
+    					listen(textarea, "input", /*textarea_input_handler*/ ctx[28])
     				];
 
     				mounted = true;
@@ -19865,7 +19705,7 @@ var app = (function () {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
-    					if_block0 = create_if_block_6$1(ctx);
+    					if_block0 = create_if_block_7(ctx);
     					if_block0.c();
     					if_block0.m(div0, t1);
     				}
@@ -19874,7 +19714,7 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (/*user*/ ctx[1].email && /*operator*/ ctx[3].email !== /*user*/ ctx[1].email) {
+    			if (!/*edited_display*/ ctx[2]) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
@@ -19900,25 +19740,14 @@ var app = (function () {
     				if_block2 = null;
     			}
 
-    			if (/*Dict*/ ctx[12]) {
-    				if (if_block3) {
-    					if_block3.p(ctx, dirty);
-    				} else {
-    					if_block3 = create_if_block_2$4(ctx);
-    					if_block3.c();
-    					if_block3.m(div1, t4);
-    				}
-    			} else if (if_block3) {
-    				if_block3.d(1);
-    				if_block3 = null;
-    			}
+    			if (/*dict*/ ctx[15]) if_block3.p(ctx, dirty);
 
     			if (!current || dirty[0] & /*placeholder_desc*/ 1024) {
     				attr(textarea, "placeholder", /*placeholder_desc*/ ctx[10]);
     			}
 
-    			if (!current || dirty[0] & /*readonlyOper*/ 8192) {
-    				textarea.readOnly = /*readonlyOper*/ ctx[13];
+    			if (!current || dirty[0] & /*readonlyOper*/ 4096) {
+    				textarea.readOnly = /*readonlyOper*/ ctx[12];
     			}
 
     			if (dirty[0] & /*user*/ 2) {
@@ -19990,7 +19819,7 @@ var app = (function () {
     			if (if_block3) if_block3.d();
     			if (if_block4) if_block4.d();
     			if (if_block5) if_block5.d();
-    			/*div3_binding*/ ctx[29](null);
+    			/*div3_binding*/ ctx[30](null);
     			mounted = false;
     			run_all(dispose);
     		}
@@ -19998,10 +19827,16 @@ var app = (function () {
     }
 
     function instance$j($$self, $$props, $$invalidate) {
+    	let $pswd;
+    	let $signal;
+    	let $dicts;
+    	component_subscribe($$self, pswd, $$value => $$invalidate(33, $pswd = $$value));
+    	component_subscribe($$self, signal, $$value => $$invalidate(34, $signal = $$value));
+    	component_subscribe($$self, dicts, $$value => $$invalidate(35, $dicts = $$value));
     	let lang = "en";
 
-    	langs.subscribe(data => {
-    		lang = data;
+    	const us_lang = langs.subscribe(data => {
+    		$$invalidate(23, lang = data);
     	});
 
     	let { operator } = $$props;
@@ -20020,40 +19855,18 @@ var app = (function () {
     		placeholder_desc,
     		upload;
 
-    	let Dict;
-
-    	dicts.subscribe(data => {
-    		if (data) {
-    			$$invalidate(12, Dict = data);
-    			$$invalidate(8, placeholder_name = Dict.getValByKey(lang, "input operator name"));
-    			$$invalidate(9, placeholder_email = Dict.getValByKey(lang, "input operator email"));
-    			$$invalidate(10, placeholder_desc = Dict.getValByKey(lang, "input description"));
-    		}
-    	});
-
-    	let signalch = false;
-
-    	const us_signal = signal.subscribe(data => {
-    		if (data) {
-    			signalch = data;
-    		}
-    	});
-
-    	let psw;
-
-    	pswd.subscribe(data => {
-    		psw = data;
-    	});
-
-    	onDestroy(us_signal);
+    	let dict = $dicts;
+    	const signalch = $signal;
+    	const psw = $pswd;
+    	onDestroy(us_lang);
     	let { edited_display } = $$props;
     	let readonlyOper = true;
     	let readonlyAdm = true;
 
     	editable.subscribe(data => {
     		$$invalidate(2, edited_display = data);
-    		$$invalidate(13, readonlyOper = !edited_display);
-    		$$invalidate(14, readonlyAdm = !edited_display);
+    		$$invalidate(12, readonlyOper = !edited_display);
+    		$$invalidate(13, readonlyAdm = !edited_display);
     	});
 
     	// $: if (readonly) {
@@ -20207,7 +20020,7 @@ var app = (function () {
     	function div3_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			oper_admin_div = $$value;
-    			$$invalidate(15, oper_admin_div);
+    			$$invalidate(14, oper_admin_div);
     		});
     	}
 
@@ -20223,6 +20036,16 @@ var app = (function () {
     		if ('edited_display' in $$props) $$invalidate(2, edited_display = $$props.edited_display);
     	};
 
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty[0] & /*lang*/ 8388608) {
+    			if (dict && lang) {
+    				$$invalidate(8, placeholder_name = dict["input operator name"][lang]);
+    				$$invalidate(9, placeholder_email = dict["input operator email"][lang]);
+    				$$invalidate(10, placeholder_desc = dict["input description"][lang]);
+    			}
+    		}
+    	};
+
     	return [
     		status,
     		user,
@@ -20236,10 +20059,10 @@ var app = (function () {
     		placeholder_email,
     		placeholder_desc,
     		upload,
-    		Dict,
     		readonlyOper,
     		readonlyAdm,
     		oper_admin_div,
+    		dict,
     		OnClickUpload,
     		OnChangeFile,
     		OnChange,
@@ -20247,6 +20070,7 @@ var app = (function () {
     		dep,
     		id,
     		update,
+    		lang,
     		input_binding,
     		input_change_handler,
     		input0_input_handler,
@@ -20581,7 +20405,7 @@ var app = (function () {
                                 clearTimeout(timr);
                             }
                             
-                        }, 100);
+                        }, 200);
                     }
 
                 }
@@ -20620,19 +20444,21 @@ var app = (function () {
 
         setRemoteDesc(desc) {
 
-            let that = this;
-            utils.log('setRemoteDescription start', that);
-            utils.log('Peer connectionState:'+this.con.connectionState, that);
+            utils.log('setRemoteDescription start', this);
+            utils.log('Peer connectionState:'+this.con.connectionState, this);
 
-            this.con.setRemoteDescription(desc).then(
-                function () {
-                    that.params['rem_desc'] = that.con.remoteDescription;
-                    if (that.con.remoteDescription.type === 'offer') {
-                        that.con.createAnswer().then(
-                            desc => that.onCreateAnswerSuccess(desc),
-                            that.onCreateAnswerError
+            this.con.setRemoteDescription(desc).then(()=> {
+                this.params['rem_desc'] = this.con.remoteDescription;
+                if (this.con.remoteDescription.type === 'offer') {
+                    try{
+                        this.con.createAnswer().then(
+                            desc => this.onCreateAnswerSuccess(desc),
+                            this.onCreateAnswerError
                         );
+                    }catch(ex){
+                        console.log(ex);
                     }
+                }
                 },
                 function (error) {
                     utils.log('Failed to set remote description: ' + error.toString(), this);
@@ -20729,32 +20555,21 @@ var app = (function () {
     // module id = 343
     // module chunks = 0
 
-    class DataChannel {
+    const dc_msg = writable(); 
+
+    class DataChannelOperator{
         constructor(rtc,pc){
+
             this.rtc = rtc;
             this.pc = pc;
             this.call_num = 3;
             this.forward;
-        }
-
-        CreateDC(){
-            this.dc = pc.con.createDataChannel(pc.pc_key+" data channel");
-        }
-
-    }
-
-    const dc_msg = writable(); 
-
-    class DataChannelOperator extends DataChannel{
-        constructor(rtc,pc){
-            super (rtc, pc);
 
             let that = this;
             that.cnt_call = 0;
             // this.dc.onopen = () => {
             //     console.log('OnOpenDataChannel');
             // }
-
             
             this.dc = pc.con.createDataChannel(pc.pc_key+" data channel"); 
 
@@ -20778,6 +20593,8 @@ var app = (function () {
                 console.log('Receive Channel Callback');
 
                 this.dc = event.channel;//change dc
+
+                rtc.PlayCallCnt(); 
                 
             };
             
@@ -21073,7 +20890,7 @@ var app = (function () {
                 if(pc.con.iceConnectionState==='checking'){
                     utils.log(pc.pc_key +' ICE state change event: checking', this);
                     this.checking_tmr = setTimeout(()=> {
-                        pc.con.restartIce();
+                        // pc.con.restartIce();
                     },5000);
 
                 }
@@ -21188,7 +21005,7 @@ var app = (function () {
                 }
             }
 
-            let params = {};//this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
+            let params = this.pcPull[pc_key]?this.pcPull[pc_key].params:{};
 
             this.pcPull[pc_key] = null;
             this.pcPull[pc_key] = new Peer(this, pc_config, pc_key);
@@ -21196,9 +21013,9 @@ var app = (function () {
             this.pcPull[pc_key].params = params;
 
             // setTimeout(()=>{
-            this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);   
-            this.startTime = Date.now();         
-            cb();
+                this.DC = new DataChannelOperator(this, this.pcPull[pc_key]);   
+                this.startTime = Date.now();         
+                cb();
             // },1000); 
      
         }
@@ -21276,7 +21093,6 @@ var app = (function () {
     langs.subscribe((data) => {
     });
 
-    // export const msg = writable(''); 
 
     class  RTCOperator extends RTCBase{
 
@@ -21287,10 +21103,6 @@ var app = (function () {
             this.signch = signch;
 
             this.checking_tmr;
-
-            // this.Init( ()=> {
-
-            // });
         }
 
         Init(cb){
@@ -21515,9 +21327,6 @@ var app = (function () {
 
 
         OnMessage(data) {
-
-            let that = this;
-            
             //log(data,that);
             msg_1.set(data);
 
@@ -21525,12 +21334,12 @@ var app = (function () {
 
             if (data.func === 'mute') {
 
-                    this.RemoveTracks();
+                this.RemoveTracks();
                     // this.OnInit();
             }
 
             if (data.func === 'talk') {
-                clearInterval(that.DC.inter);
+                clearInterval(this.DC.inter);
             }
 
             
@@ -21540,32 +21349,31 @@ var app = (function () {
 
 
             if (data.desc) {
-                if( that.pcPull[data.abonent].con &&
-                    (that.pcPull[data.abonent].con.connectionState==="failed"
-                    || that.pcPull[data.abonent].con.connectionState==="disconnected"))
-                    that.pcPull[data.abonent].con.restartIce();
+                if( this.pcPull && this.pcPull[data.abonent].con &&
+                    (this.pcPull[data.abonent].con.connectionState==="failed"
+                    || this.pcPull[data.abonent].con.connectionState==="disconnected"))
 
-                if (that.pcPull[data.abonent]) {
-                    that.pcPull[data.abonent].params['rem_desc'] = data.desc;
-                    that.pcPull[data.abonent].setRemoteDesc(data.desc);
+                    this.pcPull[data.abonent].con.restartIce();
 
-                    that.PlayCallCnt();
+                if (this.pcPull[data.abonent]) {
+                    this.pcPull[data.abonent].params['rem_desc'] = data.desc;
+                    this.pcPull[data.abonent].setRemoteDesc(data.desc);
                 }
             }
             if (data.cand) {
-                if (that.pcPull[data.abonent]) {
-                    if (!that.pcPull[data.abonent].con || that.pcPull[data.abonent].con.signalingState === 'closed') {
+                if (this.pcPull[data.abonent]) {
+                    if (!this.pcPull[data.abonent].con || this.pcPull[data.abonent].con.signalingState === 'closed') {
                         return;
                     }
                     try {
-                        that.pcPull[data.abonent].params['rem_cand'] = data.cand;
+                        this.pcPull[data.abonent].params['rem_cand'] = data.cand;
                         if (Array.isArray(data.cand)) {
                             for (let c in data.cand) {
-                                that.pcPull[data.abonent].con.addIceCandidate(data.cand[c]);
+                                this.pcPull[data.abonent].con.addIceCandidate(data.cand[c]);
                                 //log(' Remote ICE candidate: \n' + (data.cand[c] ? JSON.stringify(data.cand[c]) : '(null)'), that);
                             }
                         } else {
-                            that.pcPull[data.abonent].con.addIceCandidate(data.cand);
+                            this.pcPull[data.abonent].con.addIceCandidate(data.cand);
                             //log(' Remote ICE candidate: \n' + (data.cand ? JSON.stringify(data.cand) : '(null)'), that);
                         }
 
@@ -23033,14 +22841,14 @@ var app = (function () {
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
     	child_ctx[8] = list[i][0];
-    	child_ctx[3] = list[i][1];
+    	child_ctx[2] = list[i][1];
     	return child_ctx;
     }
 
     // (10:14) {#if all_tarifs}
     function create_if_block$5(ctx) {
     	let each_1_anchor;
-    	let each_value = Object.entries(/*all_tarifs*/ ctx[2]);
+    	let each_value = Object.entries(/*all_tarifs*/ ctx[1]);
     	let each_blocks = [];
 
     	for (let i = 0; i < each_value.length; i += 1) {
@@ -23063,8 +22871,8 @@ var app = (function () {
     			insert(target, each_1_anchor, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*Object, all_tarifs, onSubmit, Dict, lang*/ 23) {
-    				each_value = Object.entries(/*all_tarifs*/ ctx[2]);
+    			if (dirty & /*Object, all_tarifs, onSubmit, dict, lang*/ 27) {
+    				each_value = Object.entries(/*all_tarifs*/ ctx[1]);
     				let i;
 
     				for (i = 0; i < each_value.length; i += 1) {
@@ -23096,7 +22904,7 @@ var app = (function () {
     // (14:22) {#if tarif['Ribbon']}
     function create_if_block_2$2(ctx) {
     	let div;
-    	let t_value = /*Dict*/ ctx[1].dict[/*tarif*/ ctx[3]['Ribbon']][/*lang*/ ctx[0]] + "";
+    	let t_value = /*dict*/ ctx[3][/*tarif*/ ctx[2]['Ribbon']][/*lang*/ ctx[0]] + "";
     	let t;
 
     	return {
@@ -23110,7 +22918,7 @@ var app = (function () {
     			append(div, t);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*Dict, all_tarifs, lang*/ 7 && t_value !== (t_value = /*Dict*/ ctx[1].dict[/*tarif*/ ctx[3]['Ribbon']][/*lang*/ ctx[0]] + "")) set_data(t, t_value);
+    			if (dirty & /*all_tarifs, lang*/ 3 && t_value !== (t_value = /*dict*/ ctx[3][/*tarif*/ ctx[2]['Ribbon']][/*lang*/ ctx[0]] + "")) set_data(t, t_value);
     		},
     		d(detaching) {
     			if (detaching) detach(div);
@@ -23122,14 +22930,14 @@ var app = (function () {
     function create_if_block_1$3(ctx) {
     	let h4;
     	let span0;
-    	let t0_value = /*Dict*/ ctx[1].dict['Duration'][/*lang*/ ctx[0]] + "";
+    	let t0_value = /*dict*/ ctx[3]['Duration'][/*lang*/ ctx[0]] + "";
     	let t0;
     	let t1;
     	let span1;
-    	let t2_value = /*tarif*/ ctx[3].Duration + "";
+    	let t2_value = /*tarif*/ ctx[2].Duration + "";
     	let t2;
     	let t3;
-    	let t4_value = /*Dict*/ ctx[1].dict['Days'][/*lang*/ ctx[0]] + "";
+    	let t4_value = /*dict*/ ctx[3]['Days'][/*lang*/ ctx[0]] + "";
     	let t4;
 
     	return {
@@ -23157,9 +22965,9 @@ var app = (function () {
     			append(span1, t4);
     		},
     		p(ctx, dirty) {
-    			if (dirty & /*Dict, lang*/ 3 && t0_value !== (t0_value = /*Dict*/ ctx[1].dict['Duration'][/*lang*/ ctx[0]] + "")) set_data(t0, t0_value);
-    			if (dirty & /*all_tarifs*/ 4 && t2_value !== (t2_value = /*tarif*/ ctx[3].Duration + "")) set_data(t2, t2_value);
-    			if (dirty & /*Dict, lang*/ 3 && t4_value !== (t4_value = /*Dict*/ ctx[1].dict['Days'][/*lang*/ ctx[0]] + "")) set_data(t4, t4_value);
+    			if (dirty & /*lang*/ 1 && t0_value !== (t0_value = /*dict*/ ctx[3]['Duration'][/*lang*/ ctx[0]] + "")) set_data(t0, t0_value);
+    			if (dirty & /*all_tarifs*/ 2 && t2_value !== (t2_value = /*tarif*/ ctx[2].Duration + "")) set_data(t2, t2_value);
+    			if (dirty & /*lang*/ 1 && t4_value !== (t4_value = /*dict*/ ctx[3]['Days'][/*lang*/ ctx[0]] + "")) set_data(t4, t4_value);
     		},
     		d(detaching) {
     			if (detaching) detach(h4);
@@ -23178,83 +22986,83 @@ var app = (function () {
     	let t1;
     	let t2;
     	let p;
-    	let t3_value = /*tarif*/ ctx[3]['Desc'][/*lang*/ ctx[0]] + "";
+    	let t3_value = /*tarif*/ ctx[2]['Desc'][/*lang*/ ctx[0]] + "";
     	let t3;
     	let t4;
     	let div1;
     	let t5;
     	let h40;
     	let span0;
-    	let t6_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Waiting Mode']) + "";
+    	let t6_value = /*dict*/ ctx[3]['Waiting Mode'][/*lang*/ ctx[0]] + "";
     	let t6;
     	let t7;
     	let span1;
-    	let t8_value = /*tarif*/ ctx[3]['Waiting Mode'][/*lang*/ ctx[0]] + "";
+    	let t8_value = /*tarif*/ ctx[2]['Waiting Mode'][/*lang*/ ctx[0]] + "";
     	let t8;
     	let t9;
     	let h41;
     	let span2;
-    	let t10_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Total Operators']) + "";
+    	let t10_value = /*dict*/ ctx[3]['Total Operators'][/*lang*/ ctx[0]] + "";
     	let t10;
     	let t11;
     	let span3;
-    	let t12_value = /*tarif*/ ctx[3]['Total Operators'][/*lang*/ ctx[0]] + "";
+    	let t12_value = /*tarif*/ ctx[2]['Total Operators'][/*lang*/ ctx[0]] + "";
     	let t12;
     	let t13;
     	let h42;
     	let span4;
-    	let t14_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Multi Operator Mode']) + "";
+    	let t14_value = /*dict*/ ctx[3]['Multi Operator Mode'][/*lang*/ ctx[0]] + "";
     	let t14;
     	let t15;
     	let span5;
-    	let t16_value = /*tarif*/ ctx[3]['Multi Operator Mode'][/*lang*/ ctx[0]] + "";
+    	let t16_value = /*dict*/ ctx[3]['Multi Operator Mode'][/*lang*/ ctx[0]] + "";
     	let t16;
     	let t17;
     	let h43;
     	let span6;
-    	let t18_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Total Depts']) + "";
+    	let t18_value = /*dict*/ ctx[3]['Total Depts'][/*lang*/ ctx[0]] + "";
     	let t18;
     	let t19;
     	let span7;
-    	let t20_value = /*tarif*/ ctx[3]['Total Depts'][/*lang*/ ctx[0]] + "";
+    	let t20_value = /*dict*/ ctx[3]['Total Depts'][/*lang*/ ctx[0]] + "";
     	let t20;
     	let t21;
     	let h44;
     	let span8;
-    	let t22_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Dedicated Servers']) + "";
+    	let t22_value = /*dict*/ ctx[3]['Dedicated Servers'][/*lang*/ ctx[0]] + "";
     	let t22;
     	let t23;
     	let span9;
-    	let t24_value = /*Dict*/ ctx[1].dict[/*tarif*/ ctx[3]['Dedicated Servers']][/*lang*/ ctx[0]] + "";
+    	let t24_value = /*dict*/ ctx[3]['Dedicated Servers'][/*lang*/ ctx[0]] + "";
     	let t24;
     	let t25;
     	let h45;
     	let span10;
-    	let t26_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Full Support']) + "";
+    	let t26_value = /*dict*/ ctx[3]['Full Support'][/*lang*/ ctx[0]] + "";
     	let t26;
     	let t27;
     	let span11;
-    	let t28_value = /*Dict*/ ctx[1].dict[/*tarif*/ ctx[3]['Full Support']][/*lang*/ ctx[0]] + "";
+    	let t28_value = /*dict*/ ctx[3]['Full Support'][/*lang*/ ctx[0]] + "";
     	let t28;
     	let t29;
     	let div2;
     	let h46;
-    	let t30_value = /*tarif*/ ctx[3]['Price'][/*lang*/ ctx[0]] + "";
+    	let t30_value = /*tarif*/ ctx[2]['Price'][/*lang*/ ctx[0]] + "";
     	let t30;
     	let h5;
     	let t31;
-    	let t32_value = /*Dict*/ ctx[1].dict['month'][/*lang*/ ctx[0]] + "";
+    	let t32_value = /*dict*/ ctx[3]['month'][/*lang*/ ctx[0]] + "";
     	let t32;
     	let t33;
     	let button;
-    	let t34_value = /*Dict*/ ctx[1].dict['Choose'][/*lang*/ ctx[0]] + "";
+    	let t34_value = /*dict*/ ctx[3]['Choose'][/*lang*/ ctx[0]] + "";
     	let t34;
     	let button_tarif_value;
     	let t35;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*tarif*/ ctx[3]['Ribbon'] && create_if_block_2$2(ctx);
-    	let if_block1 = /*tarif*/ ctx[3].Duration && create_if_block_1$3(ctx);
+    	let if_block0 = /*tarif*/ ctx[2]['Ribbon'] && create_if_block_2$2(ctx);
+    	let if_block1 = /*tarif*/ ctx[2].Duration && create_if_block_1$3(ctx);
 
     	return {
     		c() {
@@ -23428,7 +23236,7 @@ var app = (function () {
     			}
     		},
     		p(ctx, dirty) {
-    			if (/*tarif*/ ctx[3]['Ribbon']) {
+    			if (/*tarif*/ ctx[2]['Ribbon']) {
     				if (if_block0) {
     					if_block0.p(ctx, dirty);
     				} else {
@@ -23441,10 +23249,10 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			if (dirty & /*all_tarifs*/ 4 && t1_value !== (t1_value = /*name*/ ctx[8].toUpperCase() + "")) set_data(t1, t1_value);
-    			if (dirty & /*all_tarifs, lang*/ 5 && t3_value !== (t3_value = /*tarif*/ ctx[3]['Desc'][/*lang*/ ctx[0]] + "")) set_data(t3, t3_value);
+    			if (dirty & /*all_tarifs*/ 2 && t1_value !== (t1_value = /*name*/ ctx[8].toUpperCase() + "")) set_data(t1, t1_value);
+    			if (dirty & /*all_tarifs, lang*/ 3 && t3_value !== (t3_value = /*tarif*/ ctx[2]['Desc'][/*lang*/ ctx[0]] + "")) set_data(t3, t3_value);
 
-    			if (/*tarif*/ ctx[3].Duration) {
+    			if (/*tarif*/ ctx[2].Duration) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
@@ -23457,23 +23265,23 @@ var app = (function () {
     				if_block1 = null;
     			}
 
-    			if (dirty & /*Dict, lang*/ 3 && t6_value !== (t6_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Waiting Mode']) + "")) set_data(t6, t6_value);
-    			if (dirty & /*all_tarifs, lang*/ 5 && t8_value !== (t8_value = /*tarif*/ ctx[3]['Waiting Mode'][/*lang*/ ctx[0]] + "")) set_data(t8, t8_value);
-    			if (dirty & /*Dict, lang*/ 3 && t10_value !== (t10_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Total Operators']) + "")) set_data(t10, t10_value);
-    			if (dirty & /*all_tarifs, lang*/ 5 && t12_value !== (t12_value = /*tarif*/ ctx[3]['Total Operators'][/*lang*/ ctx[0]] + "")) set_data(t12, t12_value);
-    			if (dirty & /*Dict, lang*/ 3 && t14_value !== (t14_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Multi Operator Mode']) + "")) set_data(t14, t14_value);
-    			if (dirty & /*all_tarifs, lang*/ 5 && t16_value !== (t16_value = /*tarif*/ ctx[3]['Multi Operator Mode'][/*lang*/ ctx[0]] + "")) set_data(t16, t16_value);
-    			if (dirty & /*Dict, lang*/ 3 && t18_value !== (t18_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Total Depts']) + "")) set_data(t18, t18_value);
-    			if (dirty & /*all_tarifs, lang*/ 5 && t20_value !== (t20_value = /*tarif*/ ctx[3]['Total Depts'][/*lang*/ ctx[0]] + "")) set_data(t20, t20_value);
-    			if (dirty & /*Dict, lang*/ 3 && t22_value !== (t22_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Dedicated Servers']) + "")) set_data(t22, t22_value);
-    			if (dirty & /*Dict, all_tarifs, lang*/ 7 && t24_value !== (t24_value = /*Dict*/ ctx[1].dict[/*tarif*/ ctx[3]['Dedicated Servers']][/*lang*/ ctx[0]] + "")) set_data(t24, t24_value);
-    			if (dirty & /*Dict, lang*/ 3 && t26_value !== (t26_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Full Support']) + "")) set_data(t26, t26_value);
-    			if (dirty & /*Dict, all_tarifs, lang*/ 7 && t28_value !== (t28_value = /*Dict*/ ctx[1].dict[/*tarif*/ ctx[3]['Full Support']][/*lang*/ ctx[0]] + "")) set_data(t28, t28_value);
-    			if (dirty & /*all_tarifs, lang*/ 5 && t30_value !== (t30_value = /*tarif*/ ctx[3]['Price'][/*lang*/ ctx[0]] + "")) set_data(t30, t30_value);
-    			if (dirty & /*Dict, lang*/ 3 && t32_value !== (t32_value = /*Dict*/ ctx[1].dict['month'][/*lang*/ ctx[0]] + "")) set_data(t32, t32_value);
-    			if (dirty & /*Dict, lang*/ 3 && t34_value !== (t34_value = /*Dict*/ ctx[1].dict['Choose'][/*lang*/ ctx[0]] + "")) set_data(t34, t34_value);
+    			if (dirty & /*lang*/ 1 && t6_value !== (t6_value = /*dict*/ ctx[3]['Waiting Mode'][/*lang*/ ctx[0]] + "")) set_data(t6, t6_value);
+    			if (dirty & /*all_tarifs, lang*/ 3 && t8_value !== (t8_value = /*tarif*/ ctx[2]['Waiting Mode'][/*lang*/ ctx[0]] + "")) set_data(t8, t8_value);
+    			if (dirty & /*lang*/ 1 && t10_value !== (t10_value = /*dict*/ ctx[3]['Total Operators'][/*lang*/ ctx[0]] + "")) set_data(t10, t10_value);
+    			if (dirty & /*all_tarifs, lang*/ 3 && t12_value !== (t12_value = /*tarif*/ ctx[2]['Total Operators'][/*lang*/ ctx[0]] + "")) set_data(t12, t12_value);
+    			if (dirty & /*lang*/ 1 && t14_value !== (t14_value = /*dict*/ ctx[3]['Multi Operator Mode'][/*lang*/ ctx[0]] + "")) set_data(t14, t14_value);
+    			if (dirty & /*lang*/ 1 && t16_value !== (t16_value = /*dict*/ ctx[3]['Multi Operator Mode'][/*lang*/ ctx[0]] + "")) set_data(t16, t16_value);
+    			if (dirty & /*lang*/ 1 && t18_value !== (t18_value = /*dict*/ ctx[3]['Total Depts'][/*lang*/ ctx[0]] + "")) set_data(t18, t18_value);
+    			if (dirty & /*lang*/ 1 && t20_value !== (t20_value = /*dict*/ ctx[3]['Total Depts'][/*lang*/ ctx[0]] + "")) set_data(t20, t20_value);
+    			if (dirty & /*lang*/ 1 && t22_value !== (t22_value = /*dict*/ ctx[3]['Dedicated Servers'][/*lang*/ ctx[0]] + "")) set_data(t22, t22_value);
+    			if (dirty & /*lang*/ 1 && t24_value !== (t24_value = /*dict*/ ctx[3]['Dedicated Servers'][/*lang*/ ctx[0]] + "")) set_data(t24, t24_value);
+    			if (dirty & /*lang*/ 1 && t26_value !== (t26_value = /*dict*/ ctx[3]['Full Support'][/*lang*/ ctx[0]] + "")) set_data(t26, t26_value);
+    			if (dirty & /*lang*/ 1 && t28_value !== (t28_value = /*dict*/ ctx[3]['Full Support'][/*lang*/ ctx[0]] + "")) set_data(t28, t28_value);
+    			if (dirty & /*all_tarifs, lang*/ 3 && t30_value !== (t30_value = /*tarif*/ ctx[2]['Price'][/*lang*/ ctx[0]] + "")) set_data(t30, t30_value);
+    			if (dirty & /*lang*/ 1 && t32_value !== (t32_value = /*dict*/ ctx[3]['month'][/*lang*/ ctx[0]] + "")) set_data(t32, t32_value);
+    			if (dirty & /*lang*/ 1 && t34_value !== (t34_value = /*dict*/ ctx[3]['Choose'][/*lang*/ ctx[0]] + "")) set_data(t34, t34_value);
 
-    			if (dirty & /*all_tarifs*/ 4 && button_tarif_value !== (button_tarif_value = /*name*/ ctx[8])) {
+    			if (dirty & /*all_tarifs*/ 2 && button_tarif_value !== (button_tarif_value = /*name*/ ctx[8])) {
     				attr(button, "tarif", button_tarif_value);
     			}
     		},
@@ -23493,7 +23301,7 @@ var app = (function () {
     	let div2;
     	let div0;
     	let h2;
-    	let t0_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Our Pricing']) + "";
+    	let t0_value = /*dict*/ ctx[3]['Our Pricing'][/*lang*/ ctx[0]] + "";
     	let t0;
     	let t1;
     	let p;
@@ -23501,7 +23309,7 @@ var app = (function () {
     	let div1;
     	let t4;
     	let div3;
-    	let if_block = /*all_tarifs*/ ctx[2] && create_if_block$5(ctx);
+    	let if_block = /*all_tarifs*/ ctx[1] && create_if_block$5(ctx);
 
     	return {
     		c() {
@@ -23544,9 +23352,9 @@ var app = (function () {
     			append(div4, div3);
     		},
     		p(ctx, [dirty]) {
-    			if (dirty & /*Dict, lang*/ 3 && t0_value !== (t0_value = /*Dict*/ ctx[1].getValByKey(/*lang*/ ctx[0], ['Our Pricing']) + "")) set_data(t0, t0_value);
+    			if (dirty & /*lang*/ 1 && t0_value !== (t0_value = /*dict*/ ctx[3]['Our Pricing'][/*lang*/ ctx[0]] + "")) set_data(t0, t0_value);
 
-    			if (/*all_tarifs*/ ctx[2]) {
+    			if (/*all_tarifs*/ ctx[1]) {
     				if (if_block) {
     					if_block.p(ctx, dirty);
     				} else {
@@ -23569,6 +23377,8 @@ var app = (function () {
     }
 
     function instance$g($$self, $$props, $$invalidate) {
+    	let $dicts;
+    	component_subscribe($$self, dicts, $$value => $$invalidate(6, $dicts = $$value));
     	let { rtc } = $$props;
     	let lang = 'en';
 
@@ -23576,28 +23386,21 @@ var app = (function () {
     		$$invalidate(0, lang = data);
     	});
 
-    	let Dict;
-
-    	dicts.subscribe(data => {
-    		if (data) {
-    			$$invalidate(1, Dict = data);
-    		}
-    	});
-
+    	const dict = $dicts;
     	let tarif = 'free';
     	let all_tarifs;
 
     	(async () => {
-    		$$invalidate(2, all_tarifs = await (await fetch('/server/kolmit/tarifs/tarifs.json?')).json());
+    		$$invalidate(1, all_tarifs = await (await fetch('/server/kolmit/tarifs/tarifs.json?')).json());
     	})();
 
-    	onDestroy(unsubscr_lang);
+    	onDestroy(unsubscr_lang, us_dict);
 
     	async function onSubmit(el) {
     		// alert(el.target.attributes.tarif.value);
     		if (el.target.attributes.tarif.value === 'basic') {
     			await rtc.ChooseTarif(el.target.attributes.tarif.value);
-    			$$invalidate(3, tarif = all_tarifs[el.target.attributes.tarif.value]);
+    			$$invalidate(2, tarif = all_tarifs[el.target.attributes.tarif.value]);
     		}
     	}
 
@@ -23605,7 +23408,7 @@ var app = (function () {
     		if ('rtc' in $$props) $$invalidate(5, rtc = $$props.rtc);
     	};
 
-    	return [lang, Dict, all_tarifs, tarif, onSubmit, rtc];
+    	return [lang, all_tarifs, tarif, dict, onSubmit, rtc];
     }
 
     class Tarif extends SvelteComponent {
@@ -23729,6 +23532,8 @@ var app = (function () {
     }
 
     function instance$f($$self, $$props, $$invalidate) {
+    	let $dicts;
+    	component_subscribe($$self, dicts, $$value => $$invalidate(6, $dicts = $$value));
     	let { rtc } = $$props;
     	let lang = 'en';
 
@@ -23736,17 +23541,9 @@ var app = (function () {
     		$$invalidate(4, lang = data);
     	});
 
+    	const dict = $dicts;
     	let txt = 'Download Call Center';
-    	let dnld = '';
-    	let Dict;
-
-    	const unsubscribe = dicts.subscribe(data => {
-    		if (data) {
-    			$$invalidate(6, Dict = data);
-    			$$invalidate(1, dnld = Dict.dict[txt][lang]);
-    		}
-    	});
-
+    	let dnld = dict[txt][lang];
     	onDestroy(unsubscribe);
     	let pricing = false;
 
@@ -23761,14 +23558,14 @@ var app = (function () {
     	};
 
     	$$self.$$.update = () => {
-    		if ($$self.$$.dirty & /*lang, Dict, txt*/ 112) {
+    		if ($$self.$$.dirty & /*lang, txt*/ 48) {
     			if (lang && Dict && txt) {
     				$$invalidate(1, dnld = Dict.dict[txt][lang]);
     			}
     		}
     	};
 
-    	return [rtc, dnld, pricing, OnCollClick, lang, txt, Dict];
+    	return [rtc, dnld, pricing, OnCollClick, lang, txt];
     }
 
     class Landpage extends SvelteComponent {
@@ -24500,35 +24297,37 @@ var app = (function () {
     			line2 = svg_element("line");
     			attr(line0, "id", "top");
     			attr(line0, "x1", "0");
-    			attr(line0, "y1", "8");
-    			attr(line0, "x2", "26");
-    			attr(line0, "y2", "8");
+    			attr(line0, "y1", "9");
+    			attr(line0, "x2", "32");
+    			attr(line0, "y2", "9");
     			set_style(line0, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line0, "class", "svelte-ks73yc");
+    			attr(line0, "class", "svelte-1lxplrm");
     			attr(line1, "id", "mid");
     			attr(line1, "x1", "0");
-    			attr(line1, "y1", "16");
-    			attr(line1, "x2", "26");
-    			attr(line1, "y2", "16");
+    			attr(line1, "y1", "18.5");
+    			attr(line1, "x2", "32");
+    			attr(line1, "y2", "18.5");
     			set_style(line1, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line1, "class", "svelte-ks73yc");
+    			attr(line1, "class", "svelte-1lxplrm");
     			attr(line2, "id", "bot");
     			attr(line2, "x1", "0");
-    			attr(line2, "y1", "24");
-    			attr(line2, "x2", "26");
-    			attr(line2, "y2", "24");
+    			attr(line2, "y1", "28");
+    			attr(line2, "x2", "32");
+    			attr(line2, "y2", "28");
     			set_style(line2, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line2, "class", "svelte-ks73yc");
-    			attr(svg, "width", "26");
-    			attr(svg, "height", "26");
-    			attr(svg, "class", "svelte-ks73yc");
+    			attr(line2, "class", "svelte-1lxplrm");
+    			attr(svg, "width", "32");
+    			attr(svg, "height", "32");
+    			attr(svg, "viewBox", "0 0 32 32");
+    			attr(svg, "aria-label", "search icon");
+    			attr(svg, "class", "svelte-1lxplrm");
     			set_style(button, "transition", "color " + /*duration*/ ctx[1] + "s ease-in-out");
 
     			set_style(button, "color", /*open*/ ctx[0]
     			? /*menuColor*/ ctx[3]
     			: /*burgerColor*/ ctx[2]);
 
-    			attr(button, "class", "svelte-ks73yc");
+    			attr(button, "class", "svelte-1lxplrm");
     			toggle_class(button, "open", /*open*/ ctx[0]);
     		},
     		m(target, anchor) {
@@ -25008,6 +24807,7 @@ var app = (function () {
     		},
     		m(target, anchor) {
     			insert(target, video, anchor);
+    			/*video_binding*/ ctx[5](video);
     			insert(target, t, anchor);
 
     			if (footer_slot) {
@@ -25038,6 +24838,7 @@ var app = (function () {
     		},
     		d(detaching) {
     			if (detaching) detach(video);
+    			/*video_binding*/ ctx[5](null);
     			if (detaching) detach(t);
     			if (footer_slot) footer_slot.d(detaching);
     		}
@@ -25050,45 +24851,45 @@ var app = (function () {
     	let { srcObject = '' } = $$props;
     	let lv;
 
-    	// import {posterst} from './js/stores.js'
-    	// let poster;
-    	// const us_poster = posterst.subscribe((data) => {
-    	//         if(data){
-    	//             poster = data;
-    	//         }
-    	// });
     	onMount(async () => {
-    		$$invalidate(2, lv = document.getElementById('localVideo'));
+    		
     	});
+
+    	function video_binding($$value) {
+    		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
+    			lv = $$value;
+    			($$invalidate(1, lv), $$invalidate(2, srcObject));
+    		});
+    	}
 
     	$$self.$$set = $$props => {
     		if ('display' in $$props) $$invalidate(0, display = $$props.display);
-    		if ('srcObject' in $$props) $$invalidate(1, srcObject = $$props.srcObject);
+    		if ('srcObject' in $$props) $$invalidate(2, srcObject = $$props.srcObject);
     		if ('$$scope' in $$props) $$invalidate(3, $$scope = $$props.$$scope);
     	};
 
     	$$self.$$.update = () => {
     		if ($$self.$$.dirty & /*lv, srcObject*/ 6) {
     			if (lv && srcObject) {
-    				$$invalidate(2, lv.srcObject = srcObject, lv);
+    				$$invalidate(1, lv.srcObject = srcObject, lv);
     			} else if (lv && lv.srcObject) {
     				lv.srcObject.getVideoTracks().forEach(track => {
     					track.stop();
     					lv.srcObject.removeTrack(track);
     				});
 
-    				$$invalidate(2, lv.src = '', lv);
+    				$$invalidate(1, lv.src = '', lv);
     			}
     		}
     	};
 
-    	return [display, srcObject, lv, $$scope, slots];
+    	return [display, lv, srcObject, $$scope, slots, video_binding];
     }
 
     class Video_local extends SvelteComponent {
     	constructor(options) {
     		super();
-    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { display: 0, srcObject: 1 });
+    		init(this, options, instance$a, create_fragment$a, safe_not_equal, { display: 0, srcObject: 2 });
     	}
     }
 
@@ -25502,8 +25303,9 @@ var app = (function () {
                     
                     // msg.set(data);
                     msg_1.set(data);
-                    if(window.operator)
+                    if(window.operator){
                         window.operator.OnMessage(data);
+                    }
                     cb(data);
                 }
             };
@@ -25658,9 +25460,9 @@ var app = (function () {
     	};
     }
 
-    // (73:16) {#if Dict}
+    // (73:16) {#if dict}
     function create_if_block_3(ctx) {
-    	let t0_value = /*Dict*/ ctx[8].dict['Language Select'][/*lang*/ ctx[7]] + "";
+    	let t0_value = /*dict*/ ctx[13]['Language Select'][/*lang*/ ctx[7]] + "";
     	let t0;
     	let t1;
 
@@ -25674,7 +25476,7 @@ var app = (function () {
     			insert(target, t1, anchor);
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*Dict, lang*/ 384 && t0_value !== (t0_value = /*Dict*/ ctx[8].dict['Language Select'][/*lang*/ ctx[7]] + "")) set_data(t0, t0_value);
+    			if (dirty[0] & /*lang*/ 128 && t0_value !== (t0_value = /*dict*/ ctx[13]['Language Select'][/*lang*/ ctx[7]] + "")) set_data(t0, t0_value);
     		},
     		d(detaching) {
     			if (detaching) detach(t0);
@@ -25683,7 +25485,7 @@ var app = (function () {
     	};
     }
 
-    // (92:16) {#if Dict && (window.operator && operator.role==="admin") && isPaid}
+    // (92:16) {#if dict && (window.operator && operator.role==="admin") && isPaid}
     function create_if_block_1$2(ctx) {
     	let if_block_anchor;
 
@@ -25727,7 +25529,7 @@ var app = (function () {
     // (95:16) {:else}
     function create_else_block_1(ctx) {
     	let h4;
-    	let t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "";
+    	let t_value = /*dict*/ ctx[13]['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "";
     	let t;
     	let mounted;
     	let dispose;
@@ -25747,7 +25549,7 @@ var app = (function () {
     			}
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*Dict, lang*/ 384 && t_value !== (t_value = /*Dict*/ ctx[8].dict['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "")) set_data(t, t_value);
+    			if (dirty[0] & /*lang*/ 128 && t_value !== (t_value = /*dict*/ ctx[13]['Cancel Edit Call Center'][/*lang*/ ctx[7]] + "")) set_data(t, t_value);
     		},
     		d(detaching) {
     			if (detaching) detach(h4);
@@ -25760,7 +25562,7 @@ var app = (function () {
     // (93:16) {#if !edited_display}
     function create_if_block_2$1(ctx) {
     	let h4;
-    	let t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "";
+    	let t_value = /*dict*/ ctx[13]['Edit Call Center'][/*lang*/ ctx[7]] + "";
     	let t;
     	let mounted;
     	let dispose;
@@ -25780,7 +25582,7 @@ var app = (function () {
     			}
     		},
     		p(ctx, dirty) {
-    			if (dirty[0] & /*Dict, lang*/ 384 && t_value !== (t_value = /*Dict*/ ctx[8].dict['Edit Call Center'][/*lang*/ ctx[7]] + "")) set_data(t, t_value);
+    			if (dirty[0] & /*lang*/ 128 && t_value !== (t_value = /*dict*/ ctx[13]['Edit Call Center'][/*lang*/ ctx[7]] + "")) set_data(t, t_value);
     		},
     		d(detaching) {
     			if (detaching) detach(h4);
@@ -25815,8 +25617,8 @@ var app = (function () {
     	let if_block1_anchor;
     	let mounted;
     	let dispose;
-    	let if_block0 = /*Dict*/ ctx[8] && create_if_block_3(ctx);
-    	let if_block1 = /*Dict*/ ctx[8] && (window.operator && /*operator*/ ctx[0].role === "admin") && /*isPaid*/ ctx[3] && create_if_block_1$2(ctx);
+    	let if_block0 = /*dict*/ ctx[13] && create_if_block_3(ctx);
+    	let if_block1 = /*dict*/ ctx[13] && (window.operator && /*operator*/ ctx[0].role === "admin") && /*isPaid*/ ctx[3] && create_if_block_1$2(ctx);
 
     	return {
     		c() {
@@ -25905,18 +25707,7 @@ var app = (function () {
     			}
     		},
     		p(ctx, dirty) {
-    			if (/*Dict*/ ctx[8]) {
-    				if (if_block0) {
-    					if_block0.p(ctx, dirty);
-    				} else {
-    					if_block0 = create_if_block_3(ctx);
-    					if_block0.c();
-    					if_block0.m(t0.parentNode, t0);
-    				}
-    			} else if (if_block0) {
-    				if_block0.d(1);
-    				if_block0 = null;
-    			}
+    			if (/*dict*/ ctx[13]) if_block0.p(ctx, dirty);
 
     			if (dirty[0] & /*lang*/ 128) {
     				input0.checked = input0.__value === /*lang*/ ctx[7];
@@ -25930,7 +25721,7 @@ var app = (function () {
     				input2.checked = input2.__value === /*lang*/ ctx[7];
     			}
 
-    			if (/*Dict*/ ctx[8] && (window.operator && /*operator*/ ctx[0].role === "admin") && /*isPaid*/ ctx[3]) {
+    			if (/*dict*/ ctx[13] && (window.operator && /*operator*/ ctx[0].role === "admin") && /*isPaid*/ ctx[3]) {
     				if (if_block1) {
     					if_block1.p(ctx, dirty);
     				} else {
@@ -25975,9 +25766,9 @@ var app = (function () {
     	}
 
     	let callcenter_1_props = {
-    		abonent: /*abonent*/ ctx[13],
+    		abonent: /*abonent*/ ctx[12],
     		tarif: /*tarif*/ ctx[1],
-    		psw: /*psw*/ ctx[9]
+    		psw: /*psw*/ ctx[8]
     	};
 
     	if (/*status*/ ctx[4] !== void 0) {
@@ -26004,7 +25795,7 @@ var app = (function () {
     		p(ctx, dirty) {
     			const callcenter_1_changes = {};
     			if (dirty[0] & /*tarif*/ 2) callcenter_1_changes.tarif = /*tarif*/ ctx[1];
-    			if (dirty[0] & /*psw*/ 512) callcenter_1_changes.psw = /*psw*/ ctx[9];
+    			if (dirty[0] & /*psw*/ 256) callcenter_1_changes.psw = /*psw*/ ctx[8];
 
     			if (!updating_status && dirty[0] & /*status*/ 16) {
     				updating_status = true;
@@ -26080,10 +25871,10 @@ var app = (function () {
     	let t1;
     	let div0;
     	let p;
-    	let t2_value = /*remote*/ ctx[12].text.msg + "";
+    	let t2_value = /*remote*/ ctx[11].text.msg + "";
     	let t2;
     	let br;
-    	let t3_value = /*remote*/ ctx[12].text.name + "";
+    	let t3_value = /*remote*/ ctx[11].text.name + "";
     	let t3;
     	let t4;
     	let div2;
@@ -26109,7 +25900,7 @@ var app = (function () {
     	let if_block1;
     	let if_block1_anchor;
     	let current;
-    	const videoremote_spread_levels = [/*remote*/ ctx[12].video];
+    	const videoremote_spread_levels = [/*remote*/ ctx[11].video];
     	let videoremote_props = {};
 
     	for (let i = 0; i < videoremote_spread_levels.length; i += 1) {
@@ -26135,7 +25926,7 @@ var app = (function () {
     	callbutton = new CallButtonOperator({ props: callbutton_props });
     	binding_callbacks.push(() => bind$1(callbutton, 'status', callbutton_status_binding));
     	callbutton.$on("click", /*OnClickCallButton*/ ctx[16]);
-    	const videolocal_spread_levels = [/*local*/ ctx[11].video];
+    	const videolocal_spread_levels = [/*local*/ ctx[10].video];
 
     	let videolocal_props = {
     		$$slots: { footer: [create_footer_slot] },
@@ -26148,7 +25939,7 @@ var app = (function () {
 
     	videolocal = new Video_local({ props: videolocal_props });
     	let if_block0 = /*video_button_display*/ ctx[5] && create_if_block_4(ctx);
-    	const audiolocal_spread_levels = [/*local*/ ctx[11].audio];
+    	const audiolocal_spread_levels = [/*local*/ ctx[10].audio];
 
     	function audiolocal_paused_binding(value) {
     		/*audiolocal_paused_binding*/ ctx[20](value);
@@ -26160,13 +25951,13 @@ var app = (function () {
     		audiolocal_props = assign(audiolocal_props, audiolocal_spread_levels[i]);
     	}
 
-    	if (/*local*/ ctx[11].audio.paused !== void 0) {
-    		audiolocal_props.paused = /*local*/ ctx[11].audio.paused;
+    	if (/*local*/ ctx[10].audio.paused !== void 0) {
+    		audiolocal_props.paused = /*local*/ ctx[10].audio.paused;
     	}
 
     	audiolocal = new Audio_local({ props: audiolocal_props });
     	binding_callbacks.push(() => bind$1(audiolocal, 'paused', audiolocal_paused_binding));
-    	const audioremote_spread_levels = [/*remote*/ ctx[12].audio];
+    	const audioremote_spread_levels = [/*remote*/ ctx[11].audio];
 
     	function audioremote_srcObject_binding(value) {
     		/*audioremote_srcObject_binding*/ ctx[21](value);
@@ -26178,8 +25969,8 @@ var app = (function () {
     		audioremote_props = assign(audioremote_props, audioremote_spread_levels[i]);
     	}
 
-    	if (/*remote*/ ctx[12].audio.srcObject !== void 0) {
-    		audioremote_props.srcObject = /*remote*/ ctx[12].audio.srcObject;
+    	if (/*remote*/ ctx[11].audio.srcObject !== void 0) {
+    		audioremote_props.srcObject = /*remote*/ ctx[11].audio.srcObject;
     	}
 
     	audioremote = new Audio_remote({ props: audioremote_props });
@@ -26199,7 +25990,7 @@ var app = (function () {
     	const if_blocks = [];
 
     	function select_block_type_1(ctx, dirty) {
-    		if ((!/*tarif*/ ctx[1] || /*tarif*/ ctx[1].name === 'free') && !/*abonent*/ ctx[13]) return 0;
+    		if ((!/*tarif*/ ctx[1] || /*tarif*/ ctx[1].name === 'free') && !/*abonent*/ ctx[12]) return 0;
     		return 1;
     	}
 
@@ -26244,7 +26035,7 @@ var app = (function () {
     			set_style(p, "white-space", "nowrap");
     			set_style(p, "color", "white");
     			set_style(p, "text-align", "center");
-    			set_style(div0, "display", /*remote*/ ctx[12].text.display);
+    			set_style(div0, "display", /*remote*/ ctx[11].text.display);
     			set_style(div0, "position", "relative");
     			set_style(div0, "height", "auto");
     			set_style(div0, "z-index", "10");
@@ -26305,8 +26096,8 @@ var app = (function () {
     			current = true;
     		},
     		p(ctx, dirty) {
-    			const videoremote_changes = (dirty[0] & /*remote*/ 4096)
-    			? get_spread_update(videoremote_spread_levels, [get_spread_object(/*remote*/ ctx[12].video)])
+    			const videoremote_changes = (dirty[0] & /*remote*/ 2048)
+    			? get_spread_update(videoremote_spread_levels, [get_spread_object(/*remote*/ ctx[11].video)])
     			: {};
 
     			videoremote.$set(videoremote_changes);
@@ -26323,18 +26114,18 @@ var app = (function () {
     			}
 
     			callbutton.$set(callbutton_changes);
-    			if ((!current || dirty[0] & /*remote*/ 4096) && t2_value !== (t2_value = /*remote*/ ctx[12].text.msg + "")) set_data(t2, t2_value);
-    			if ((!current || dirty[0] & /*remote*/ 4096) && t3_value !== (t3_value = /*remote*/ ctx[12].text.name + "")) set_data(t3, t3_value);
+    			if ((!current || dirty[0] & /*remote*/ 2048) && t2_value !== (t2_value = /*remote*/ ctx[11].text.msg + "")) set_data(t2, t2_value);
+    			if ((!current || dirty[0] & /*remote*/ 2048) && t3_value !== (t3_value = /*remote*/ ctx[11].text.name + "")) set_data(t3, t3_value);
 
-    			if (!current || dirty[0] & /*remote*/ 4096) {
-    				set_style(div0, "display", /*remote*/ ctx[12].text.display);
+    			if (!current || dirty[0] & /*remote*/ 2048) {
+    				set_style(div0, "display", /*remote*/ ctx[11].text.display);
     			}
 
-    			const videolocal_changes = (dirty[0] & /*local*/ 2048)
-    			? get_spread_update(videolocal_spread_levels, [get_spread_object(/*local*/ ctx[11].video)])
+    			const videolocal_changes = (dirty[0] & /*local*/ 1024)
+    			? get_spread_update(videolocal_spread_levels, [get_spread_object(/*local*/ ctx[10].video)])
     			: {};
 
-    			if (dirty[0] & /*container*/ 1024 | dirty[1] & /*$$scope*/ 65536) {
+    			if (dirty[0] & /*container*/ 512 | dirty[1] & /*$$scope*/ 65536) {
     				videolocal_changes.$$scope = { dirty, ctx };
     			}
 
@@ -26353,32 +26144,32 @@ var app = (function () {
     				if_block0 = null;
     			}
 
-    			const audiolocal_changes = (dirty[0] & /*local*/ 2048)
-    			? get_spread_update(audiolocal_spread_levels, [get_spread_object(/*local*/ ctx[11].audio)])
+    			const audiolocal_changes = (dirty[0] & /*local*/ 1024)
+    			? get_spread_update(audiolocal_spread_levels, [get_spread_object(/*local*/ ctx[10].audio)])
     			: {};
 
-    			if (!updating_paused && dirty[0] & /*local*/ 2048) {
+    			if (!updating_paused && dirty[0] & /*local*/ 1024) {
     				updating_paused = true;
-    				audiolocal_changes.paused = /*local*/ ctx[11].audio.paused;
+    				audiolocal_changes.paused = /*local*/ ctx[10].audio.paused;
     				add_flush_callback(() => updating_paused = false);
     			}
 
     			audiolocal.$set(audiolocal_changes);
 
-    			const audioremote_changes = (dirty[0] & /*remote*/ 4096)
-    			? get_spread_update(audioremote_spread_levels, [get_spread_object(/*remote*/ ctx[12].audio)])
+    			const audioremote_changes = (dirty[0] & /*remote*/ 2048)
+    			? get_spread_update(audioremote_spread_levels, [get_spread_object(/*remote*/ ctx[11].audio)])
     			: {};
 
-    			if (!updating_srcObject && dirty[0] & /*remote*/ 4096) {
+    			if (!updating_srcObject && dirty[0] & /*remote*/ 2048) {
     				updating_srcObject = true;
-    				audioremote_changes.srcObject = /*remote*/ ctx[12].audio.srcObject;
+    				audioremote_changes.srcObject = /*remote*/ ctx[11].audio.srcObject;
     				add_flush_callback(() => updating_srcObject = false);
     			}
 
     			audioremote.$set(audioremote_changes);
     			const burgermenu_changes = {};
 
-    			if (dirty[0] & /*Dict, lang, edited_display, operator, isPaid*/ 457 | dirty[1] & /*$$scope*/ 65536) {
+    			if (dirty[0] & /*lang, edited_display, operator, isPaid*/ 201 | dirty[1] & /*$$scope*/ 65536) {
     				burgermenu_changes.$$scope = { dirty, ctx };
     			}
 
@@ -26459,6 +26250,8 @@ var app = (function () {
     }
 
     function instance$5($$self, $$props, $$invalidate) {
+    	let $dicts;
+    	component_subscribe($$self, dicts, $$value => $$invalidate(35, $dicts = $$value));
     	let callcenter;
     	const url = new URL(window.location.href);
 
@@ -26500,24 +26293,16 @@ var app = (function () {
     		$$invalidate(7, lang = data);
     	});
 
-    	let Dict;
-
-    	dicts.subscribe(data => {
-    		if (data) {
-    			$$invalidate(8, Dict = data);
-    		}
-    	});
-
+    	const dict = $dicts;
     	let psw;
 
     	pswd.subscribe(data => {
-    		$$invalidate(9, psw = data);
+    		$$invalidate(8, psw = data);
     	});
 
     	signal.subscribe(signalch => {
     		if (signalch) {
     			window.operator = new RTCOperator("operator", operator, abonent, md5(JSON.stringify(Date.now()) + operator.email), psw, signalch);
-    			initRTC();
     		}
     	});
 
@@ -26584,7 +26369,7 @@ var app = (function () {
     		//window.operator.type = "operator";
     		window.operator.PlayCallCnt = () => {
     			call_cnt = 10;
-    			$$invalidate(11, local.audio.paused = false, local);
+    			$$invalidate(10, local.audio.paused = false, local);
 
     			inter = setInterval(
     				function () {
@@ -26592,7 +26377,7 @@ var app = (function () {
 
     					if (call_cnt === 0) {
     						clearInterval(inter);
-    						$$invalidate(11, local.audio.paused = true, local);
+    						$$invalidate(10, local.audio.paused = true, local);
     					}
     				},
     				2000
@@ -26605,7 +26390,7 @@ var app = (function () {
     		};
 
     		window.operator.SetRemoteAudio = src => {
-    			if (src) $$invalidate(12, remote.audio.srcObject = src, remote);
+    			if (src) $$invalidate(11, remote.audio.srcObject = src, remote);
     		};
 
     		window.operator.GetRemoteVideo = () => {
@@ -26613,14 +26398,14 @@ var app = (function () {
     		};
 
     		window.operator.SetLocalVideo = src => {
-    			if (src) $$invalidate(11, local.video.srcObject = src, local);
+    			if (src) $$invalidate(10, local.video.srcObject = src, local);
     		};
 
     		window.operator.SetRemoteVideo = src => {
     			if (status === 'talk') {
-    				$$invalidate(12, remote.video.srcObject = src, remote);
-    				$$invalidate(12, remote.video.display = 'block', remote);
-    				$$invalidate(11, local.audio.paused = true, local);
+    				$$invalidate(11, remote.video.srcObject = src, remote);
+    				$$invalidate(11, remote.video.display = 'block', remote);
+    				$$invalidate(10, local.audio.paused = true, local);
     			}
     		};
     	}
@@ -26644,6 +26429,7 @@ var app = (function () {
 
     		switch (status) {
     			case 'inactive':
+    				initRTC();
     				window.operator.Offer();
     				$$invalidate(4, status = 'active');
     				break;
@@ -26655,37 +26441,37 @@ var app = (function () {
     			case 'call':
     				$$invalidate(4, status = 'talk');
     				clearInterval(inter);
-    				$$invalidate(11, local.audio.paused = true, local);
-    				$$invalidate(12, remote.audio.muted = false, remote);
+    				$$invalidate(10, local.audio.paused = true, local);
+    				$$invalidate(11, remote.audio.muted = false, remote);
     				window.operator.OnTalk();
     				$$invalidate(5, video_button_display = true);
-    				$$invalidate(12, remote.text.display = 'block', remote);
+    				$$invalidate(11, remote.text.display = 'block', remote);
     				const event = new Event('talk');
     				document.getElementsByTagName('body')[0].dispatchEvent(event);
     				break;
     			case 'talk':
     				window.operator.OnInactive();
-    				$$invalidate(12, remote.audio.muted = true, remote);
-    				$$invalidate(11, local.video.display = 'none', local);
+    				$$invalidate(11, remote.audio.muted = true, remote);
+    				$$invalidate(10, local.video.display = 'none', local);
     				$$invalidate(5, video_button_display = false);
-    				$$invalidate(12, remote.video.display = 'none', remote);
-    				$$invalidate(12, remote.video.srcObject = '', remote);
-    				$$invalidate(12, remote.video.poster = '', remote);
-    				$$invalidate(12, remote.text.display = 'none', remote);
-    				$$invalidate(12, remote.text.name = '', remote);
-    				$$invalidate(12, remote.text.email = '', remote);
+    				$$invalidate(11, remote.video.display = 'none', remote);
+    				$$invalidate(11, remote.video.srcObject = '', remote);
+    				$$invalidate(11, remote.video.poster = '', remote);
+    				$$invalidate(11, remote.text.display = 'none', remote);
+    				$$invalidate(11, remote.text.name = '', remote);
+    				$$invalidate(11, remote.text.email = '', remote);
     				$$invalidate(4, status = 'inactive');
     				// local.video.poster = UserSvg;    
     				break;
     			case 'muted':
     				$$invalidate(4, status = 'inactive');
     				$$invalidate(5, video_button_display = false);
-    				$$invalidate(11, local.video.srcObject = '', local);
-    				$$invalidate(12, remote.audio.muted = true, remote);
-    				$$invalidate(12, remote.video.display = 'none', remote);
-    				$$invalidate(12, remote.video.srcObject = '', remote);
-    				$$invalidate(12, remote.video.poster = '', remote);
-    				$$invalidate(12, remote.text.display = 'none', remote);
+    				$$invalidate(10, local.video.srcObject = '', local);
+    				$$invalidate(11, remote.audio.muted = true, remote);
+    				$$invalidate(11, remote.video.display = 'none', remote);
+    				$$invalidate(11, remote.video.srcObject = '', remote);
+    				$$invalidate(11, remote.video.poster = '', remote);
+    				$$invalidate(11, remote.text.display = 'none', remote);
     				// local.video.poster = UserSvg;
     				window.operator.OnInactive();
     				break;
@@ -26696,8 +26482,8 @@ var app = (function () {
 
     	function OnClickVideoButton() {
     		$$invalidate(4, status = 'talk');
-    		$$invalidate(11, local.audio.paused = true, local);
-    		$$invalidate(11, local.video.display = 'block', local);
+    		$$invalidate(10, local.audio.paused = true, local);
+    		$$invalidate(10, local.video.display = 'block', local);
 
     		if (window.operator.DC.dc.readyState === 'open') {
     			window.operator.GetUserMedia({ audio: 0, video: 1 }, function () {
@@ -26708,20 +26494,20 @@ var app = (function () {
 
     	function OnMessage(data, resolve) {
     		if (data.func === 'mute') {
-    			$$invalidate(11, local.audio.paused = true, local);
-    			$$invalidate(12, remote.audio.muted = true, remote);
+    			$$invalidate(10, local.audio.paused = true, local);
+    			$$invalidate(11, remote.audio.muted = true, remote);
     			$$invalidate(5, video_button_display = false);
-    			$$invalidate(11, local.video.display = 'none', local);
-    			$$invalidate(11, local.video.srcObject = '', local);
+    			$$invalidate(10, local.video.display = 'none', local);
+    			$$invalidate(10, local.video.srcObject = '', local);
 
     			// local.video.display = 'block';
-    			$$invalidate(12, remote.video.srcObject = '', remote);
+    			$$invalidate(11, remote.video.srcObject = '', remote);
 
-    			$$invalidate(12, remote.video.poster = '', remote);
-    			$$invalidate(12, remote.video.display = 'none', remote);
-    			$$invalidate(12, remote.text.name = '', remote);
-    			$$invalidate(12, remote.text.email = '', remote);
-    			$$invalidate(12, remote.text.display = 'none', remote);
+    			$$invalidate(11, remote.video.poster = '', remote);
+    			$$invalidate(11, remote.video.display = 'none', remote);
+    			$$invalidate(11, remote.text.name = '', remote);
+    			$$invalidate(11, remote.text.email = '', remote);
+    			$$invalidate(11, remote.text.display = 'none', remote);
 
     			// local.video.poster = UserSvg;
     			window.operator.OnInactive();
@@ -26750,11 +26536,11 @@ var app = (function () {
     			if (data.profile) {
     				let profile = JSON.parse(data.profile);
     				let avatar = profile.src;
-    				$$invalidate(12, remote.video.poster = avatar, remote);
-    				$$invalidate(12, remote.video.display = 'block', remote);
-    				$$invalidate(12, remote.text.display = 'block', remote);
-    				$$invalidate(12, remote.text.name = profile.name, remote);
-    				$$invalidate(12, remote.text.email = profile.email, remote);
+    				$$invalidate(11, remote.video.poster = avatar, remote);
+    				$$invalidate(11, remote.video.display = 'block', remote);
+    				$$invalidate(11, remote.text.display = 'block', remote);
+    				$$invalidate(11, remote.text.name = profile.name, remote);
+    				$$invalidate(11, remote.text.email = profile.email, remote);
     			}
     		}
 
@@ -26762,11 +26548,11 @@ var app = (function () {
     		//status ='call';
 
     		if (data.camera) {
-    			$$invalidate(11, local.video.src = that.localStream, local);
+    			$$invalidate(10, local.video.src = that.localStream, local);
     		}
 
     		if (data.status === 'wait') {
-    			($$invalidate(12, remote.text.display = 'block', remote), $$invalidate(12, remote.text.msg = 'You have a waiting call', remote));
+    			($$invalidate(11, remote.text.display = 'block', remote), $$invalidate(11, remote.text.msg = 'You have a waiting call', remote));
     		}
     	}
 
@@ -26780,21 +26566,21 @@ var app = (function () {
     	function div_binding($$value) {
     		binding_callbacks[$$value ? 'unshift' : 'push'](() => {
     			container = $$value;
-    			$$invalidate(10, container);
+    			$$invalidate(9, container);
     		});
     	}
 
     	function audiolocal_paused_binding(value) {
     		if ($$self.$$.not_equal(local.audio.paused, value)) {
     			local.audio.paused = value;
-    			$$invalidate(11, local);
+    			$$invalidate(10, local);
     		}
     	}
 
     	function audioremote_srcObject_binding(value) {
     		if ($$self.$$.not_equal(remote.audio.srcObject, value)) {
     			remote.audio.srcObject = value;
-    			$$invalidate(12, remote);
+    			$$invalidate(11, remote);
     		}
     	}
 
@@ -26847,12 +26633,12 @@ var app = (function () {
     		video_button_display,
     		edited_display,
     		lang,
-    		Dict,
     		psw,
     		container,
     		local,
     		remote,
     		abonent,
+    		dict,
     		progress,
     		OnSelected,
     		OnClickCallButton,
@@ -28384,6 +28170,8 @@ var app = (function () {
     }
 
     function instance$1($$self, $$props, $$invalidate) {
+    	let $dicts;
+    	component_subscribe($$self, dicts, $$value => $$invalidate(13, $dicts = $$value));
     	let psw;
 
     	// const us_pswd = pswd.subscribe((data) => {
@@ -28442,14 +28230,7 @@ var app = (function () {
     		}
     	});
 
-    	let Dict;
-
-    	dicts.subscribe(data => {
-    		if (data) {
-    			Dict = data;
-    		}
-    	});
-
+    	let dict = $dicts;
     	onDestroy(us_signal);
 
     	onMount(async () => {
@@ -28487,7 +28268,7 @@ var app = (function () {
     						window.location.assign(url);
     					}
     				} else {
-    					let psw_ = prompt(Dict.getValByKey(lang, 'invalid password') + String(data.check));
+    					let psw_ = prompt(dict['invalid password'][lang]) + String(data.check);
 
     					if (psw_) {
     						psw = md5(psw_);

@@ -1,5 +1,5 @@
 <div class="callObject" on:long-press = {OnLongPress}   
-    style="display: block;position:absolute;max-width: 100%; height:100%;top:0;left:15px;z-index:10">
+    style="display: block;position:absolute;max-width: 100%; height:100%;top:0;left:6px;z-index:10">
     
     <svg 
         class="callButton" status={status}  on:click  on:mute width="35" height="35">
@@ -60,7 +60,7 @@ export let OnLongPress;
         transform: rotate(120deg);
     }
     [status='inactive'] g{
-        fill:rgb(255, 255, 255);
+        fill: #fff0;
     }
     [status='active']{
         transform: rotate(120deg);

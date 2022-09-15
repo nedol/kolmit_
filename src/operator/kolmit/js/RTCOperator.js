@@ -11,7 +11,6 @@ const us_lang = langs.subscribe((data) => {
         lang = data;
 });
 
-// export const msg = writable(''); 
 
 export default class  RTCOperator extends RTCBase{
 
@@ -22,10 +21,6 @@ export default class  RTCOperator extends RTCBase{
         this.signch = signch;
 
         this.checking_tmr;
-
-        // this.Init( ()=> {
-
-        // });
     }
 
     Init(cb){
@@ -250,9 +245,6 @@ export default class  RTCOperator extends RTCBase{
 
 
     OnMessage(data) {
-
-        let that = this;
-        
         //log(data,that);
         msg_1.set(data);
 
@@ -262,12 +254,12 @@ export default class  RTCOperator extends RTCBase{
 
         if (data.func === 'mute') {
 
-                this.RemoveTracks();
+            this.RemoveTracks();
                 // this.OnInit();
         }
 
         if (data.func === 'talk') {
-            clearInterval(that.DC.inter);
+            clearInterval(this.DC.inter);
         }
 
         
@@ -281,32 +273,31 @@ export default class  RTCOperator extends RTCBase{
 
 
         if (data.desc) {
-            if( that.pcPull[data.abonent].con &&
-                (that.pcPull[data.abonent].con.connectionState==="failed"
-                || that.pcPull[data.abonent].con.connectionState==="disconnected"))
-                that.pcPull[data.abonent].con.restartIce();
+            if( this.pcPull && this.pcPull[data.abonent].con &&
+                (this.pcPull[data.abonent].con.connectionState==="failed"
+                || this.pcPull[data.abonent].con.connectionState==="disconnected"))
 
-            if (that.pcPull[data.abonent]) {
-                that.pcPull[data.abonent].params['rem_desc'] = data.desc;
-                that.pcPull[data.abonent].setRemoteDesc(data.desc);
+                this.pcPull[data.abonent].con.restartIce();
 
-                that.PlayCallCnt();
+            if (this.pcPull[data.abonent]) {
+                this.pcPull[data.abonent].params['rem_desc'] = data.desc;
+                this.pcPull[data.abonent].setRemoteDesc(data.desc);
             }
         }
         if (data.cand) {
-            if (that.pcPull[data.abonent]) {
-                if (!that.pcPull[data.abonent].con || that.pcPull[data.abonent].con.signalingState === 'closed') {
+            if (this.pcPull[data.abonent]) {
+                if (!this.pcPull[data.abonent].con || this.pcPull[data.abonent].con.signalingState === 'closed') {
                     return;
                 }
                 try {
-                    that.pcPull[data.abonent].params['rem_cand'] = data.cand;
+                    this.pcPull[data.abonent].params['rem_cand'] = data.cand;
                     if (Array.isArray(data.cand)) {
                         for (let c in data.cand) {
-                            that.pcPull[data.abonent].con.addIceCandidate(data.cand[c]);
+                            this.pcPull[data.abonent].con.addIceCandidate(data.cand[c]);
                             //log(' Remote ICE candidate: \n' + (data.cand[c] ? JSON.stringify(data.cand[c]) : '(null)'), that);
                         }
                     } else {
-                        that.pcPull[data.abonent].con.addIceCandidate(data.cand);
+                        this.pcPull[data.abonent].con.addIceCandidate(data.cand);
                         //log(' Remote ICE candidate: \n' + (data.cand ? JSON.stringify(data.cand) : '(null)'), that);
                     }
 
