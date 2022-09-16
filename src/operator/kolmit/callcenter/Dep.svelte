@@ -3,8 +3,11 @@
   <button class="collapsible" {owner} bind:this={button}  on:click={OnCollClick}> 
     <input type="text" {readonly} style="border-width: 0px;" on:change={OnDepChange({dep})} on:click={OnClickInput} 
       bind:value={dep.alias}  placeholder="input dep name"/>
-    {#if edited_display}
-    {#if operator.email===operator.abonent} 
+   
+      {@debug operator}
+      {#if edited_display}
+
+    {#if operator.email===abonent} 
     <svg height="30" width="30"  on:click={RemoveDep(dep.id)} style="position: relative;float:right">
       <glyph glyph-name="minus-circle" unicode="&#xefc0;" horiz-adv-x="50" />
       <g class="currentLayer">
