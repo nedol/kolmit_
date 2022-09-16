@@ -105,7 +105,7 @@
     OnMessage(data);
   });
 
-  import Profile from "./Profile.svelte";
+  import Profile from "./modal/Profile.svelte";
   import CallButtonUser from "./CallButtonUser.svelte";
   import DropdownList from "./DropdownList.svelte";
   import Video from "./Video.svelte";
@@ -257,6 +257,12 @@
     OnClickCallButton();
   }
 
+  $:if(!profile &&  window.user){
+    window.user.Call();
+    status = "call";
+    remote.video.srcObject = null;
+  }
+
   async function OnClickCallButton() {
     try {
       // Fix up for prefixing
@@ -287,13 +293,16 @@
         window.user.SendCheck();
         break;
       case "active":
-        if (!localStorage.getItem("kolmit")) {
-          profile = true;
-        }
+        if (!localStorage.getItem("kolmit_abonent")) {
+          if(confirm("Could you introduce youself?")){
+            profile = true;
+          }
 
-        window.user.Call();
-        status = "call";
-        remote.video.srcObject = null;
+        }else{
+          window.user.Call();
+          status = "call";
+          remote.video.srcObject = null;
+        }
 
         break;
       case "call":

@@ -163,7 +163,7 @@ export class DataChannelUser{
         par.call = that.rtc.call_num;
         par.type = that.rtc.type;
         par.email = that.rtc.email.from;
-        par.profile = localStorage.getItem("kolmi_abonent");
+        par.profile = localStorage.getItem("kolmit_abonent");
 
         if(that.dc.readyState==='open') {
             that.SendData(par);

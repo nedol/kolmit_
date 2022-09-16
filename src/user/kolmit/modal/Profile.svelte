@@ -1,4 +1,4 @@
-<form  class="form-signin"  style='display:block; position:fixed;top:0' bind:this={form} use:setForm>
+<div  class="form-signin"  style='display:block; position:fixed;top:0' bind:this={form} use:setForm>
     <style>
         input{
             border-width:0;
@@ -43,7 +43,7 @@
             </div>
         </div>
         <div>  
-            <img {src} class="avatar" id="avatar_img"
+            <img {src} bind:this={avatar} id="avatar_img"
                 alt="avatar" on:click={OnClickUpload}
                 style="display: block;
                 margin-left: auto;
@@ -55,7 +55,7 @@
                 margin-left: auto;
                 margin-right: auto;">Upload photo...</span>
             </div>
-            <input  class="file-upload" on:change="{OnChangeFile}"
+            <input bind:this={upload}  on:change="{OnChangeFile}"
                 accept="image/png, image/jpeg"
                 bind:files
                 id="avatar"
@@ -64,29 +64,25 @@
                 style="display: none"/>
         </div>
         <div for="send_form">&nbsp;</div>
-        <button id="send_form" class="btn btn-primary"  on:click|preventDefault|stopPropagation={OnClickSend}>{dict['Save and Close'][lang]}</button>
+        <button id="send_form" class="btn btn-primary"  on:click={OnClickSend}>{dict['Save and Close'][lang]}</button>
     </div>
-</form> 
+</div> 
 
 <script>
-    import { onDestroy, onMount } from 'svelte';
-	// import {resizeImg} from 'resize-img'
-	import loadImage from "blueimp-load-image/js/load-image.js"
+    import { getContext } from 'svelte';
+    import loadImage from "blueimp-load-image/js/load-image.js"
     import  "blueimp-load-image/js/load-image-scale.js"
 
     export let profile;
     export let selected;
 
-    let src ="../kolmit/assets/user.svg";
+    let form;
+    let src ="../assets/user.svg";
     let name;
     let email;
-    let form;
     let files;
-
-
-    onMount(()=>{
-        console.log() ;
-    })
+    let avatar;    
+    let upload;
 
     $: if (files) {
         // Переменная `files` будет типа `FileList`, а не массивом:
@@ -94,27 +90,20 @@
         console.log(files);
     }
 
-    import {langs} from './js/stores.js'
+    import {langs} from '../js/stores.js'
     let lang = 'en';
     lang = $langs;
 
-    import {dicts} from './js/stores.js'
+    import {dicts} from '../js/stores.js'
     const dict = $dicts;
 
-    onDestroy();
 
-
-    function OnClickSend(){
-            localStorage.setItem('kolmi_abonent', JSON.stringify({id: window.id, src:src,name:name,email:email}));
-            profile = false;    
-            selected= '';                   
-    }    
 
     async function setForm(form){
         // window.parent.document.body.append(document.getElementsByClassName('form-signin')[0]);
         window.parent.document.body.append(form);
-        if(localStorage.getItem('kolmi_abonent')){
-            let item  = JSON.parse(localStorage.getItem('kolmi_abonent'));
+        if(localStorage.getItem('kolmit_abonent')){
+            let item  = JSON.parse(localStorage.getItem('kolmit_abonent'));
             name = item.name;
             email = item.email;
             src = item.src;
@@ -122,21 +111,7 @@
 
     }
 
-    //TODO: import { createEventDispatcher } from 'svelte'
-    //      const dispatch =  createEventDispatcher()
-    //  ... dispatch('custom_event')
     
-    function OnClickUpload(){
-        let event =  new MouseEvent('click', {
-        bubbles: true,
-        cancelable: true,
-        view: window,
-        });
-        window.parent.document.getElementById('avatar').dispatchEvent(event);
-        window.parent.document.getElementById('avatar').addEventListener("change", OnChangeFile);
-    }
-
-
     async function OnChangeFile(e){
 
         try {
@@ -167,5 +142,30 @@
         }
     }
 
-</script>
+    
 
+    function OnClickSend(){
+        localStorage.setItem('kolmit_abonent', JSON.stringify({id: window.id, src:src,name:name,email:email}));   
+        selected= '';         
+        profile = false;
+    }    
+
+
+
+    //TODO: import { createEventDispatcher } from 'svelte'
+    //      const dispatch =  createEventDispatcher()
+    //  ... dispatch('custom_event')
+    
+    function OnClickUpload(){
+        let event =  new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+        });
+
+        // dispatch('notify')
+        upload.dispatchEvent(event);
+    }
+
+
+</script>

@@ -1,4 +1,4 @@
-<div bind:this={oper_admin_div} style="display:flex; flex-wrap: nowrap;justify-content: space-between;">
+<div bind:this={oper_admin_div} style="display:flex; flex-wrap: nowrap;justify-content: space-between;margin-bottom:10px">
   <div class="user_pic_div" style="position:relative; width:85px;height:85px">
     <img
       class="user_pic is-rounded"
@@ -64,7 +64,7 @@
     {/if}
   </div>
 
-  <div style="flex:1; margin-left:10px; font-size:xx-small">
+  <div style="flex:1; margin-left:10px; font-size:xx-small; ">
     {#if dict}
       <input
         type="text"

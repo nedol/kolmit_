@@ -5,10 +5,10 @@
 
 
 <button class:open on:click|preventDefault|stopPropagation ={() => open = !open} style="transition: color {duration}s ease-in-out; color: {open ? menuColor : burgerColor};">
-	<svg width=32 height=32  viewBox="0 0 32 32" aria-label="search icon">
-        <line id="top" x1=0 y1=9    x2=32 y2=9    style="transition: transform {duration}s ease-in-out, opacity {duration}s ease-in-out;"/>
-		<line id="mid" x1=0 y1=18.5 x2=32 y2=18.5 style="transition: transform {duration}s ease-in-out, opacity {duration}s ease-in-out;"/>
-		<line id="bot" x1=0 y1=28    x2=32 y2=28  style="transition: transform {duration}s ease-in-out, opacity {duration}s ease-in-out;"/>
+	<svg width=26 height=26>
+        <line id="top" x1=0 y1=8  x2=26 y2=8    style="transition: transform {duration}s ease-in-out, opacity {duration}s ease-in-out;"/>
+		<line id="mid" x1=0 y1=16 x2=26 y2=16 style="transition: transform {duration}s ease-in-out, opacity {duration}s ease-in-out;"/>
+		<line id="bot" x1=0 y1=24 x2=26 y2=24  style="transition: transform {duration}s ease-in-out, opacity {duration}s ease-in-out;"/>
 	</svg>
 </button>
 
@@ -27,11 +27,8 @@
         position: absolute;
         right: 20px;
         top: 0px;
-
         margin: 5px;
-
         z-index: 100;
-
         background-color: Transparent;
         background-repeat: no-repeat;
         border: none;

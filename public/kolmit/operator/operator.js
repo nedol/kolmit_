@@ -19062,6 +19062,7 @@ var app = (function () {
     			set_style(div3, "display", "flex");
     			set_style(div3, "flex-wrap", "nowrap");
     			set_style(div3, "justify-content", "space-between");
+    			set_style(div3, "margin-bottom", "10px");
     		},
     		m(target, anchor) {
     			insert(target, div3, anchor);
@@ -23700,37 +23701,35 @@ var app = (function () {
     			line2 = svg_element("line");
     			attr(line0, "id", "top");
     			attr(line0, "x1", "0");
-    			attr(line0, "y1", "9");
-    			attr(line0, "x2", "32");
-    			attr(line0, "y2", "9");
+    			attr(line0, "y1", "8");
+    			attr(line0, "x2", "26");
+    			attr(line0, "y2", "8");
     			set_style(line0, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line0, "class", "svelte-1lxplrm");
+    			attr(line0, "class", "svelte-kr1e3o");
     			attr(line1, "id", "mid");
     			attr(line1, "x1", "0");
-    			attr(line1, "y1", "18.5");
-    			attr(line1, "x2", "32");
-    			attr(line1, "y2", "18.5");
+    			attr(line1, "y1", "16");
+    			attr(line1, "x2", "26");
+    			attr(line1, "y2", "16");
     			set_style(line1, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line1, "class", "svelte-1lxplrm");
+    			attr(line1, "class", "svelte-kr1e3o");
     			attr(line2, "id", "bot");
     			attr(line2, "x1", "0");
-    			attr(line2, "y1", "28");
-    			attr(line2, "x2", "32");
-    			attr(line2, "y2", "28");
+    			attr(line2, "y1", "24");
+    			attr(line2, "x2", "26");
+    			attr(line2, "y2", "24");
     			set_style(line2, "transition", "transform " + /*duration*/ ctx[1] + "s ease-in-out, opacity " + /*duration*/ ctx[1] + "s ease-in-out");
-    			attr(line2, "class", "svelte-1lxplrm");
-    			attr(svg, "width", "32");
-    			attr(svg, "height", "32");
-    			attr(svg, "viewBox", "0 0 32 32");
-    			attr(svg, "aria-label", "search icon");
-    			attr(svg, "class", "svelte-1lxplrm");
+    			attr(line2, "class", "svelte-kr1e3o");
+    			attr(svg, "width", "26");
+    			attr(svg, "height", "26");
+    			attr(svg, "class", "svelte-kr1e3o");
     			set_style(button, "transition", "color " + /*duration*/ ctx[1] + "s ease-in-out");
 
     			set_style(button, "color", /*open*/ ctx[0]
     			? /*menuColor*/ ctx[3]
     			: /*burgerColor*/ ctx[2]);
 
-    			attr(button, "class", "svelte-1lxplrm");
+    			attr(button, "class", "svelte-kr1e3o");
     			toggle_class(button, "open", /*open*/ ctx[0]);
     		},
     		m(target, anchor) {
