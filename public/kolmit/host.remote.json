@@ -1,9 +1,0 @@
-
-{
-
-        "host_port" : "https://nedol.ru/kolmit/server/",
-        "host_server":"https://nedol.ru/server/",
-        "host_ws" : "wss://nedol.ru/web-socket"
-
-}
-
