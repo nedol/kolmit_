@@ -1,5 +1,5 @@
 <script>
-import Site from './site.svelte';
+import Site from './Site.svelte';
 // import 'bulma/css/bulma.css';
 // import './assets/icofont/icofont.min.css'
 
