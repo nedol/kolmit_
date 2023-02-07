@@ -39,6 +39,7 @@
 
   if (tarif && tarif.paid) {
     //fetch db
+    //check tarif field for right paid date
     isPaid = new Date(tarif.paid) > Date.now();
   }
 
@@ -87,7 +88,6 @@
 
   import { msg_1 } from './js/stores.js';
   const us_msg_1 = msg_1.subscribe((data) => {
-    console.log();
     // if(window.operator.&& window.operator.OnMessage)
     //         window.operator.OnMessage(data);
     if (data) OnMessage(data);
@@ -100,7 +100,7 @@
 
   import { posterst } from './js/stores.js';
   let container;
-  const us_post = '';
+  let us_post = '';
 
   onMount(() => {
     us_post = posterst.subscribe((child) => {
@@ -237,8 +237,6 @@
     } catch (ex) {
       log('Web Audio API is not supported in this browser');
     }
-
-    console.log();
 
     switch (status) {
       case 'inactive':
