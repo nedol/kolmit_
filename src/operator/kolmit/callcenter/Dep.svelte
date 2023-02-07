@@ -23,22 +23,26 @@
   <div class="content"  bind:this={content} style="max-height:0px">
       <br>
     {#if dep.admin}     
-      <div>
+
         <Oper id={dep.admin.id}
           bind:status={status} {operator} {abonent} bind:dep={dep} bind:user={dep.admin} {update} {readonly}></Oper>
-      </div>
 
+      <br>
     {/if}
+
     {#if dep.staff}
     {#each dep.staff as user, u} 
       {#if user.email || (!user.email && owner===operator.email)}
-        <Oper id={u}
-          bind:status={status} {operator} {abonent} bind:dep={dep} bind:user={user} {update} {readonly}>
-        </Oper>
+
+          <Oper class='oper' id={u}
+            bind:status={status} {operator} {abonent} bind:dep={dep} bind:user={user} {update} {readonly}>
+          </Oper>
+ 
         <br>
       {/if}
     {/each} 
     {/if}
+    
     {#if edited_display}
     <div class="add_oper" on:click={AddOper} style="display:{isAddOper}">
       <svg   style="position: relative;left: 45%; height:40, width=40">
