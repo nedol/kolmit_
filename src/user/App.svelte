@@ -1,5 +1,5 @@
 <script>
-import User from './kolmit/User.svelte';
+import User from './User.svelte';
 
 export const name = 'Kolmit';
 </script>
